@@ -1,0 +1,369 @@
+{
+  "format": 1,
+  "package": "pi-continuity-work-memory",
+  "version": "1.0.0-rc.1",
+  "inventoryFile": "PACKAGE_INVENTORY.json",
+  "inventoryFileExcludedFromEntries": true,
+  "files": [
+    {
+      "path": "dist/application/continuity-service.d.ts",
+      "size": 2581,
+      "sha256": "ca832558298d42c7324edac9475054a7eb9bd6b12447c8fb41f54cbd31804f6d"
+    },
+    {
+      "path": "dist/application/continuity-service.d.ts.map",
+      "size": 2429,
+      "sha256": "8f73804a4b1cb3657a80544001dd171a6e2ed3827cd1418db97919d955c80c8b"
+    },
+    {
+      "path": "dist/application/continuity-service.js",
+      "size": 19876,
+      "sha256": "f39753ee04bd4183197fceca77105ffd980630e698987862e91d52171e76ad05"
+    },
+    {
+      "path": "dist/application/continuity-service.js.map",
+      "size": 17802,
+      "sha256": "4606280a8cf60805a240fa7ae70f50c0bcbbdc7c5d3168635b811e1f2e0ffd7d"
+    },
+    {
+      "path": "dist/application/memory-ports.d.ts",
+      "size": 1092,
+      "sha256": "28be6141374d964dc07f1b5e29deafb3458b48b05cb5f0024c90832c131f36b3"
+    },
+    {
+      "path": "dist/application/memory-ports.d.ts.map",
+      "size": 1074,
+      "sha256": "06f794a0b58860bc126f15e43a68c8d70dd60344b5c28d3953ab2cd503135139"
+    },
+    {
+      "path": "dist/application/memory-ports.js",
+      "size": 99,
+      "sha256": "2e7febccba7f2b1b5422cfd4a4ec47eef4c1a1bb0375282683b9557496ab56cc"
+    },
+    {
+      "path": "dist/application/memory-ports.js.map",
+      "size": 168,
+      "sha256": "372aa693b9c3bc9de386fadeeb26c399bd6a2967ccd4f4ecb4d79197575dffcf"
+    },
+    {
+      "path": "dist/application/memory-scheduler.d.ts",
+      "size": 597,
+      "sha256": "3524bbb07ad33993b91befb6ef1a60ff9f0092115ce300d8b037d9b582ad7296"
+    },
+    {
+      "path": "dist/application/memory-scheduler.d.ts.map",
+      "size": 625,
+      "sha256": "a2adf075484a4ab97141c093c0753758314d44c39d0e088c8a4c3a66db574884"
+    },
+    {
+      "path": "dist/application/memory-scheduler.js",
+      "size": 1785,
+      "sha256": "08a57284242ef90cdc85e31b8290ebc6eac988740d2ae2addc0439e7a6e0fad6"
+    },
+    {
+      "path": "dist/application/memory-scheduler.js.map",
+      "size": 1716,
+      "sha256": "08c453180bf81d161d188332b70635b946d4f6364a445f8474030a382ea29579"
+    },
+    {
+      "path": "dist/application/memory-service.d.ts",
+      "size": 1445,
+      "sha256": "aff59372246fbb63dad9ea1c610a5ea95cc72134b50da28b243023e9a59e4e35"
+    },
+    {
+      "path": "dist/application/memory-service.d.ts.map",
+      "size": 1350,
+      "sha256": "bdd791fc64ccad81db963e1386e483efc2378e20dc4223d0cab9f806ce3ce66b"
+    },
+    {
+      "path": "dist/application/memory-service.js",
+      "size": 10361,
+      "sha256": "ab2085c1243e8f99131ed11466e8e20baf5f4ef00353fe5908593f92f3f4f796"
+    },
+    {
+      "path": "dist/application/memory-service.js.map",
+      "size": 10070,
+      "sha256": "d990bc6e3fc6425af4e753e1054876eabdfbab85926b5f4c386d3eb4adb7b100"
+    },
+    {
+      "path": "dist/application/tool-classifier.d.ts",
+      "size": 493,
+      "sha256": "b543be1b3e677d23c1e8f52d8cf3c869ffbd41ab609df4206977958c43fe1802"
+    },
+    {
+      "path": "dist/application/tool-classifier.d.ts.map",
+      "size": 528,
+      "sha256": "4e403e2b88f82d474d9a059dec8dbf3bb6b47ab65527b1345f73592ae37ed704"
+    },
+    {
+      "path": "dist/application/tool-classifier.js",
+      "size": 3862,
+      "sha256": "9a14481f17952935c8a857bd02aeb8ed1634f1151aa4318fe55f7f653c3b5362"
+    },
+    {
+      "path": "dist/application/tool-classifier.js.map",
+      "size": 3027,
+      "sha256": "61a188144c7cf9f238b557a9edc47924976b5ddf58cb4ca9dbb734a87dfaa321"
+    },
+    {
+      "path": "dist/domain/canonical.d.ts",
+      "size": 425,
+      "sha256": "aad59fdc0c7584fae35a99612c3562c41a9d5f7eb7246ba0194dc0c8e09c0264"
+    },
+    {
+      "path": "dist/domain/canonical.d.ts.map",
+      "size": 456,
+      "sha256": "ba274357ba06de8dd7b281f340bbeebfd40dd61d8c76eea49493e8f0a6646601"
+    },
+    {
+      "path": "dist/domain/canonical.js",
+      "size": 2174,
+      "sha256": "6b310ff604344d834250be40210ff646b97af948db2c3c651f67dfebbe5e93f3"
+    },
+    {
+      "path": "dist/domain/canonical.js.map",
+      "size": 2035,
+      "sha256": "04e86c68bbeed50f75cc1809128b4cec7f6420ea4ecb6d71960fffcfec10c647"
+    },
+    {
+      "path": "dist/domain/checkpoint-chain.d.ts",
+      "size": 854,
+      "sha256": "1dcaa67e3f088688bb3610fb1fa55d9387ab68f311f8b15fee0fa80c4414a133"
+    },
+    {
+      "path": "dist/domain/checkpoint-chain.d.ts.map",
+      "size": 886,
+      "sha256": "12506d9489954d27ab3ca069f710424ca06164ee41b5b3fdf2e34d63c39d027b"
+    },
+    {
+      "path": "dist/domain/checkpoint-chain.js",
+      "size": 2132,
+      "sha256": "5445fc609368745e7e38143b0e2a9b0374bb7bd84d797cac4960d0dfe02d0026"
+    },
+    {
+      "path": "dist/domain/checkpoint-chain.js.map",
+      "size": 2249,
+      "sha256": "faaec13d02a62c5887f10c2cc4f552c21019a4e239b872e27947f2e970917fea"
+    },
+    {
+      "path": "dist/domain/types.d.ts",
+      "size": 3901,
+      "sha256": "d42b5ef7dd02395f44d30d90e6f6f9867653d4368562ec32f04fbc8c4add0749"
+    },
+    {
+      "path": "dist/domain/types.d.ts.map",
+      "size": 3867,
+      "sha256": "1d3d09f355e79c5c0182ff95c60a0d38f3481ef164f01961dd2c768bffd513a7"
+    },
+    {
+      "path": "dist/domain/types.js",
+      "size": 746,
+      "sha256": "854fbdf2c6b04826903da9dcb1f02af3079f71016f53470de9cf10b891974bd1"
+    },
+    {
+      "path": "dist/domain/types.js.map",
+      "size": 722,
+      "sha256": "5f00ef6fc1001234735c84c6cc68cc1a0cc8a6081b3cd8a1b1c645774d5d1561"
+    },
+    {
+      "path": "dist/extension.d.ts",
+      "size": 167,
+      "sha256": "849008877ea7bd7c341570abf2e5bb4f1a5dc0db33b47a93d3f1a047b78ea639"
+    },
+    {
+      "path": "dist/extension.d.ts.map",
+      "size": 228,
+      "sha256": "a03a78db0b2ef440841eff5d65668a5ced32d54e7a1b0228e7e79ab46c38601c"
+    },
+    {
+      "path": "dist/extension.js",
+      "size": 27834,
+      "sha256": "d098b43ba57e32c3c7340f2b366293a17b8c5bff12e9dec92dd872f59b0bf30d"
+    },
+    {
+      "path": "dist/extension.js.map",
+      "size": 24903,
+      "sha256": "9229619a26586491221071de101e026ae895a5776c4e7cb48938602392c5ae41"
+    },
+    {
+      "path": "dist/infrastructure/continuity-store.d.ts",
+      "size": 2586,
+      "sha256": "b8e65e1c37cf3c10869b37424de742786ac4e20834b3f168b958b538d801edce"
+    },
+    {
+      "path": "dist/infrastructure/continuity-store.d.ts.map",
+      "size": 2429,
+      "sha256": "a330fa28b18bb90e256bb911c7ab19d454121a1d6f26cb225bb0c87e2f76c2ae"
+    },
+    {
+      "path": "dist/infrastructure/continuity-store.js",
+      "size": 15589,
+      "sha256": "f6dac2766f90994ae2ea25fbb50816b6fd58d65e8b8ed2e52222eccc7fd9d059"
+    },
+    {
+      "path": "dist/infrastructure/continuity-store.js.map",
+      "size": 10464,
+      "sha256": "1cbc140be2f35121493215fafc1daa2bc48b1f6673dcc9c6563699b461af95cb"
+    },
+    {
+      "path": "dist/infrastructure/git-fingerprint.d.ts",
+      "size": 1092,
+      "sha256": "631dcd01602970541aea15f8b8890579b60f559d5ac2f8753d76b6aa50aea4db"
+    },
+    {
+      "path": "dist/infrastructure/git-fingerprint.d.ts.map",
+      "size": 1111,
+      "sha256": "8851fa4af0c09a78dbba61feb7c28943afc160016179c5fd55a18a02923f18b3"
+    },
+    {
+      "path": "dist/infrastructure/git-fingerprint.js",
+      "size": 5064,
+      "sha256": "71150a69a5494e10e475322f3978ab79c9c8f53d6e65c40ed2fcc52cd143b279"
+    },
+    {
+      "path": "dist/infrastructure/git-fingerprint.js.map",
+      "size": 5351,
+      "sha256": "d2a40c868943c59b2027c4abb1a80b0cd9748807bf0403d03cca26df8a4ceba9"
+    },
+    {
+      "path": "dist/infrastructure/memory-store.d.ts",
+      "size": 2079,
+      "sha256": "4ea2eda559c5af46d4ab97df861e8aa8de28d139db68955fefb86cc5730f8f4d"
+    },
+    {
+      "path": "dist/infrastructure/memory-store.d.ts.map",
+      "size": 2053,
+      "sha256": "07ef1dac454a792c5784d30a626c5359ca94c01e1c9b87a29fd0e533cc2ba49d"
+    },
+    {
+      "path": "dist/infrastructure/memory-store.js",
+      "size": 13910,
+      "sha256": "4b58e3525c32b77e8ae9d9498890f37f343e08a9553b6047733e719a897ba6ea"
+    },
+    {
+      "path": "dist/infrastructure/memory-store.js.map",
+      "size": 10431,
+      "sha256": "e55dc776dd10d4561ef49ee071c86374426c2ad8a20dea2e9f7256347ee6d823"
+    },
+    {
+      "path": "dist/infrastructure/paths.d.ts",
+      "size": 267,
+      "sha256": "b5757962d6979f65d3dc95f2afc559a60255e6bd4da496bb2be3ce737139cdb7"
+    },
+    {
+      "path": "dist/infrastructure/paths.d.ts.map",
+      "size": 319,
+      "sha256": "d08f64d76538b4516b432b5087d99d02c0aba410b3b2eaf565522e7f92790000"
+    },
+    {
+      "path": "dist/infrastructure/paths.js",
+      "size": 579,
+      "sha256": "8f01ec69b2996e9840d3398a2732f42632b98e813da5f7f700b8fc88d0dbea97"
+    },
+    {
+      "path": "dist/infrastructure/paths.js.map",
+      "size": 620,
+      "sha256": "cd3e8e33610ae4a6ab9e1f74d8bb7818be5752ae8b9fe2be933d159b32701a07"
+    },
+    {
+      "path": "dist/infrastructure/pi-memory-provider.d.ts",
+      "size": 729,
+      "sha256": "b8996c5711e930cfe2b69cd033213366d573e71d00da14e48249a726fbf32379"
+    },
+    {
+      "path": "dist/infrastructure/pi-memory-provider.d.ts.map",
+      "size": 656,
+      "sha256": "e6879c816ad14622aa6a2e9a2d7701ce7ab9c0704dbca42d02cd5043b1e64032"
+    },
+    {
+      "path": "dist/infrastructure/pi-memory-provider.js",
+      "size": 7815,
+      "sha256": "993ff5ebdec622d6e691b609878c31c49dd3240879c1017d23ad130421cea991"
+    },
+    {
+      "path": "dist/infrastructure/pi-memory-provider.js.map",
+      "size": 5858,
+      "sha256": "f5818b334393bc93f34ecd56c2081f3668039b2e27f4a47a59cf705003dad882"
+    },
+    {
+      "path": "dist/infrastructure/sqlite.d.ts",
+      "size": 468,
+      "sha256": "b0b558d225db72eddcc3a43239dd9988809aedca8bba020cc8f66cbcfe9cdeac"
+    },
+    {
+      "path": "dist/infrastructure/sqlite.d.ts.map",
+      "size": 548,
+      "sha256": "265172563da64835553c5b455e79c9d108f40bcb4f7bb61cccc1912bde5ee06d"
+    },
+    {
+      "path": "dist/infrastructure/sqlite.js",
+      "size": 2618,
+      "sha256": "be6770f5dc229e5fea72877cb2dccf8411aca931a319f3127ac11b1db48d4e6c"
+    },
+    {
+      "path": "dist/infrastructure/sqlite.js.map",
+      "size": 2786,
+      "sha256": "9e46104298dfaa17d5ab9dc1dcdaec6ad7f8c4f5b96f80c58cf98010de0fbef6"
+    },
+    {
+      "path": "dist/interface/session-adapter.d.ts",
+      "size": 638,
+      "sha256": "7c49bd031b55632cf56c1eda2bd72e4185b53c7e1928f50e5e89749337fe49a9"
+    },
+    {
+      "path": "dist/interface/session-adapter.d.ts.map",
+      "size": 543,
+      "sha256": "f0a9b23aec493b217395aa7bb270643828bbac768cab1233b731aeb13eae6bfd"
+    },
+    {
+      "path": "dist/interface/session-adapter.js",
+      "size": 3384,
+      "sha256": "7fea5ea3555d615aae864c851d6df9bcfdc74fe6eb9fbf271ee3083b12b91b9d"
+    },
+    {
+      "path": "dist/interface/session-adapter.js.map",
+      "size": 3159,
+      "sha256": "f5eacad1fd287e9d203d425d78e7e2fe4b7ec347168ae9a486a8a1e248f38998"
+    },
+    {
+      "path": "LICENSE",
+      "size": 1056,
+      "sha256": "1126322e2cc8d165adc4c792eeb195717de2bcc7b39be1ce77959d78e87ef685"
+    },
+    {
+      "path": "package.json",
+      "size": 1689,
+      "sha256": "1f8d45e8f33e6a460a403c106adf59f3d88c3f373b522c1f36304c9ad56f9565"
+    },
+    {
+      "path": "proof/ACCEPTANCE.md",
+      "size": 4956,
+      "sha256": "ecd0fada98dbd116a686b7f8ca1e5e6f492bbf294a3e1d61a8b080e13897ccad"
+    },
+    {
+      "path": "proof/RESULTS.json",
+      "size": 3037,
+      "sha256": "d6887495150a7e78a7e86733a03dd5aeed0ea5603814e404302a12608adb8ae9"
+    },
+    {
+      "path": "README.md",
+      "size": 5962,
+      "sha256": "d50fb337de82cf2cc598825ab788aa6db43d337ac49f8733ec8970046cc1e4fd"
+    },
+    {
+      "path": "scripts/validate-alpine-arm64.sh",
+      "size": 832,
+      "sha256": "eb6224553525f3f2dc5ef51b4457641cbf65ef5981a5e7dffac49f545d904247"
+    },
+    {
+      "path": "scripts/validate-install.mjs",
+      "size": 7493,
+      "sha256": "469298acd46acf58ce46d2c3556853383b5904f5ad9bda0bc278b24d250b94b6"
+    },
+    {
+      "path": "scripts/validate-provider.mjs",
+      "size": 7888,
+      "sha256": "ba7fc0748686820d9a493afa15ad5d977a8f085fa76f204ded6507e5a0bec113"
+    }
+  ]
+}

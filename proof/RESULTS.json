@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "Completed",
+  "generatedAt": "2026-08-11T15:18:23Z",
+  "releaseCandidate": "1.0.0-rc.1",
+  "environment": {
+    "node": "v24.18.1",
+    "npm": "11.12.1",
+    "pi": "0.84.1",
+    "sqlite": "node:sqlite",
+    "platform": "Alpine Linux 3.24.1 ARM64 (aarch64)",
+    "providerModel": "openai/gpt-5.6-sol"
+  },
+  "pass": [
+    {
+      "gate": "recorded rc.1 source validation",
+      "evidence": "The original release build recorded typecheck, build, 32/32 tests, global install proof, release static validation, premerge, and git diff --check on Ubuntu 24.04.3 LTS x86_64."
+    },
+    {
+      "gate": "global install",
+      "evidence": "Pi 0.84.1 user-scope install loaded in two independent Git workspaces without -e/-l; repository scope keys differed; global-user memory crossed; both stores survived remove."
+    },
+    {
+      "gate": "behavioral proofs",
+      "evidence": "The recorded source suite covered full exit/resume state, manual/auto compaction, direct !/!! mutation tracking, fail-closed authority, hash-chain/quarantine/drift, crash uncertainty, branch/fork authority, store-only recovery, scoped memory/citations, trust, scheduler lifecycle, two-process concurrency, published baseline, secret redaction, and non-interactive mode."
+    },
+    {
+      "gate": "Alpine Linux 3.24 ARM64",
+      "evidence": "scripts/validate-alpine-arm64.sh passed on Alpine 3.24.1 aarch64 with Node v24.18.1 and Pi 0.84.1, including the isolated global-install proof."
+    },
+    {
+      "gate": "real provider/model",
+      "evidence": "openai/gpt-5.6-sol completed Stage 1 and Stage 2 from a real passing npm test run, published non-empty Stage 1 records and a Stage 2 baseline, recorded non-zero provider usage and citation usage, and passed the published-memory secret scan."
+    },
+    {
+      "gate": "release artifact integrity",
+      "evidence": "The extracted payload matched its original exact SHA-256 inventory before repair; the completed payload inventory was regenerated after the targeted repair and is verified during final packaging."
+    }
+  ],
+  "repairs": [
+    {
+      "area": "nested OpenAI Responses compatibility",
+      "change": "Memory-only nested calls suppress supportsExplicitPromptCacheMode on a request-model copy while retaining cacheRetention=none, avoiding the endpoint-rejected prompt_cache_options field and omitting a prompt cache key."
+    },
+    {
+      "area": "session memory evidence",
+      "change": "Included bashExecution entries now serialize command/output/result metadata into the Stage 1 source; entries marked excludeFromContext remain content-free."
+    },
+    {
+      "area": "provider proof authority",
+      "change": "The proof now creates and runs a real passing Node test through npm test instead of asking the model to trust a printf assertion; failure output includes pipeline reason and stage counts."
+    }
+  ],
+  "deferred": [],
+  "policy": "A DEFERRED mandatory gate is not PASS; this completed artifact has no deferred mandatory gate."
+}

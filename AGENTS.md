@@ -28,3 +28,9 @@ and validation material.
 Harness has no task database or orchestration lifecycle. Use repository-owned
 plans and behavior-level proof; do not create parallel control-plane state.
 <!-- HARNESS:END -->
+
+## Release Artifact Boundary
+
+Treat this tree as the extracted release artifact. Use `README.md` for the artifact requirements, installation, command surface, and validation entry points; use `proof/ACCEPTANCE.md` for the executable evidence map. The broader `npm install`, `npm run validate`, `scripts/validate-premerge.sh`, and `git diff --check` gates require the source checkout and are not included in the sanitized release ZIP.
+
+In `scripts/validate-install.mjs`, `copyInstallPayload()` and both `initializeGit()` calls execute before the `try/finally` whose first operation is `pi install`. The missing-payload and Git-initialization failure branches throw before that block, so those failures bypass the final `rmSync(proofRoot, ...)` cleanup.

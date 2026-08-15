@@ -1,0 +1,57 @@
+{
+  "name": "pi-continuity-work-memory",
+  "version": "1.0.0-rc.2",
+  "description": "Branch-correct Pi work continuity, evidence-backed safe checkpoints, and scoped persistent memory.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "continuity",
+    "work-memory",
+    "checkpoint"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "pi": {
+    "extensions": [
+      "./dist/extension.js"
+    ]
+  },
+  "files": [
+    "dist",
+    "scripts/validate-install.mjs",
+    "scripts/pi-version.mjs",
+    "scripts/validate-provider.mjs",
+    "scripts/validate-alpine-arm64.sh",
+    "proof/ACCEPTANCE.md",
+    "proof/RESULTS.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "@earendil-works/pi-ai": ">=0.84.1 <0.85.0",
+    "@earendil-works/pi-coding-agent": ">=0.84.1 <0.85.0",
+    "typebox": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "0.84.1",
+    "@earendil-works/pi-coding-agent": "0.84.1",
+    "@types/node": "24.12.4",
+    "typebox": "1.3.7",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "npm run build:test && node --test --test-concurrency=1 .test-build/test/*.test.js",
+    "build:test": "tsc -p tsconfig.test.json",
+    "validate:install": "node scripts/validate-install.mjs",
+    "validate:release": "node scripts/validate-release.mjs",
+    "validate": "npm run clean && npm run typecheck && npm run build && npm test && npm run validate:install && npm run validate:release",
+    "prepack": "npm run clean && npm run build",
+    "release": "node scripts/package-release.mjs"
+  }
+}

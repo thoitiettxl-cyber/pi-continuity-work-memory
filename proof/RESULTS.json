@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "status": "Completed",
+  "generatedAt": "2026-08-14T18:47:41Z",
+  "packageVersion": "1.0.0-rc.2",
+  "worktree": "release-ready 1.0.0-rc.2 source based on the original 1.0.0-rc.1 source snapshot",
+  "environment": {
+    "node": "v24.18.1",
+    "npm": "11.12.1",
+    "sqlite": "node:sqlite",
+    "platform": "Alpine Linux 3.24.1 ARM64 (aarch64)",
+    "piLowerBound": "0.84.1",
+    "piCurrent": "0.84.2",
+    "piRange": ">=0.84.1 <0.85.0"
+  },
+  "pass": [
+    {
+      "gate": "source provenance and release alignment",
+      "evidence": "The supplied source ZIP SHA-256 and all 43 original manifest entries were verified. The three documented release-only repairs were reconstructed with explicit provenance; runtime JavaScript matched the canonical repaired modules before new P0 changes."
+    },
+    {
+      "gate": "npm run validate",
+      "evidence": "Typecheck, build, 51/51 tests, isolated global install on Pi 0.84.1, and release static validation passed."
+    },
+    {
+      "gate": "scripts/validate-premerge.sh",
+      "evidence": "The supported-Pi check, complete validate gate, and git diff --check passed in an unborn intent-to-add Git worktree."
+    },
+    {
+      "gate": "provider-bound privacy and cost boundary",
+      "evidence": "Positive and negative tests capture Stage 1 and Stage 2 DTOs and prove ordinary text/bash/tool evidence remains while raw images, parameterized or wrapped base64, long opaque payloads, secrets, hidden thinking, opaque signatures, default/custom session paths, and excluded bash content do not cross the provider boundary. Provider source and Stage 2 DTOs are bounded."
+    },
+    {
+      "gate": "modified-source real provider",
+      "evidence": "With explicit owner authorization, cliproxy/gpt-5.6-sol on Pi 0.84.2 completed Stage 1 and Stage 2 for the modified source, published one record and one baseline, accounted provider usage and citation usage, and passed the published-memory secret scan. Candidate-extension discovery was isolated from configured packages to prevent an installed-extension conflict; terminal proof paths close SQLite and remove temporary proof state."
+    },
+    {
+      "gate": "pipeline crash and lease recovery",
+      "evidence": "Tests prove unique attempt owners, heartbeat across both provider stages, post-lock expiry checks, expired-run startup recovery, atomic reclaim, orphan pending/building cleanup, stale-owner finish fencing, prior published-head preservation, retry after failure/expiry/supersession, and same-service concurrency exclusion."
+    },
+    {
+      "gate": "Pi support matrix",
+      "evidence": "Version fixtures accept 0.84.1 and 0.84.2, reject 0.85.0 with the peer-range diagnostic, and reports that reach a Pi binary include the detected version plus >=0.84.1 <0.85.0."
+    },
+    {
+      "gate": "global install on current Pi",
+      "evidence": "PI_VALIDATION_PI=/usr/local/bin/pi passed the isolated two-workspace global-install proof on Pi 0.84.2; repository scopes remained distinct, global-user memory crossed, and stores survived remove."
+    },
+    {
+      "gate": "Alpine Linux 3.24 ARM64",
+      "evidence": "scripts/validate-alpine-arm64.sh passed on Alpine 3.24.1 aarch64 with Node v24.18.1 and Pi 0.84.2, including the exact global-install proof."
+    },
+    {
+      "gate": "release artifact",
+      "evidence": "npm run release built a sanitized ZIP from package.json files, generated an exact inventory, installed the exact staged payload, passed unzip -t, and wrote SHA-256 plus release-report.json."
+    }
+  ],
+  "deferred": [],
+  "releaseIdentity": {
+    "status": "selected",
+    "version": "1.0.0-rc.2",
+    "reason": "The owner explicitly selected 1.0.0-rc.2 so the hardened source and artifacts remain distinct from immutable canonical 1.0.0-rc.1."
+  },
+  "policy": "All mandatory source, native, real-provider, supported-Pi, Alpine ARM64, and release-artifact gates passed for 1.0.0-rc.2. No commit, push, publication, or deployment was performed."
+}

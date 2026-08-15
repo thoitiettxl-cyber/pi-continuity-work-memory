@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.test-build/
+release/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.log

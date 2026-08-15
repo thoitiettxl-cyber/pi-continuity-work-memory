@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "package": "pi-continuity-work-memory",
+  "version": "1.0.0-rc.1",
+  "files": [
+    {
+      "path": ".gitignore",
+      "size": 83,
+      "sha256": "bd455e436f682a66e824f3b2e39419f7717d6f03c7432717d015f5d5dcda98e8",
+      "provenance": "original"
+    },
+    {
+      "path": "BUILD_PROVENANCE.md",
+      "size": 3090,
+      "sha256": "2535bd25e5593fd468211e646deff79512c4ceec0a6808f69c6aed93a78ad4ac",
+      "provenance": "original"
+    },
+    {
+      "path": "LICENSE",
+      "size": 1056,
+      "sha256": "1126322e2cc8d165adc4c792eeb195717de2bcc7b39be1ce77959d78e87ef685",
+      "provenance": "original"
+    },
+    {
+      "path": "ORIGINAL_SOURCE_STATUS.txt",
+      "size": 32,
+      "sha256": "e6f6129c283c49e774f6076222c3461fd112cdc647dc1c260d6ca834ceef69d6",
+      "provenance": "original"
+    },
+    {
+      "path": "package-lock.json",
+      "size": 127453,
+      "sha256": "c1355fe2f27e231c3a10f456851ee2e910f805d5f6c9c5400abba8c96d573d00",
+      "provenance": "original"
+    },
+    {
+      "path": "package.json",
+      "size": 1689,
+      "sha256": "1f8d45e8f33e6a460a403c106adf59f3d88c3f373b522c1f36304c9ad56f9565",
+      "provenance": "original"
+    },
+    {
+      "path": "proof/ACCEPTANCE.md",
+      "size": 4404,
+      "sha256": "1216bf03fbe7f7ce40b28ef632a610c8d1b2bf94af584c5bce5bab773569a91c",
+      "provenance": "original"
+    },
+    {
+      "path": "proof/RESULTS.json",
+      "size": 1800,
+      "sha256": "4572d8aff7f9a489d1985a6d4f723f2b8006acf09fc393fde2bcf04b7b7c18dd",
+      "provenance": "original"
+    },
+    {
+      "path": "README.md",
+      "size": 5667,
+      "sha256": "f7476c0cf7ea8dee20f3aaf8f4dfad19083ccbae85bca844623b6ea20e3f64ba",
+      "provenance": "original"
+    },
+    {
+      "path": "scripts/clean.mjs",
+      "size": 241,
+      "sha256": "442c9b96dcb53282b22751fb0eaae768f16b0c352984a495a8f5e3e95884b621",
+      "provenance": "original"
+    },
+    {
+      "path": "scripts/package-release.mjs",
+      "size": 4468,
+      "sha256": "3e724a9f10a01f9e82cac409b2db51a1ebce56968788bd3b5fa0e3a96daad82a",
+      "provenance": "original"
+    },
+    {
+      "path": "scripts/validate-alpine-arm64.sh",
+      "size": 832,
+      "sha256": "eb6224553525f3f2dc5ef51b4457641cbf65ef5981a5e7dffac49f545d904247",
+      "provenance": "original"
+    },
+    {
+      "path": "scripts/validate-install.mjs",
+      "size": 7493,
+      "sha256": "469298acd46acf58ce46d2c3556853383b5904f5ad9bda0bc278b24d250b94b6",
+      "provenance": "original"
+    },
+    {
+      "path": "scripts/validate-premerge.sh",
+      "size": 395,
+      "sha256": "98c73b2150670278e51d6f44860be1743945de11f4f7817d24138312e742c136",
+      "provenance": "original"
+    },
+    {
+      "path": "scripts/validate-provider.mjs",
+      "size": 7566,
+      "sha256": "307c8226a7c1837314f829ce49628d7a8f22c35a23abe0b2e0e1392132249fd0",
+      "provenance": "original"
+    },
+    {
+      "path": "scripts/validate-release.mjs",
+      "size": 2146,
+      "sha256": "c9610c6d0ebfc293e85600588f8612ca182cbf36e5661eb2c5cd3e58fb01e395",
+      "provenance": "original"
+    },
+    {
+      "path": "src/application/continuity-service.ts",
+      "size": 18919,
+      "sha256": "fc57a58779a2872e1d38676eab2ffd7230b85d6679a6bd37c896279f73b9e995",
+      "provenance": "original"
+    },
+    {
+      "path": "src/application/memory-ports.ts",
+      "size": 976,
+      "sha256": "3f929517cda06b1d15c9d7a2f77d1e0b45fc68f3c6ddbb5633a74bced4c326fa",
+      "provenance": "original"
+    },
+    {
+      "path": "src/application/memory-scheduler.ts",
+      "size": 1692,
+      "sha256": "b84f0378a1ed06f8c105bf330031e9ee4ae592c359bebb34585b988865e3fcb9",
+      "provenance": "original"
+    },
+    {
+      "path": "src/application/memory-service.ts",
+      "size": 9712,
+      "sha256": "cc2033896ec28bdea0784dec1f37345b353eaa27be9cf4235e9c755c1cc28860",
+      "provenance": "original"
+    },
+    {
+      "path": "src/application/tool-classifier.ts",
+      "size": 3594,
+      "sha256": "76e7e13ddf8ab293d3e2ed65e88b633be9ff67ffcec9128b1bc896f78746e871",
+      "provenance": "original"
+    },
+    {
+      "path": "src/domain/canonical.ts",
+      "size": 2144,
+      "sha256": "804b6fb4289e8db0b375e757a84d7abf6aef9537d2463b511b684f462eacb887",
+      "provenance": "original"
+    },
+    {
+      "path": "src/domain/checkpoint-chain.ts",
+      "size": 2512,
+      "sha256": "f016db4ac1b83ce05f9e9fb97bf03561c02e5d1a0889f67ae2c6069a5e8084d4",
+      "provenance": "original"
+    },
+    {
+      "path": "src/domain/types.ts",
+      "size": 3965,
+      "sha256": "7248a1a18921e720300bc18fd5c2543898c139222434926c4cad1ec4b539b5f6",
+      "provenance": "original"
+    },
+    {
+      "path": "src/extension.ts",
+      "size": 24283,
+      "sha256": "6fd1a83e33fe37c9f5e1f7baa2c438340a28227408936bab02a6468a72d503ef",
+      "provenance": "original"
+    },
+    {
+      "path": "src/infrastructure/continuity-store.ts",
+      "size": 16621,
+      "sha256": "7f160f70d0b377858c0f565cc935ceb8ad076339b6d7d188dfafc59d3e2a57c2",
+      "provenance": "original"
+    },
+    {
+      "path": "src/infrastructure/git-fingerprint.ts",
+      "size": 5249,
+      "sha256": "b33477a927da549cf15addf0b37bb03d8727021d5310c40fa855466982f0c83a",
+      "provenance": "original"
+    },
+    {
+      "path": "src/infrastructure/memory-store.ts",
+      "size": 14372,
+      "sha256": "1380c82fa707e3cd5fe560816297a0561d880f3214db95ba8747750b0c90f9be",
+      "provenance": "original"
+    },
+    {
+      "path": "src/infrastructure/paths.ts",
+      "size": 675,
+      "sha256": "36fd6cf868bfe8fe6dedf3970dd5e58418609a62c7edb77b1fef47b7f180a18f",
+      "provenance": "original"
+    },
+    {
+      "path": "src/infrastructure/pi-memory-provider.ts",
+      "size": 7316,
+      "sha256": "d0d176583e92fd0432e6f0c4fa8b5b188663cef1e455237e53b894295af587a9",
+      "provenance": "original"
+    },
+    {
+      "path": "src/infrastructure/sqlite.ts",
+      "size": 2295,
+      "sha256": "c27066d5245f8df6381fd316ee4283453dc661d09c65961c10e4887ec4ccc877",
+      "provenance": "original"
+    },
+    {
+      "path": "src/interface/session-adapter.ts",
+      "size": 3070,
+      "sha256": "d1ae56e688f5aa41e98b3cd6a7274578ee73995b9ce7ba76fa5f66d96d64f421",
+      "provenance": "original"
+    },
+    {
+      "path": "test/canonical.test.ts",
+      "size": 1098,
+      "sha256": "ba114d6151d2b8f31147064568861996dfe3f2b861935895ea77863ae3de10cf",
+      "provenance": "original"
+    },
+    {
+      "path": "test/concurrency.test.ts",
+      "size": 2010,
+      "sha256": "e2f1244681ceb64d8f930f520d8f4425307bae5292636fd6e6035d6ccf398d4b",
+      "provenance": "original"
+    },
+    {
+      "path": "test/continuity.test.ts",
+      "size": 11691,
+      "sha256": "c40b83483c9e41ac679719995e3241a8077ffad00b94411845e97f7c61fe7289",
+      "provenance": "original"
+    },
+    {
+      "path": "test/extension-mode.test.ts",
+      "size": 9581,
+      "sha256": "cbdd063ba59dbac06ba9526e2927ebf2a798051da32046ac6f3313da2f1021a5",
+      "provenance": "original"
+    },
+    {
+      "path": "test/git-fingerprint.test.ts",
+      "size": 2225,
+      "sha256": "c31df7cc2d924c4a182f1d5f3a052e1ef762020166484770eca225de99683caf",
+      "provenance": "original"
+    },
+    {
+      "path": "test/helpers.ts",
+      "size": 2445,
+      "sha256": "fd7ab238ceeedbf79aa4ba4f2d41b099cf7e4c561acc4cda5c84fcab789b1a18",
+      "provenance": "original"
+    },
+    {
+      "path": "test/memory.test.ts",
+      "size": 8146,
+      "sha256": "85085841d55ca4a035b19c11555e23dda3ceee3af358413d36d1e3ccddf678be",
+      "provenance": "original"
+    },
+    {
+      "path": "test/scheduler.test.ts",
+      "size": 1496,
+      "sha256": "4e106062113f266ef87d1de332727d04e82a635810a6e864e78b4e3e46e09810",
+      "provenance": "original"
+    },
+    {
+      "path": "tsconfig.build.json",
+      "size": 243,
+      "sha256": "0c88a23fa1543adf3045d3a2ac0a7745b78ec8ca5b106a6ea5ba25d8ca8c49c5",
+      "provenance": "original"
+    },
+    {
+      "path": "tsconfig.json",
+      "size": 389,
+      "sha256": "73502efe3f8d6b86a74b22d1dcfcf5ecf4cfc2adef93c96aac2e8d3d7b5caa9f",
+      "provenance": "original"
+    },
+    {
+      "path": "tsconfig.test.json",
+      "size": 180,
+      "sha256": "8139af29c4fc4b15de5334f8dfe6584f710e760d4cc5d3e3b0c3703c2b2056be",
+      "provenance": "original"
+    }
+  ]
+}

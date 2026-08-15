@@ -56,6 +56,32 @@
     }
   ],
   "deferred": [],
+  "developmentValidation": {
+    "status": "PASS_SOURCE_LOCAL",
+    "generatedAt": "2026-08-15T07:09:21Z",
+    "scope": "P0 authority hardening on dev-next",
+    "commands": [
+      "npm run validate",
+      "scripts/validate-premerge.sh"
+    ],
+    "observations": {
+      "tests": "104/104",
+      "typecheck": "PASS",
+      "build": "PASS",
+      "piInstallProof": "PASS on Pi 0.84.1 in two isolated workspaces",
+      "releaseStaticValidation": "PASS",
+      "diffCheck": "PASS",
+      "sealedValidationReceipts": "PASS",
+      "consequentialOperationLedger": "PASS",
+      "orderedSqliteMigrations": "PASS"
+    },
+    "notRevalidated": [
+      "real-provider execution",
+      "Alpine device matrix",
+      "packaged release archive"
+    ],
+    "authority": "This development result applies only to the changed source-local worktree. Historical RC2 external proofs are not reused as authority for these changes."
+  },
   "releaseIdentity": {
     "status": "selected",
     "version": "1.0.0-rc.2",

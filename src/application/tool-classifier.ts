@@ -30,31 +30,26 @@ const VALIDATION_COMMANDS = [
 ];
 
 const READ_ONLY_COMMANDS = [
-	/^(?:pwd|ls|find|rg|grep|sed|head|tail|wc|stat|file|which|type|uname|env|printenv)(?:\s+[^;&|]*)?$/,
-	/^git\s+(?:status|diff|show|log|rev-parse|branch|ls-files)(?:\s+[^;&|]*)?$/,
+	/^(?:pwd|ls|rg|grep|head|tail|wc|stat|file|which|type|uname|printenv)(?:\s+[^;&|]*)?$/,
+	/^git\s+(?:status|diff|show|log|rev-parse|ls-files)(?:\s+[^;&|]*)?$/,
+	/^git\s+branch(?:\s+(?:--show-current|--list|-a|-r|-v|-vv))*$/,
 	/^npm\s+(?:view|list|ls|explain)(?:\s+[^;&|]*)?$/,
 	/^node\s+(?:--version|-v)$/,
 ];
 
+const SENSITIVE_VALIDATION_ARGUMENT = /(?:^|\s)--(?:api[_-]?key|access[_-]?token|refresh[_-]?token|auth[_-]?token|token|password|passwd|secret|client[_-]?secret|authorization|cookie)(?:=|\s)/i;
+
 export type ToolClassification = "ignored" | "read" | "mutation" | "validation";
+export type MutationConsequence = "none" | "local" | "external";
 
-export function normalizeCommand(command: string): string {
-	return command.trim().replace(/\s+/g, " ");
-}
-
-export function isExecutableValidationCommand(command: string): boolean {
-	const normalized = normalizeCommand(command);
-	if (!normalized || /[\n\r;&|<>`$()]/.test(normalized) || /(?:^|\s)(?:sh|bash|zsh)\s+-c\b/.test(normalized)) return false;
-	return VALIDATION_COMMANDS.some((pattern) => pattern.test(normalized));
-}
-
-export function splitValidationCommand(command: string): { program: string; args: string[] } {
-	if (!isExecutableValidationCommand(command)) throw new Error("Command is not an allow-listed executable validation");
+export function splitSimpleCommand(command: string): { program: string; args: string[]; tokens: string[] } {
+	if (!command.trim() || /[\n\r\0]/.test(command)) throw new Error("Command is empty or contains a line boundary");
 	const tokens: string[] = [];
 	let current = "";
 	let quote: "'" | '"' | null = null;
 	for (let index = 0; index < command.length; index += 1) {
 		const character = command[index]!;
+		if (character === "`" || character === "$" || character === "\0") throw new Error("Shell expansion is not allowed");
 		if (quote) {
 			if (character === quote) quote = null;
 			else current += character;
@@ -64,6 +59,7 @@ export function splitValidationCommand(command: string): { program: string; args
 			quote = character;
 			continue;
 		}
+		if (/[;&|<>()[\]{}*?~#]/.test(character)) throw new Error("Shell operators and expansions are not allowed");
 		if (/\s/.test(character)) {
 			if (current) {
 				tokens.push(current);
@@ -73,17 +69,36 @@ export function splitValidationCommand(command: string): { program: string; args
 		}
 		if (character === "\\") {
 			index += 1;
-			if (index >= command.length) throw new Error("Trailing escape in validation command");
+			if (index >= command.length) throw new Error("Trailing escape in command");
 			current += command[index]!;
 			continue;
 		}
 		current += character;
 	}
-	if (quote) throw new Error("Unclosed quote in validation command");
+	if (quote) throw new Error("Unclosed quote in command");
 	if (current) tokens.push(current);
-	const program = tokens.shift();
-	if (!program) throw new Error("Validation command is empty");
-	return { program, args: tokens };
+	const program = tokens[0];
+	if (!program) throw new Error("Command is empty");
+	return { program, args: tokens.slice(1), tokens };
+}
+
+export function isExecutableValidationCommand(command: string): boolean {
+	let parsed: ReturnType<typeof splitSimpleCommand>;
+	try {
+		parsed = splitSimpleCommand(command);
+	} catch {
+		return false;
+	}
+	const normalized = parsed.tokens.join(" ");
+	if (/(?:^|\s)(?:sh|bash|zsh)\s+-c\b/.test(normalized)) return false;
+	if (SENSITIVE_VALIDATION_ARGUMENT.test(normalized)) return false;
+	return VALIDATION_COMMANDS.some((pattern) => pattern.test(normalized));
+}
+
+export function splitValidationCommand(command: string): { program: string; args: string[] } {
+	if (!isExecutableValidationCommand(command)) throw new Error("Command is not an allow-listed executable validation");
+	const { program, args } = splitSimpleCommand(command);
+	return { program, args };
 }
 
 export function classifyTool(toolName: string, input: Record<string, unknown>): ToolClassification {
@@ -91,8 +106,21 @@ export function classifyTool(toolName: string, input: Record<string, unknown>): 
 	if (READ_ONLY_TOOLS.has(toolName)) return "read";
 	if (MUTATION_TOOLS.has(toolName)) return "mutation";
 	if (toolName !== "bash") return "mutation";
-	const command = typeof input.command === "string" ? normalizeCommand(input.command) : "";
-	if (isExecutableValidationCommand(command)) return "validation";
-	if (READ_ONLY_COMMANDS.some((pattern) => pattern.test(command))) return "read";
+	const rawCommand = typeof input.command === "string" ? input.command : "";
+	if (isExecutableValidationCommand(rawCommand)) return "validation";
+	let normalized = "";
+	try {
+		normalized = splitSimpleCommand(rawCommand).tokens.join(" ");
+	} catch {
+		return "mutation";
+	}
+	if (READ_ONLY_COMMANDS.some((pattern) => pattern.test(normalized))) return "read";
 	return "mutation";
+}
+
+export function classifyMutationConsequence(toolName: string, input: Record<string, unknown>): MutationConsequence {
+	const classification = classifyTool(toolName, input);
+	if (classification !== "mutation") return "none";
+	if (MUTATION_TOOLS.has(toolName)) return "local";
+	return "external";
 }

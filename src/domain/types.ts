@@ -1,10 +1,15 @@
-export const CONTINUITY_SCHEMA_VERSION = 1;
+export const CONTINUITY_STATE_SCHEMA_VERSION = 1;
+export const CONTINUITY_DATABASE_SCHEMA_VERSION = 2;
+export const MEMORY_DATABASE_SCHEMA_VERSION = 2;
+export const CONTINUITY_SCHEMA_VERSION = CONTINUITY_STATE_SCHEMA_VERSION;
 export const MEMORY_SCHEMA_VERSION = 1;
 
-export type CheckpointAuthority = "none" | "verified" | "embedded" | "quarantined";
+export type CheckpointAuthority = "none" | "verified" | "embedded" | "legacy" | "quarantined";
 export type ContinuityHealth = "safe" | "drifted" | "degraded" | "unavailable";
 export type MutationStatus = "none" | "pending" | "determined" | "uncertain";
 export type MemoryScope = "global-user" | "repository" | "work-item" | "session";
+export type MutationConsequence = "none" | "local" | "external";
+export type ReconciliationOutcome = "applied" | "not_applied" | "partially_applied";
 
 export interface PlanStep {
 	id: string;
@@ -14,14 +19,68 @@ export interface PlanStep {
 
 export interface ValidationEvidence {
 	id: string;
+	receiptVersion: 1 | null;
+	sessionKey: string;
+	nodeId: string;
 	command: string;
+	commandDigest: string;
 	exitCode: number;
 	startedAt: number;
 	finishedAt: number;
 	mutationSequence: number;
+	preRepositoryFingerprint: string | null;
+	postRepositoryFingerprint: string | null;
 	repositoryFingerprint: string;
+	operationLedgerDigest: string | null;
 	outputDigest: string;
 	provider: "observed-tool" | "continuity-validate";
+	receiptDigest: string | null;
+}
+
+export interface OperationReconciliation {
+	id: string;
+	toolCallId: string;
+	revision: number;
+	outcome: ReconciliationOutcome;
+	note: string;
+	noteDigest: string;
+	recordDigest: string;
+	actor: "human-command";
+	sessionKey: string;
+	nodeId: string;
+	createdAt: number;
+	integrityValid: boolean;
+}
+
+export interface TrackedOperation {
+	toolCallId: string;
+	operationKey: string | null;
+	nodeId: string;
+	sequence: number;
+	toolName: string;
+	kind: "mutation" | "validation";
+	consequence: MutationConsequence;
+	inputDigest: string;
+	preFingerprint: string | null;
+	preOperationLedgerDigest: string | null;
+	command: string | null;
+	commandDigest: string | null;
+	status: "pending" | "determined" | "uncertain";
+	isError: boolean | null;
+	resultDigest: string | null;
+	createdAt: number;
+	resolvedAt: number | null;
+	reconciliation: OperationReconciliation | null;
+}
+
+export interface UnresolvedOperation {
+	toolCallId: string;
+	operationKey: string | null;
+	toolName: string;
+	consequence: MutationConsequence;
+	command: string | null;
+	status: "pending" | "uncertain";
+	createdAt: number;
 }
 
 export interface WorkState {
@@ -93,13 +152,16 @@ export interface CheckpointRecord {
 	repositoryId: string;
 	parentId: string | null;
 	parentHash: string;
+	payloadVersion: 1 | 2;
 	payloadJson: string;
 	payloadHash: string;
 	chainHash: string;
 	repositoryFingerprint: string;
 	validationEvidenceId: string;
+	validationReceiptDigest: string | null;
+	operationLedgerDigest: string | null;
 	mutationSequence: number;
-	status: "verified" | "quarantined";
+	status: "provisional" | "verified" | "quarantined";
 	createdAt: number;
 }
 
@@ -110,6 +172,7 @@ export interface ContinuityStatus {
 	reason: string;
 	lineage: SessionLineage;
 	state: WorkState;
+	unresolvedOperations: UnresolvedOperation[];
 }
 
 export interface MemoryRecord {

@@ -73,7 +73,8 @@ For isolated tests, override them with `PI_CONTINUITY_HOME` and `PI_WORK_MEMORY_
 
 Commands:
 
-- `/continuity status|show|checkpoint|recover [checkpoint-id]`
+- `/continuity status|show|checkpoint|recover [checkpoint-id]|operations`
+- `/continuity reconcile <operation-id> <applied|not_applied|partially_applied> <evidence-note>`
 - `/memory status|run|reset|remember <global-user|repository|work-item|session> <text>`
 
 Structured tools:
@@ -95,14 +96,20 @@ Structured tools:
 A checkpoint becomes `verified` only when all of these hold:
 
 1. No mutation result is pending or uncertain.
-2. An allow-listed executable validation succeeded after the latest mutation.
-3. The repository fingerprint was identical before and after that validation.
-4. A second stable fingerprint still matches at checkpoint creation.
-5. The complete parent hash-chain validates.
+2. Every operation on the active branch is determined or explicitly reconciled by the user.
+3. An allow-listed executable validation succeeded after the latest mutation and operation-ledger state.
+4. The complete validation receipt, including command, exit code, timestamps, mutation sequence, pre/post fingerprints, ledger digest, output digest, session/node identity, and issuer, validates against its receipt digest.
+5. The repository fingerprint was identical before and after that validation.
+6. A provisional checkpoint is inserted, then a final stable fingerprint still matches before promotion to `verified`.
+7. The promotion transaction revalidates the parent hash-chain, checkpoint column projections, validation receipt, mutation state, and operation-ledger digest.
 
 The fingerprint covers HEAD, branch, porcelain-v2 status, staged binary diff, worktree binary diff, and content hashes for every untracked file. Two consecutive captures must match. Repository changes after checkpoint yield `drifted`. Corrupt payloads, missing parents, or cycles are quarantined.
 
+Validation receipts persist a conservative command summary plus a digest of the complete parsed executable/argv. Arbitrary argument text is represented only by short one-way digests, so passwords or tokens embedded in test selectors are not copied into SQLite, embedded state, checkpoints, or later migration backups.
+
 Session-embedded state always has `authority: embedded`. It can restore context after compaction, fork, clone, or copy, but never grants safe authority in the copied session. Text written by a model cannot set a checkpoint status.
+
+RC2 checkpoint payloads remain available for state-only recovery after database migration, but report `authority: legacy` because their validation rows were not receipt-bound when created. A fresh validation creates a payload-v2 checkpoint and starts a new `GENESIS` authority chain rather than retroactively upgrading old evidence.
 
 `/continuity recover` is deliberately store-only. It never runs Git, checks out or resets, writes repository files, applies patches, stashes, commits, pushes, publishes, deploys, or replays uncertain side effects.
 
@@ -110,7 +117,24 @@ Session-embedded state always has `authority: embedded`. It can restore context 
 
 Continuity snapshots are attached to Pi session-tree nodes and mirrored transactionally in SQLite. Reconstruction selects only snapshots on the active branch. Forked/cloned sessions inherit embedded context, get a separate lineage identity, and must validate a new checkpoint for authority.
 
-A mutation is persisted as `pending` before execution. If Pi or the machine stops before the corresponding tool result, resume converts it to `mutationUncertain=true`. SQLite uses WAL, `busy_timeout`, immediate transactions, retry handling, revisioned branch snapshots, job leases, and generation checks.
+A mutation is persisted as `pending` before execution. If Pi or the machine stops before the corresponding tool result, resume converts that operation to `uncertain`. Uncertainty is derived from the active-branch operation ledger and cannot be cleared by an unrelated later mutation.
+
+Unknown and non-read-only tools are treated conservatively as external operations. Their stable operation key binds repository identity, tool identity, a canonical simple-command argv digest (or canonical structured input digest), and the pre-operation Git HEAD. Equivalent quoting therefore cannot mint a second claim, and changing agent-controlled work metadata cannot bypass one. Agent-issued shell commands containing compound operators, redirection, substitution, expansion, or multiple lines fail closed and must be split into simple commands. An agent retry is blocked while an equivalent operation is pending, uncertain, or already determined. The user can reconcile an uncertain operation only through the direct `/continuity reconcile ...` command after inspecting the real target. Reconciliation records are append-only, secret-redacted, digest-bound, invalidate older validation, and require fresh executable proof before a checkpoint. No agent-callable tool can self-declare reconciliation.
+
+SQLite uses WAL, `busy_timeout`, immediate transactions, retry handling, revisioned branch snapshots, ordered schema migrations, migration checksums, semantic schema checksums, integrity checks, job leases, and generation checks.
+
+## Persistent-store upgrades
+
+Continuity and learning-memory databases use ordered database schema migrations independently from the embedded session-state schema. Opening an RC2 schema-v1 store with this runtime:
+
+1. verifies the claimed v1 tables, columns, and indexes before adoption;
+2. creates a private `backups/` sibling directory;
+3. writes a consistent `VACUUM INTO` backup plus SHA-256 sidecar with mode `0600`;
+4. applies contiguous checksum-bound migrations inside an immediate transaction;
+5. records migration history and a canonical `sqlite_schema` checksum; and
+6. runs SQLite integrity and foreign-key checks before the store becomes available.
+
+A failed migration rolls back the transaction and retains the pre-migration backup. A database newer than the runtime, an unknown migration checksum, a malformed claimed legacy schema, or schema drift fails closed. Stop older Pi processes before first opening a persistent store with the upgraded runtime; an RC2 process does not understand the v2 database schema.
 
 ## Persistent memory
 

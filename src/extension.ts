@@ -157,6 +157,7 @@ export default function extension(pi: ExtensionAPI): void {
 				reason: `mutation tracking failed closed: ${authorityCompromisedReason}`,
 				lineage: continuity.lineage(),
 				state: continuity.currentState(),
+				unresolvedOperations: [],
 			};
 		}
 		return continuity.status(branchContext(ctx), signal);
@@ -293,11 +294,12 @@ export default function extension(pi: ExtensionAPI): void {
 		context = ctx;
 		if (!continuity) return;
 		try {
-			await continuity.observeToolCall({
+			return await continuity.observeToolCall({
 				toolCallId: event.toolCallId,
 				toolName: event.toolName,
 				input: event.input,
 				branch: branchContext(ctx),
+				actor: "agent-tool",
 				signal: ctx.signal,
 			});
 		} catch (error) {
@@ -326,19 +328,21 @@ export default function extension(pi: ExtensionAPI): void {
 		context = ctx;
 		if (!continuity) return;
 		const toolCallId = `user-bash:${randomUUID()}`;
+		const activeBranch = branchContext(ctx);
 		try {
 			await continuity.observeToolCall({
 				toolCallId,
 				toolName: "bash",
 				input: { command: event.command },
-				branch: branchContext(ctx),
+				branch: activeBranch,
+				actor: "user-bash",
 				signal: ctx.signal,
 			});
 		} catch (error) {
 			compromiseAuthority(ctx, error);
 			return;
 		}
-		if (!continuityStore?.getTrackedCall(toolCallId)) return;
+		if (!continuityStore?.getTrackedCall(toolCallId, continuity.identity.sessionKey, activeBranch.nodeIds)) return;
 		const local = createLocalBashOperations();
 		return {
 			operations: {
@@ -552,7 +556,7 @@ export default function extension(pi: ExtensionAPI): void {
 	});
 
 	pi.registerCommand("continuity", {
-		description: "Continuity status, checkpoint, show, or state-only recovery",
+		description: "Continuity status, checkpoint, operations, reconciliation, or state-only recovery",
 		async handler(args, ctx) {
 			context = ctx;
 			try {
@@ -581,7 +585,23 @@ export default function extension(pi: ExtensionAPI): void {
 					safeNotify(ctx, "Continuity work state recovered; repository untouched.");
 					return;
 				}
-				safeNotify(ctx, "Usage: /continuity status|show|checkpoint|recover [checkpoint-id]", "warning");
+				if (subcommand === "operations") {
+					safeNotify(ctx, JSON.stringify(services.continuity.listOperations(branchContext(ctx)), null, 2));
+					return;
+				}
+				if (subcommand === "reconcile") {
+					const match = args.trim().match(/^reconcile\s+(\S+)\s+(applied|not_applied|partially_applied)\s+(.+)$/s);
+					if (!match) {
+						safeNotify(ctx, "Usage: /continuity reconcile <operation-id> <applied|not_applied|partially_applied> <evidence-note>", "warning");
+						return;
+					}
+					services.continuity.reconcileOperation(branchContext(ctx), match[1]!, match[2]! as "applied" | "not_applied" | "partially_applied", match[3]!);
+					appendState();
+					await refreshTuiStatus(ctx);
+					safeNotify(ctx, `Reconciled operation ${match[1]}; fresh validation is required.`);
+					return;
+				}
+				safeNotify(ctx, "Usage: /continuity status|show|checkpoint|recover [checkpoint-id]|operations|reconcile ...", "warning");
 			} catch (error) {
 				safeNotify(ctx, redactSecrets(error instanceof Error ? error.message : String(error)), "error");
 			}

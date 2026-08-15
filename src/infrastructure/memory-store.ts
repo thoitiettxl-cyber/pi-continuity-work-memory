@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { MEMORY_DATABASE_SCHEMA_VERSION } from "../domain/types.js";
 import type {
 	MemoryRecord,
 	MemoryScope,
@@ -8,6 +9,15 @@ import type {
 	PublishedBaseline,
 } from "../domain/types.js";
 import { DurableSqlite, asNumber } from "./sqlite.js";
+import {
+	requiredExactColumns,
+	requiredForeignKeys,
+	requiredIndexColumns,
+	requiredOnlySchemaObjects,
+	requiredSchemaMatchesSql,
+	runSqliteMigrations,
+	type SqliteMigration,
+} from "./sqlite-migrations.js";
 
 export interface ScopeSelector {
 	scope: MemoryScope;
@@ -79,17 +89,7 @@ function rowToBaseline(row: Record<string, unknown>): PublishedBaseline {
 	};
 }
 
-export class MemoryStore {
-	readonly db: DurableSqlite;
-
-	constructor(path: string) {
-		this.db = new DurableSqlite(path);
-		this.migrate();
-		this.recoverAbandonedPipelines();
-	}
-
-	private migrate(): void {
-		this.db.exec(`
+const MEMORY_V1_SQL = `
 CREATE TABLE IF NOT EXISTS memory_meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
@@ -162,7 +162,60 @@ CREATE TABLE IF NOT EXISTS citation_usage (
   created_at INTEGER NOT NULL,
   FOREIGN KEY(memory_id) REFERENCES memory_records(id)
 );
-`);
+`;
+
+const MEMORY_V2_SQL = "SELECT 1;";
+
+function verifyMemoryV1(db: DurableSqlite): void {
+	requiredSchemaMatchesSql(db, MEMORY_V1_SQL, ["schema_migrations"]);
+	requiredOnlySchemaObjects(db, [
+		"baseline_heads", "citation_usage", "idx_baseline_scope", "idx_memory_run_lease", "idx_memory_scope",
+		"memory_baselines", "memory_meta", "memory_records", "pipeline_runs", "schema_migrations",
+	]);
+	requiredExactColumns(db, "memory_meta", ["key", "value"]);
+	requiredExactColumns(db, "pipeline_runs", ["id", "session_key", "source_hash", "generation", "status", "owner", "lease_until", "reason", "stage1_records", "stage2_baselines", "usage_json", "created_at", "updated_at"]);
+	requiredExactColumns(db, "memory_records", ["id", "scope", "scope_key", "content", "citation", "source_session_key", "source_hash", "run_id", "status", "usage_count", "last_used_at", "created_at", "updated_at"]);
+	requiredExactColumns(db, "memory_baselines", ["id", "scope", "scope_key", "content", "source_generation", "run_id", "status", "created_at"]);
+	requiredExactColumns(db, "baseline_heads", ["scope", "scope_key", "baseline_id", "updated_at"]);
+	requiredExactColumns(db, "citation_usage", ["id", "memory_id", "session_key", "created_at"]);
+	requiredIndexColumns(db, "idx_memory_run_lease", ["status", "lease_until"]);
+	requiredIndexColumns(db, "idx_memory_scope", ["scope", "scope_key", "status", "updated_at"]);
+	requiredIndexColumns(db, "idx_baseline_scope", ["scope", "scope_key", "status", "created_at"]);
+	requiredForeignKeys(db, "memory_records", [{ from: "run_id", table: "pipeline_runs", to: "id" }]);
+	requiredForeignKeys(db, "memory_baselines", [{ from: "run_id", table: "pipeline_runs", to: "id" }]);
+	requiredForeignKeys(db, "baseline_heads", [{ from: "baseline_id", table: "memory_baselines", to: "id" }]);
+	requiredForeignKeys(db, "citation_usage", [{ from: "memory_id", table: "memory_records", to: "id" }]);
+}
+
+const MEMORY_MIGRATIONS: readonly SqliteMigration[] = [
+	{
+		version: 1,
+		name: "initial-rc2-schema",
+		checksumMaterial: MEMORY_V1_SQL,
+		apply: (db) => db.exec(MEMORY_V1_SQL),
+		verify: verifyMemoryV1,
+	},
+	{
+		version: 2,
+		name: "ordered-migration-metadata",
+		checksumMaterial: MEMORY_V2_SQL,
+		apply: (db) => db.exec(MEMORY_V2_SQL),
+		verify: verifyMemoryV1,
+	},
+];
+
+export class MemoryStore {
+	readonly db: DurableSqlite;
+
+	constructor(path: string) {
+		this.db = new DurableSqlite(path);
+		runSqliteMigrations(this.db, {
+			storeName: "memory",
+			metaTable: "memory_meta",
+			targetVersion: MEMORY_DATABASE_SCHEMA_VERSION,
+			migrations: MEMORY_MIGRATIONS,
+		});
+		this.recoverAbandonedPipelines();
 	}
 
 	recoverAbandonedPipelines(now?: number): PipelineRecoveryResult {

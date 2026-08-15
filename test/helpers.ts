@@ -32,12 +32,14 @@ export class FakeCommandRunner implements CommandRunner {
 	commands: Array<{ command: string; args: string[] }> = [];
 	validationCode = 0;
 	validationOutput = "validation passed";
+	onRun?: (command: string, args: string[]) => void | Promise<void>;
 	private statusCalls = 0;
 
 	constructor(readonly root: string) {}
 
 	async run(command: string, args: string[]): Promise<CommandResult> {
 		this.commands.push({ command, args: [...args] });
+		await this.onRun?.(command, args);
 		if (command !== "git") return { stdout: this.validationOutput, stderr: "", code: this.validationCode, killed: false };
 		const joined = args.join(" ");
 		if (joined === "rev-parse --show-toplevel") return { stdout: `${this.root}\n`, stderr: "", code: 0 };

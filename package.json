@@ -25,6 +25,7 @@
     "scripts/pi-version.mjs",
     "scripts/validate-provider.mjs",
     "scripts/validate-alpine-arm64.sh",
+    "scripts/manage-user-install.mjs",
     "proof/ACCEPTANCE.md",
     "proof/RESULTS.json",
     "README.md",
@@ -50,6 +51,8 @@
     "build:test": "tsc -p tsconfig.test.json",
     "validate:install": "node scripts/validate-install.mjs",
     "validate:release": "node scripts/validate-release.mjs",
+    "deploy:user": "node scripts/manage-user-install.mjs deploy",
+    "remove:user": "node scripts/manage-user-install.mjs remove",
     "validate": "npm run clean && npm run typecheck && npm run build && npm test && npm run validate:install && npm run validate:release",
     "prepack": "npm run clean && npm run build",
     "release": "node scripts/package-release.mjs"

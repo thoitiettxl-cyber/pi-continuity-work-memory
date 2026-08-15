@@ -37,6 +37,7 @@ const requiredPayload = [
 	"scripts/pi-version.mjs",
 	"scripts/validate-provider.mjs",
 	"scripts/validate-alpine-arm64.sh",
+	"scripts/manage-user-install.mjs",
 	"proof/ACCEPTANCE.md",
 	"proof/RESULTS.json",
 	"README.md",

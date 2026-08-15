@@ -10,21 +10,57 @@ The implementation combines three design inputs: Harness-style clean architectur
 - Pi `>=0.84.1 <0.85.0`
 - Built-in `node:sqlite`; no native SQLite npm addon
 - Git for verified safe checkpoints
-- `zip` and `unzip` only when building the release ZIP from source
+- `unzip`/`zipinfo` when deploying a release ZIP; `zip` only when building one from source
 
 ## Install globally, opt in explicitly
 
-Extract the release ZIP, then install its package directory at user scope:
+For a managed user installation, keep the development checkout separate and
+deploy the verified release payload to the stable package path under Pi's agent
+directory:
 
 ```sh
-pi install /absolute/path/to/pi-continuity-work-memory
+node scripts/manage-user-install.mjs deploy \
+  --archive release/pi-continuity-work-memory-1.0.0-rc.2.zip
 ```
 
-Pi's default `install` scope is user/global, so the extension loads in every workspace without `-e` or `-l`. Installing the package is the opt-in action. Removing it does not delete either persistent store.
+Use this command only with a trusted release: verification executes the
+candidate package's `scripts/validate-install.mjs` and loads the candidate
+extension in an isolated Pi agent directory. The adjacent `.sha256` file checks
+artifact integrity but is not a signature or independent trust source. Supply a
+digest obtained through a trusted channel with `--expected-sha256 <digest>`
+when one is available.
+
+The command verifies the checksum, ZIP structure and size limits, package
+inventory, entry point, and isolated global-install proof before changing the
+agent directory. It then takes compatible installer/settings locks, backs up
+the current settings/runtime, atomically activates the package at
+`~/.pi/agent/packages/pi-continuity-work-memory`, replaces prior user-scope
+local registrations of this package, and writes one stable user-scope
+registration. Persistent stores are not moved or deleted. Start a fresh Pi
+process after a successful deployment.
+
+Use `--dry-run` to perform all payload checks, including execution of the
+isolated install proof, and print the migration plan without creating or
+changing the Pi agent directory. An already extracted trusted release package
+can be supplied with `--package /absolute/path/to/package`.
+
+To unregister the package while retaining both the managed runtime and the
+persistent stores:
 
 ```sh
-pi remove /absolute/path/to/pi-continuity-work-memory
+node scripts/manage-user-install.mjs remove
 ```
+
+Pass `--remove-runtime` only when the runtime directory should also be moved
+into the timestamped rollback backup. Neither remove mode deletes the
+Continuity or learning-memory stores.
+
+Direct source-tree registration with `pi install /path/to/development/checkout`
+is intended only for development: Pi records a local path reference and does
+not copy the package. Do not keep a source-tree registration active at the same
+time as the managed package, because both copies register the same commands and
+tools. The manager changes only global user settings; remove any project-local
+registration from that project's `.pi/settings.json` separately.
 
 Default stores:
 

@@ -9,6 +9,7 @@ import type {
 	ProviderResult,
 } from "../src/application/memory-ports.js";
 import { MemoryService } from "../src/application/memory-service.js";
+import { MemoryScheduler } from "../src/application/memory-scheduler.js";
 import { emptyWorkState, type PipelineUsage } from "../src/domain/types.js";
 import { MemoryStore } from "../src/infrastructure/memory-store.js";
 import { identity, temporaryDirectory } from "./helpers.js";
@@ -115,6 +116,41 @@ test("consolidation crash leaves building generation invisible and prior head sa
 	const after = store.publishedBaselines(service.selectors());
 	assert.deepEqual(after, before);
 	assert.ok(!after.some((baseline) => baseline.content.includes("unsafe partial")));
+	store.close();
+});
+
+test("scheduler shutdown lets an aborted memory worker release its lease", async () => {
+	const root = temporaryDirectory("memory-shutdown");
+	const store = new MemoryStore(join(root, "memory.sqlite"));
+	const service = new MemoryService(identity(), () => emptyWorkState(), store);
+	const scheduler = new MemoryScheduler(1);
+	let resolveStarted!: () => void;
+	const started = new Promise<void>((resolve) => { resolveStarted = resolve; });
+	const provider: MemoryProvider = {
+		async extract(_input, signal) {
+			resolveStarted();
+			await new Promise<never>((_resolve, reject) => {
+				const abort = () => reject(signal.reason ?? new Error("provider aborted"));
+				if (signal.aborted) abort();
+				else signal.addEventListener("abort", abort, { once: true });
+			});
+			return { value: [], usage };
+		},
+		async consolidate() {
+			throw new Error("consolidation must not run");
+		},
+	};
+	const source = { text: "source", hash: "shutdown-source", citation: "session" };
+	scheduler.onAgentSettled(async (signal, generation) => {
+		await service.runPipeline(source, String(generation), provider, {
+			isCurrentGeneration: () => scheduler.currentGeneration() === generation,
+			currentSourceHash: () => source.hash,
+		}, signal);
+	});
+	await started;
+	await scheduler.shutdown();
+	assert.equal(service.latestRun()?.status, "superseded");
+	assert.equal(service.latestRun()?.reason, "worker aborted or lifecycle generation changed");
 	store.close();
 });
 

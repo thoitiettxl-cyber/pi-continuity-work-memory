@@ -115,6 +115,7 @@ export default function extension(pi: ExtensionAPI): void {
 	let authorityCompromisedReason: string | undefined;
 	let generationToken = "0";
 	const manualPipelineControllers = new Set<AbortController>();
+	const manualPipelineRuns = new Set<Promise<void>>();
 
 	const commandRunner: CommandRunner = {
 		async run(command, args, options) {
@@ -140,6 +141,10 @@ export default function extension(pi: ExtensionAPI): void {
 	const cancelManualPipelines = (reason: string): void => {
 		for (const controller of manualPipelineControllers) controller.abort(new Error(reason));
 		manualPipelineControllers.clear();
+	};
+
+	const waitForManualPipelines = async (): Promise<void> => {
+		await Promise.allSettled([...manualPipelineRuns]);
 	};
 
 	const compromiseAuthority = (ctx: ExtensionContext, error: unknown): void => {
@@ -195,8 +200,9 @@ export default function extension(pi: ExtensionAPI): void {
 		context = ctx;
 		unavailableReason = undefined;
 		authorityCompromisedReason = undefined;
-		scheduler.shutdown();
 		cancelManualPipelines("session replaced");
+		await scheduler.shutdown();
+		await waitForManualPipelines();
 		scheduler = new MemoryScheduler();
 		provider = new PiMemoryProvider(() => context);
 		generationToken = `${Date.now()}:${ctx.sessionManager.getSessionId()}`;
@@ -278,6 +284,7 @@ export default function extension(pi: ExtensionAPI): void {
 
 	pi.on("agent_start", async (_event, ctx) => {
 		context = ctx;
+		scheduler.onAgentStart();
 		scheduler.invalidate();
 		cancelManualPipelines("agent restart invalidated memory generation");
 		generationToken = `${Date.now()}:${ctx.sessionManager.getSessionId()}:agent`;
@@ -410,14 +417,17 @@ export default function extension(pi: ExtensionAPI): void {
 
 	pi.on("message_end", async (event, ctx) => {
 		context = ctx;
+		const message = event.message as unknown as { role?: string; stopReason?: string };
+		if (message.role === "assistant") scheduler.onAssistantMessageEnd(message.stopReason);
 		if (!memory) return;
 		const text = messageText(event);
 		if (text) memory.recordCitations(text);
 	});
 
 	pi.on("session_shutdown", async () => {
-		scheduler.shutdown();
 		cancelManualPipelines("session shutdown");
+		await scheduler.shutdown();
+		await waitForManualPipelines();
 		context = undefined;
 		continuity = undefined;
 		memory = undefined;
@@ -625,13 +635,18 @@ export default function extension(pi: ExtensionAPI): void {
 					manualPipelineControllers.add(controller);
 					const source = memorySource(ctx);
 					const token = generationToken;
-					try {
+					const run = (async () => {
 						const result = await services.memory.runPipeline(source, token, provider, {
 							isCurrentGeneration: () => generationToken === token,
 							currentSourceHash: () => context ? memorySource(context).hash : "replaced",
 						}, controller.signal);
 						safeNotify(ctx, `Memory pipeline: ${result.status} — ${result.reason}`, result.status === "failed" ? "error" : "info");
+					})();
+					manualPipelineRuns.add(run);
+					try {
+						await run;
 					} finally {
+						manualPipelineRuns.delete(run);
 						manualPipelineControllers.delete(controller);
 					}
 					return;

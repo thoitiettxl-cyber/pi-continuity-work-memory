@@ -16,7 +16,18 @@ test("agent_end cannot start a worker; one settled event creates one eligible ru
 	scheduler.onAgentSettled(async () => { runs += 1; });
 	await wait(20);
 	assert.equal(runs, 1);
-	scheduler.shutdown();
+	await scheduler.shutdown();
+});
+
+test("an aborted settled run does not schedule memory extraction", async () => {
+	const scheduler = new MemoryScheduler(1);
+	let runs = 0;
+	scheduler.onAgentStart();
+	scheduler.onAssistantMessageEnd("aborted");
+	assert.equal(scheduler.onAgentSettled(async () => { runs += 1; }), -1);
+	await wait(10);
+	assert.equal(runs, 0);
+	await scheduler.shutdown();
 });
 
 test("tree/session replacement invalidates old timers", async () => {
@@ -28,7 +39,7 @@ test("tree/session replacement invalidates old timers", async () => {
 	await wait(50);
 	assert.equal(runs, 0);
 	assert.equal(scheduler.pendingTimers(), 0);
-	scheduler.shutdown();
+	await scheduler.shutdown();
 });
 
 test("shutdown aborts active Stage 1/consolidator controller", async () => {
@@ -48,7 +59,27 @@ test("shutdown aborts active Stage 1/consolidator controller", async () => {
 		});
 	});
 	await wait(10);
-	scheduler.shutdown();
+	await scheduler.shutdown();
 	await wait(10);
 	assert.equal(aborted, true);
+});
+
+test("shutdown waits for an active worker before resolving", async () => {
+	const scheduler = new MemoryScheduler(1);
+	let resolveStarted!: () => void;
+	let resolveWorker!: () => void;
+	const started = new Promise<void>((resolve) => { resolveStarted = resolve; });
+	const workerDone = new Promise<void>((resolve) => { resolveWorker = resolve; });
+	scheduler.onAgentSettled(async () => {
+		resolveStarted();
+		await workerDone;
+	});
+	await started;
+	let shutdownFinished = false;
+	const shutdown = scheduler.shutdown().then(() => { shutdownFinished = true; });
+	await wait(5);
+	assert.equal(shutdownFinished, false);
+	resolveWorker();
+	await shutdown;
+	assert.equal(shutdownFinished, true);
 });

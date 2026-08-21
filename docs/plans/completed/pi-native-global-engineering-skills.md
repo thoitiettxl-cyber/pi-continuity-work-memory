@@ -6,7 +6,7 @@ Date: 2026-08-21
 
 ## Status
 
-Active
+Completed
 
 ## Outcome
 
@@ -65,8 +65,8 @@ Out of scope:
 
 - [x] Implement the six adapted skills, package discovery, provenance, install/release checks, and user-facing documentation.
 - [x] Complete full repository, premerge, Alpine, release, artifact-inspection, and installer dry-run proof.
-- [ ] Create and push the feature commit, deploy the verified archive, and verify the installed package and six skill sources.
-- [ ] Record final evidence and deployment result before finalization.
+- [x] Create and push the feature commit, deploy the verified archive, and verify the installed package and six skill sources.
+- [x] Record final evidence and deployment result before finalization.
 
 ## Decisions
 
@@ -97,7 +97,11 @@ Observed before delivery:
 - PASS — `scripts/validate-alpine-arm64.sh` on Alpine 3.24.1 ARM64, Node v24.18.1, Pi 0.84.2, and six skill source paths.
 - PASS — definitive RC3 archive `release/pi-continuity-work-memory-1.0.0-rc.3.zip` was generated with SHA-256 `e64cfd5dcaac2319ec3c4ffd363c25298f61007f7dcc939cd194bf9e3086766b`; archive inspection found the expected skill resources, and the managed-installer dry-run revalidated the archive and reported that persistent stores would remain unchanged.
 - PASS — independent read-only review findings were addressed: no inferred documentation/fix authority, no root Markdown skill diagnostics, isolated collision-resistant source proof, current acceptance ownership, and no duplicate README heading.
+- PASS — feature commit `bd6869192df2008de3214bd73843514050b53a2a` was pushed to `origin/dev-next`; `git ls-remote` observed the same remote SHA and the local branch became aligned with its tracking branch.
+- PASS — the package-owned installer deployed the checksum-pinned RC3 archive to `/root/.pi/agent/packages/pi-continuity-work-memory`, registered `packages/pi-continuity-work-memory`, preserved persistent stores, and created rollback backup `/root/.pi/agent/backups/pi-continuity-work-memory/2026-08-21T14-40-53-825Z-31753-fcf58193`.
+- PASS — the installed manifest reports `1.0.0-rc.3` and exactly six skill directories; all six installed `SKILL.md` files exist, `pi list` observes the stable registration, and a fresh Pi 0.84.2 RPC install proof loaded all six commands from the deployed package paths with zero source-collision false positives.
+- NOTE — the installer correctly reports `restartRequired: true`: existing Pi processes keep their already loaded runtime, while the fresh-process proof establishes the deployed state for newly started Pi processes.
 
 ## Result
 
-Pending implementation and executable proof.
+Completed. The six Pi-native engineering skills are source-controlled in this package, release- and install-validated on the supported Pi matrix, committed and pushed on `dev-next`, and globally deployed from the verified RC3 archive with the existing stores preserved. The installed package and a fresh Pi 0.84.2 process both observed the exact six package skill sources. Restart any Pi process that was already running before deployment; rollback remains available through the recorded installer backup or package removal with retained stores.

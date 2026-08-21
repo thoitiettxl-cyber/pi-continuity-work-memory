@@ -5,6 +5,7 @@
 ### Added
 
 - Added six package-owned, globally discoverable Pi engineering skills for intent clarification, codebase design, bug diagnosis, TDD, code review, and domain modeling, with managed-workflow authority, Alpine compatibility, upstream provenance, isolated install proof, and safe delivery constraints.
+- Added four Pi-native repository-workflow skills for accepted invariant encoding, read-only brownfield onboarding, independent onboarding-proposal audit, and evidence-backed agent-harness improvement, with explicit invocation boundaries, dual-source MIT provenance, and ten-skill install/release proof.
 - Added a package-owned managed repository workflow with checksum-verified guidance/templates, trust-and-`AGENTS.md` eligibility, structured work-shape preparation, document-free read-only/bounded work, intent-first exclusive execution-plan creation, recoverable binding/finalization, branch-correct recovery metadata, and explicit separation between repository completion and safe checkpoints.
 - Added explicit work-document identities for work-item memory so unbound tasks no longer share an implicit repository-wide `default` work-item bucket.
 

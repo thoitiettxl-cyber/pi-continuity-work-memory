@@ -10,8 +10,11 @@ const manifest = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"))
 const failures = [];
 const piCandidate = resolve(root, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
 const pi = process.env.PI_VALIDATION_PI || (existsSync(piCandidate) ? piCandidate : "pi");
-const expectedSkills = ["code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-with-docs", "tdd"];
+const expectedSkills = ["audit-onboarding-proposal", "code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "encode-invariant", "grill-with-docs", "improve-harness", "onboard-repository", "tdd"];
 const expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);
+const repositoryHarnessSkills = new Set(["audit-onboarding-proposal", "encode-invariant", "improve-harness", "onboard-repository"]);
+const mattPocockCommit = "5b15a47f2d7150f545fbcacbfe381787fc0230dc";
+const repositoryHarnessCommit = "e765792b635b4d5e3e5fc0578f82f9ca5dea2681";
 const piResult = spawnSync(pi, ["--version"], { encoding: "utf8", timeout: 30_000 });
 let piVersion = "unavailable";
 if (piResult.status !== 0) failures.push(`Pi version check failed: ${piResult.stderr || piResult.stdout}`);
@@ -50,8 +53,9 @@ const requiredPayload = [
 ];
 if (!Array.isArray(manifest.files)) failures.push("package.json files must define the release payload");
 else for (const path of requiredPayload) if (!manifest.files.includes(path)) failures.push(`Release payload is missing ${path}`);
-if (JSON.stringify(manifest.pi).includes("harness")) failures.push("Harness appears in Pi payload");
-if (JSON.stringify(manifest.pi?.skills) !== JSON.stringify(expectedSkillEntries)) failures.push("Pi manifest must load exactly the six package skill directories");
+const piEntries = [...(manifest.pi?.extensions ?? []), ...(manifest.pi?.skills ?? [])];
+if (piEntries.some((entry) => typeof entry === "string" && entry.includes("repository-harness"))) failures.push("Repository Harness appears as a Pi runtime resource");
+if (JSON.stringify(manifest.pi?.skills) !== JSON.stringify(expectedSkillEntries)) failures.push("Pi manifest must load exactly the ten package skill directories");
 const skillsRoot = resolve(root, "skills");
 let skillCount = 0;
 if (!existsSync(skillsRoot)) failures.push("Package skill root is missing");
@@ -67,13 +71,16 @@ else {
 		if (!text.startsWith("---\n") || !text.includes(`\nname: ${name}\n`) || !/\ndescription:\s*"[^\n]+"\n/.test(text)) {
 			failures.push(`Pi skill frontmatter is invalid: ${name}`);
 		}
-		if (!text.includes("5b15a47f2d7150f545fbcacbfe381787fc0230dc")) failures.push(`Upstream provenance is missing: ${name}`);
+		const sourceCommit = repositoryHarnessSkills.has(name) ? repositoryHarnessCommit : mattPocockCommit;
+		if (!text.includes(sourceCommit)) failures.push(`Pinned source provenance is missing: ${name}`);
 	}
 	const skillText = walk(skillsRoot).filter((path) => /\.(?:md|txt)$/.test(path)).map((path) => readFileSync(path, "utf8")).join("\n");
+	if (walk(skillsRoot).some((path) => !/\.(?:md|txt)$/.test(path))) failures.push("Package skills must remain prompt/reference-only resources");
 	for (const forbidden of ["Call the Skill tool", "/clear", "xdg-open", "Commit your work to the current branch", "spawn both sub-agents in parallel"]) {
 		if (skillText.includes(forbidden)) failures.push(`Cross-harness or unsafe skill assumption remains: ${forbidden}`);
 	}
-	if (!skillText.includes("Copyright (c) 2026 Matt Pocock")) failures.push("Upstream skill license notice is missing");
+	if (!skillText.includes("Copyright (c) 2026 Matt Pocock")) failures.push("Matt Pocock skill license notice is missing");
+	if (!skillText.includes("Copyright (c) 2025 Hoang Nguyen")) failures.push("Repository Harness skill license notice is missing");
 }
 const workflowRoot = resolve(root, "workflow");
 const workflowManifestPath = resolve(workflowRoot, "manifest.json");
@@ -127,4 +134,4 @@ if (failures.length) {
 	for (const failure of failures) process.stderr.write(`FAIL: ${failure}\n`);
 	process.exit(1);
 }
-process.stdout.write(`${JSON.stringify({ status: "PASS", node: process.version, pi: piVersion, piRange: SUPPORTED_PI_RANGE, sqlite: "node:sqlite", harnessRuntimeDependency: false, harnessInPiManifest: false, workflowAssets: workflowAssetCount, skills: skillCount })}\n`);
+process.stdout.write(`${JSON.stringify({ status: "PASS", node: process.version, pi: piVersion, piRange: SUPPORTED_PI_RANGE, sqlite: "node:sqlite", repositoryHarnessRuntimeDependency: false, repositoryHarnessInPiManifest: false, workflowAssets: workflowAssetCount, skills: skillCount })}\n`);

@@ -1,6 +1,6 @@
 {
   "name": "pi-continuity-work-memory",
-  "version": "1.0.0-rc.4",
+  "version": "1.0.0-rc.5",
   "description": "Managed repository workflow, branch-correct Pi continuity, evidence-backed checkpoints, scoped persistent memory, and Pi-native engineering skills.",
   "type": "module",
   "license": "MIT",
@@ -22,11 +22,15 @@
       "./dist/extension.js"
     ],
     "skills": [
+      "./skills/audit-onboarding-proposal",
       "./skills/code-review",
       "./skills/codebase-design",
       "./skills/diagnosing-bugs",
       "./skills/domain-modeling",
+      "./skills/encode-invariant",
       "./skills/grill-with-docs",
+      "./skills/improve-harness",
+      "./skills/onboard-repository",
       "./skills/tdd"
     ]
   },

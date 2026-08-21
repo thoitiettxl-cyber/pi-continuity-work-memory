@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "status": "RC4ReleaseValidated",
-  "generatedAt": "2026-08-21T15:21:38+00:00",
-  "packageVersion": "1.0.0-rc.4",
-  "worktree": "validated 1.0.0-rc.4 source with the refined Pi-native domain-modeling skill, based on the original 1.0.0-rc.1 source snapshot",
+  "status": "RC5CandidateValidated",
+  "generatedAt": "2026-08-21T16:20:10+00:00",
+  "packageVersion": "1.0.0-rc.5",
+  "worktree": "validated 1.0.0-rc.5 source with ten Pi-native engineering skills, based on the original 1.0.0-rc.1 source snapshot and the separately attributed skill adaptations",
   "environment": {
     "node": "v24.18.1",
     "npm": "11.12.1",
@@ -16,27 +16,23 @@
   "pass": [
     {
       "gate": "source provenance and release alignment",
-      "evidence": "The supplied source ZIP SHA-256 and all 43 original manifest entries were verified. The three documented release-only repairs were reconstructed with explicit provenance; runtime JavaScript matched the canonical repaired modules before new P0 changes."
+      "evidence": "The supplied source ZIP SHA-256 and all 43 original manifest entries remain verified. The six Matt Pocock adaptations retain pinned commit 5b15a47f2d7150f545fbcacbfe381787fc0230dc and its MIT notice; the four Repository Harness adaptations pin e765792b635b4d5e3e5fc0578f82f9ca5dea2681 and ship its separate MIT notice. Repository Harness is neither installed nor referenced as a Pi runtime resource."
     },
     {
       "gate": "npm run validate",
-      "evidence": "Typecheck, build, 151/151 tests, isolated two-workspace global install on Pi 0.84.1, exact six-skill package discovery, and release static validation passed for version 1.0.0-rc.4."
-    },
-    {
-      "gate": "scripts/validate-premerge.sh",
-      "evidence": "The supported-Pi check, complete validate gate, and git diff --check passed on dev-next for the RC4 source worktree."
+      "evidence": "Typecheck, build, 152/152 tests, isolated two-workspace global install on Pi 0.84.1, exact ten-skill package discovery, and release static validation passed for version 1.0.0-rc.5."
     },
     {
       "gate": "package-owned Pi engineering skills",
-      "evidence": "Pi loaded exactly six manifest-declared skill directories with zero loader diagnostics and no adjacent duplicate headings. domain-modeling now inspects workflow and operation status, treats memory as untrusted leads, hands broad ambiguity to explicit grill-with-docs invocation, separates glossary/decision/plan ownership, refuses uncertain-operation retries, and uses receipt-aware finalization without elevating checkpoints to completion authority."
+      "evidence": "Pi loaded exactly ten manifest-declared Markdown-only skill directories with zero loader diagnostics and no adjacent duplicate headings. grill-with-docs, onboard-repository, audit-onboarding-proposal, and improve-harness are explicit-only; encode-invariant is model-visible but cannot invent policy or grant mutation authority. Focused tests verify first-pass onboarding safety, independent per-hunk audit, baseline-to-fresh-rerun improvement evidence, managed Continuity preparation/recovery, and checkpoint non-completion boundaries."
     },
     {
       "gate": "provider-bound privacy and cost boundary",
-      "evidence": "Positive and negative tests capture Stage 1 and Stage 2 DTOs and prove ordinary text/bash/tool evidence remains while raw images, parameterized or wrapped base64, long opaque payloads, secrets, hidden thinking, opaque signatures, default/custom session paths, and excluded bash content do not cross the provider boundary. Provider source and Stage 2 DTOs are bounded."
+      "evidence": "Positive and negative tests capture Stage 1 and Stage 2 DTOs and prove ordinary text/bash/tool evidence remains while raw images, parameterized or wrapped base64, long opaque payloads, secrets, hidden thinking, opaque signatures, default/custom session paths, and excluded bash content do not cross the provider boundary. Provider source and Stage 2 DTOs remain bounded."
     },
     {
       "gate": "historical RC2 modified-source real provider",
-      "evidence": "Historical RC2 evidence: with explicit owner authorization, cliproxy/gpt-5.6-sol on Pi 0.84.2 completed Stage 1 and Stage 2, published one record and one baseline, accounted usage/citations, and passed the secret scan. The RC4 skill-only change did not rerun or reuse this as current provider authority."
+      "evidence": "Historical RC2 evidence only: with explicit owner authorization, cliproxy/gpt-5.6-sol on Pi 0.84.2 completed Stage 1 and Stage 2, published one record and one baseline, accounted usage/citations, and passed the secret scan. The RC5 skill/package-only change did not rerun or promote this as current provider authority."
     },
     {
       "gate": "pipeline crash and lease recovery",
@@ -48,41 +44,45 @@
     },
     {
       "gate": "global install on supported Pi versions",
-      "evidence": "The isolated two-workspace global-install proof passed on Pi 0.84.1 and Pi 0.84.2. Six skill commands resolved to the candidate package paths under an isolated HOME, repository scopes remained distinct, global-user memory crossed, and stores survived remove."
+      "evidence": "The isolated two-workspace global-install proof passed on Pi 0.84.1 and Pi 0.84.2. Ten skill commands resolved to candidate package paths under an isolated HOME, repository scopes remained distinct, global-user memory crossed, and stores survived remove."
     },
     {
       "gate": "Alpine Linux 3.24 ARM64",
-      "evidence": "scripts/validate-alpine-arm64.sh passed for RC4 on Alpine 3.24.1 aarch64 with Node v24.18.1 and Pi 0.84.2, including exact extension and six-skill global-install discovery proof."
+      "evidence": "scripts/validate-alpine-arm64.sh passed for RC5 on Alpine 3.24.1 aarch64 with Node v24.18.1 and Pi 0.84.2, including exact extension and ten-skill global-install discovery proof."
     },
     {
-      "gate": "release artifact workflow",
-      "evidence": "A preliminary npm run release built a sanitized RC4 ZIP from package.json files, generated an exact inventory, installed the staged payload with six verified skill sources, passed unzip -t, and wrote SHA-256 plus release-report.json. The definitive artifact checksum and managed-installer result are recorded outside the payload in the bound execution plan to avoid a self-referential claim."
+      "gate": "preliminary release artifact workflow",
+      "evidence": "npm run release built a sanitized RC5 ZIP from package.json files, generated an exact 132-file release report, installed the staged payload with ten verified skill sources, passed unzip -t, and wrote SHA-256 plus release-report.json. The managed-installer dry-run reverified the candidate and reported storesChanged false. The definitive artifact checksum and deployment result belong to the bound execution plan outside the payload."
     }
   ],
   "deferred": [],
+  "pendingDelivery": [
+    "final premerge validation on the completed source diff",
+    "definitive artifact generation and checksum-bound installer dry-run",
+    "commit, push, managed deployment, and fresh installed-source verification"
+  ],
   "developmentValidation": {
     "status": "PASS_SOURCE_LOCAL",
-    "generatedAt": "2026-08-21T15:21:38+00:00",
-    "scope": "RC4 domain-modeling refinement plus the existing package extension and six-skill inventory on dev-next",
+    "generatedAt": "2026-08-21T16:20:10+00:00",
+    "scope": "RC5 four-skill adaptation plus the existing package extension, managed workflow, persistent memory, and ten-skill inventory on dev-next",
     "commands": [
-      "python3 <Pi skill validator> skills/domain-modeling",
+      "node --test --test-concurrency=1 .test-build/test/skills-package.test.js",
       "npm run validate",
-      "scripts/validate-premerge.sh",
       "scripts/validate-alpine-arm64.sh",
       "npm run release",
-      "node scripts/manage-user-install.mjs deploy --archive <RC4 archive> --dry-run"
+      "node scripts/manage-user-install.mjs deploy --archive <RC5 archive> --dry-run"
     ],
     "observations": {
-      "tests": "151/151",
+      "tests": "152/152",
       "typecheck": "PASS",
       "build": "PASS",
-      "piInstallProof": "PASS on Pi 0.84.1 and Pi 0.84.2 in two isolated AGENTS-bearing workspaces with isolated HOME and exact package skill source paths",
-      "workflowAssets": "PASS: 4 checksum/inventory-bound package assets; no Harness runtime/install dependency",
+      "piInstallProof": "PASS on Pi 0.84.1 and Pi 0.84.2 in two isolated AGENTS-bearing workspaces with isolated HOME and exact ten-skill package source paths",
+      "workflowAssets": "PASS: 4 checksum/inventory-bound package assets; no Repository Harness runtime/install dependency",
       "managedWorkflowRuntime": "PASS: public Pi events/tools, eligibility, mutation gate, read-only/bounded no-doc behavior, durable intent/create/bind/drift/finalize/recovery, and non-interactive safety",
-      "engineeringSkills": "PASS: six exact Pi skill directories, zero loader diagnostics, no adjacent duplicate headings, explicit-only grill-with-docs, diagnosis authority separation, Continuity-integrated domain modeling, resolved references, and MIT provenance",
+      "engineeringSkills": "PASS: ten exact Pi skill directories, zero loader diagnostics, four explicit-only workflows, accepted-invariant authority gate, read-only onboarding/audit, fresh-rerun improvement boundary, resolved references, prompt-only resources, and dual MIT provenance",
       "releaseStaticValidation": "PASS",
-      "packagedRelease": "PASS on preliminary Pi 0.84.1 candidate packaging: sanitized RC4 inventory, exact staged install, six skill source paths, unzip test, and external SHA-256 release report",
-      "diffCheck": "PASS",
+      "packagedRelease": "PASS on preliminary Pi 0.84.1 candidate packaging: sanitized RC5 inventory, exact staged install, ten skill source paths, unzip test, external SHA-256 report, and managed-installer dry-run",
+      "diffCheck": "PASS before proof-result recording",
       "sealedValidationReceipts": "PASS",
       "consequentialOperationLedger": "PASS",
       "orderedSqliteMigrations": "PASS",
@@ -91,17 +91,17 @@
     "notRevalidated": [
       "real-provider memory execution"
     ],
-    "authority": "This development result applies to the RC4 source-local worktree, package discovery, supported-Pi install, Alpine, and candidate packaging evidence. Historical RC2 real-provider proof is retained only as history because provider runtime was unchanged. Managed RC4 deployment completion belongs exclusively to the repository execution plan and installer receipt."
+    "authority": "This result applies to the RC5 source-local worktree, skill discovery, supported-Pi install, Alpine, and preliminary packaging evidence. Historical RC2 real-provider proof remains history because provider runtime was unchanged. Final premerge, definitive artifact identity, branch push, and managed deployment completion belong to the bound repository execution plan and installer receipt."
   },
   "releaseIdentity": {
     "status": "selected",
-    "version": "1.0.0-rc.4",
-    "reason": "The user explicitly authorized versioning, commit, push, and managed global deployment of the domain-modeling refinement; RC4 preserves the immutable RC3 artifact and gives the refined payload a distinct identity."
+    "version": "1.0.0-rc.5",
+    "reason": "The user explicitly authorized complete integration, commit, push, and managed global deployment of four additional skills; RC5 preserves the immutable RC4 artifact and gives the ten-skill payload a distinct identity."
   },
   "previousRelease": {
-    "version": "1.0.0-rc.3",
-    "artifactSha256": "e64cfd5dcaac2319ec3c4ffd363c25298f61007f7dcc939cd194bf9e3086766b",
-    "evidence": "docs/plans/completed/pi-native-global-engineering-skills.md"
+    "version": "1.0.0-rc.4",
+    "artifactSha256": "83d17834af73149e426e168709731321736d7e64b72dcd1ad4e40cde43fb8b4e",
+    "evidence": "docs/plans/completed/release-domain-modeling-refinement-rc4.md"
   },
-  "policy": "Historical RC2 provider evidence and immutable RC3 release/deployment evidence remain separate. RC4 source, skill discovery, supported-Pi install, premerge, Alpine ARM64, and release-workflow evidence are recorded here. Definitive artifact and managed deployment completion belong to the repository execution plan and installer receipt outside the release payload."
+  "policy": "Historical RC2 provider evidence and immutable RC3/RC4 release/deployment evidence remain separate. RC5 source, ten-skill discovery, supported-Pi install, Alpine ARM64, and preliminary release-workflow evidence are recorded here. Final premerge, definitive artifact, push, and managed deployment completion belong to the bound execution plan and installer receipt outside the release payload."
 }

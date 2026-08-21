@@ -5,33 +5,45 @@ complete only when every mandatory row has an observed `PASS`. Missing authority
 credentials, target hardware, or external proof remains `DEFERRED` rather than
 being inferred from source or prior artifacts.
 
-## Current RC4 release validation
+## Current RC5 candidate validation
 
-`PASS (source-local, pre-deployment)` — the RC4 worktree passed
-`npm run validate` and `scripts/validate-premerge.sh` on 2026-08-21. The runs
-included typecheck, build, 151/151 tests, the isolated two-workspace Pi 0.84.1
-install proof, checksum-bound workflow assets, six exact package skill
-commands, zero diagnostics from each manifest skill path, source-path
-verification that prevents a global collision from false-passing, release
-static validation, `git diff --check`, and the existing Continuity, receipt,
-checkpoint, reconciliation, migration, provider-sanitization, scheduler, and
-multi-process integrity coverage. Pi's standalone skill validator also accepted
-the refined `domain-modeling` source.
+`PASS (source-local, pre-delivery)` — the RC5 worktree passed
+`npm run validate` on 2026-08-21: typecheck, build, 152/152 tests, isolated
+two-workspace Pi 0.84.1 installation, checksum-bound workflow assets, ten exact
+package skill commands, zero loader diagnostics, collision-resistant source
+path verification, release static validation, and the existing Continuity,
+receipt, checkpoint, reconciliation, migration, provider-sanitization,
+scheduler, and multi-process integrity coverage.
 
-`scripts/validate-alpine-arm64.sh` passed for RC4 on Alpine Linux 3.24.1 ARM64
+Focused skill proof verifies four explicit-only workflows, model-visible
+accepted-invariant encoding, first-pass read-only onboarding, independent
+per-hunk proposal audit, observed-baseline/fresh-rerun improvement evidence,
+managed preparation and recovery boundaries, prompt-only payload resources, and
+separate pinned MIT provenance for Matt Pocock and Repository Harness sources.
+The package does not install, invoke, import, or expose Repository Harness as a
+Pi runtime resource.
+
+`scripts/validate-alpine-arm64.sh` passed for RC5 on Alpine Linux 3.24.1 ARM64
 with Node v24.18.1 and Pi 0.84.2, including the isolated two-workspace package
-and six-skill source-path proof. The release workflow produced a sanitized RC4
-candidate inventory, passed exact staged installation and `unzip -t`, and wrote
-an external SHA-256 report. The definitive artifact hash belongs to
-`release/release-report.json` and the bound execution plan because embedding an
-archive's own hash inside its payload would be self-referential.
+and ten-skill source-path proof. A preliminary `npm run release` produced a
+sanitized 132-file report, passed exact staged installation and `unzip -t`, and
+the managed-installer dry-run reported `storesChanged: false`. Final premerge,
+definitive artifact identity, commit/push, and managed deployment are recorded
+only after observation in the bound execution plan and installer receipt; the
+payload does not self-assert its own deployment.
 
-The extension runtime and provider protocol were not changed by the
-`domain-modeling` refinement. Real-provider memory execution was not rerun and
-remains historical RC2 evidence rather than current RC4 authority. Managed RC4
-global deployment is recorded in the bound repository execution plan and
-installer receipt only after the package-owned installer observes it; it is not
-self-asserted by the release payload.
+The extension runtime and provider protocol were not changed by the RC5
+skill/package adaptation. Real-provider memory execution was not rerun and
+remains historical RC2 evidence rather than current RC5 authority.
+
+## Historical RC4 release and deployment baseline
+
+`Completed` — immutable RC4 archive SHA-256
+`83d17834af73149e426e168709731321736d7e64b72dcd1ad4e40cde43fb8b4e`
+passed source, premerge, Alpine, release, installer dry-run, and managed global
+deployment proof before this expansion. Its evidence remains in
+`../docs/plans/completed/release-domain-modeling-refinement-rc4.md` and is not
+relabeled as RC5 evidence.
 
 ## Historical RC3 release and deployment baseline
 
@@ -40,7 +52,7 @@ self-asserted by the release payload.
 passed release, Alpine, installer dry-run, and managed global deployment proof
 before this refinement. Its source, artifact, backup, and installed-skill
 evidence remain in `../docs/plans/completed/pi-native-global-engineering-skills.md`
-and are not relabeled as RC4 evidence.
+and are not relabeled as RC5 evidence.
 
 ## Historical RC2 release run status
 
@@ -57,7 +69,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | Sealed validation receipts | `test/continuity.test.ts`, `src/domain/validation-receipt.ts` | Every authority-relevant evidence field and full executable/argv digest is receipt-bound; persisted display text cannot retain arbitrary secret-bearing arguments; evidence or checkpoint projection tamper quarantines authority. | PASS in current source-local run |
 | Consequential operation ledger | `test/continuity.test.ts`, `test/continuity-agent-loop.test.ts`, `test/tool-classifier.test.ts`, `src/domain/operation-ledger.ts` | External operations are claimed atomically across processes, equivalent simple argv quoting deduplicates, compound shell constructs fail closed, blocked operations do not execute or terminate the agent run, results cannot cross sessions/branches, crashes become uncertain, recovery does not infer outcomes, reconciliation is human-only and digest-bound, and unresolved operations block checkpoints. | PASS in current source-local run |
 | Managed repository workflow | `test/managed-workflow*.test.ts`, `test/workflow-context.test.ts`, `test/workflow-assets.test.ts`, `test/execution-plan-files.test.ts`, `src/domain/managed-workflow.ts`, `src/application/managed-workflow-service.ts` | Package assets are checksum/inventory bound; no Harness install is required; trust plus an in-repository AGENTS context gates managed behavior; read-only/bounded/ambiguous work creates no document; durable work persists intent before exclusive creation, binds one identity-bearing plan, blocks unprepared mutation, survives branch/session recovery, rejects path/symlink/conflict/overwrite, recovers interrupted same-identity finalization, and requires pre/post-finalization proof without elevating checkpoint or memory to completion authority. | PASS in current source-local run |
-| Global engineering skills | `test/skills-package.test.ts`, `node scripts/validate-install.mjs`, `scripts/validate-release.mjs`, `scripts/manage-user-install.mjs` | The Pi manifest exposes exactly six skill directories; Pi loads each with zero diagnostics and no adjacent duplicate headings; `grill-with-docs` is explicit-only; diagnosis-only requests cannot gain fix authority; `domain-modeling` inspects workflow status/drift, treats memory as leads only, hands broad ambiguity to explicit clarification, never retries uncertain writes, and preserves receipt/finalization/checkpoint boundaries; companion references resolve; upstream MIT provenance ships; isolated workspaces load commands from package paths rather than a colliding global source; no cross-harness, concurrent/background, desktop, auto-delivery, competing-plan, memory-completion, or checkpoint-completion assumption remains. | PASS in current RC4 source-local, supported-Pi, Alpine, and package-candidate validation; managed deployment is plan/receipt-owned |
+| Global engineering skills | `test/skills-package.test.ts`, `node scripts/validate-install.mjs`, `scripts/validate-release.mjs`, `scripts/manage-user-install.mjs` | The Pi manifest exposes exactly ten prompt-only skill directories; Pi loads each with zero diagnostics and no adjacent duplicate headings; four workflows are explicit-only; diagnosis and automatic invariant loading cannot gain mutation authority; onboarding remains read-only before exact later approval; onboarding audit is independent, per-hunk, and read-only; harness improvement requires an observed baseline and exercised fresh rerun; domain modeling preserves Continuity recovery/finalization boundaries; both pinned MIT source lineages ship; isolated workspaces load commands from package paths rather than a colliding global source; no cross-harness runtime, helper executable, concurrent/background, desktop, auto-delivery, competing-plan, memory-completion, or checkpoint-completion assumption remains. | PASS in current RC5 source-local, supported-Pi, Alpine, and preliminary package-candidate validation; final deployment is plan/receipt-owned |
 | Ordered SQLite migrations | `test/sqlite-migrations.test.ts`, `src/infrastructure/sqlite-migrations.ts` | Literal RC2 continuity/memory stores migrate without data loss after exact schema verification and private checksum backup; gaps, future versions, history/checksum/schema drift, malformed v1, failed apply, and concurrent open fail closed or converge safely. | PASS in current source-local run |
 | Source provenance and release alignment | `SOURCE_MANIFEST.json`, `RECONSTRUCTION_NOTES.md`, `test/release-alignment.test.ts` | Original archive hashes remain historical; reconstructed OpenAI compatibility, included/excluded bash evidence, and real npm-test provider seed match the documented canonical repairs without claiming they existed in the supplied source. | PASS |
 | Global, opt-in install | `node scripts/validate-install.mjs` | User-scope `pi install`; two independent Git workspaces with AGENTS entrypoints load `/continuity` and `/memory` without `-e`/`-l`; checksum-bound workflow assets are present and Pi RPC accepts the installed workflow status command; repository keys differ; global memory crosses; stores survive remove; report actual Pi version/range. | PASS on Pi 0.84.1 and 0.84.2 |
@@ -65,7 +77,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | Safe boundary | `test/continuity.test.ts`, `test/git-fingerprint.test.ts`, `test/extension-mode.test.ts` | Pending/uncertain mutations block; executable validation and stable pre/post fingerprint required; direct `!`/`!!` mutations tracked; tracking failure fails closed; drift and corrupt/missing/cyclic chains detected; copied embedded checkpoint has no authority. | PASS |
 | Non-mutating recovery | `test/continuity.test.ts` | Recovery executes no repository command and changes only stored work state. | PASS |
 | Provider-bound source privacy/cost | `test/canonical.test.ts`, `test/provider-source-sanitization.test.ts` | Stage 1 source, metadata, Stage 2 records, citations, and previous baselines retain bounded ordinary evidence but exclude/redact raw image data, contiguous/wrapped/parameterized base64, long opaque payloads, secrets, hidden thinking, opaque signatures, default/custom session paths, and excluded bash content. Total provider DTOs remain bounded. | PASS |
-| Real-provider memory | `node scripts/validate-provider.mjs` | An explicitly authorized configured provider completes Stage 1 and Stage 2 for the modified source, publishes non-empty records/baseline, accounts usage/citation, passes secret scan, isolates the explicit candidate from configured discovery, and removes temporary proof state on terminal paths. Prior canonical-artifact provider evidence is not reused. | PASS on Pi 0.84.2 with `cliproxy/gpt-5.6-sol`: 1 record, 1 baseline, usage/citation accounted, temporary-state cleanup observed |
+| Real-provider memory | `node scripts/validate-provider.mjs` | An explicitly authorized configured provider completes Stage 1 and Stage 2 for the modified source, publishes non-empty records/baseline, accounts usage/citation, passes secret scan, isolates the explicit candidate from configured discovery, and removes temporary proof state on terminal paths. Prior canonical-artifact provider evidence is not reused. | HISTORICAL RC2 PASS on Pi 0.84.2 with `cliproxy/gpt-5.6-sol`: provider runtime is unchanged; this proof was not rerun and is not current RC5 authority |
 | Scope and authority isolation | `test/memory.test.ts` | Repo A marker and citation usage hidden from B, global visible, explicit/bound work and session isolated, unbound tasks receive no implicit `default` work-item bucket, untrusted promotion blocked, memory reset preserves Continuity. | PASS |
 | Project trust | `test/git-fingerprint.test.ts`, `test/extension-mode.test.ts`, `test/memory.test.ts` | Zero Git calls when untrusted; no repo/work-item injection or promotion; RPC/JSON/print load without UI access. | PASS |
 | Scheduler lifecycle | `test/scheduler.test.ts`, `test/memory.test.ts` | `agent_end` creates no worker; one settled event creates one eligible run; invalidation cancels timer/controller; stale source is superseded. | PASS |
@@ -114,9 +126,9 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 
 ## Enforcement levels
 
-- Local validation: `npm run validate`, `scripts/validate-premerge.sh`, the
-  authorized modified-source real-provider proof, Pi 0.84.2 install/Alpine
-  proof, and `npm run release` were observed passing.
+- Local validation: current RC5 `npm run validate`, Pi 0.84.2 install/Alpine
+  proof, preliminary `npm run release`, and managed-installer dry-run passed;
+  final premerge and delivery evidence remains bound to the execution plan.
 - Optional hooks: none installed or required.
 - CI invocation: none present in the supplied source snapshot.
 - Branch protection: unverified; no external repository policy was changed.

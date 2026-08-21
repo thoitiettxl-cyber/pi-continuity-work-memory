@@ -25,7 +25,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "nod
 import { fileURLToPath } from "node:url";
 
 const PACKAGE_NAME = "pi-continuity-work-memory";
-const EXPECTED_SKILLS = ["code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-with-docs", "tdd"];
+const EXPECTED_SKILLS = ["audit-onboarding-proposal", "code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "encode-invariant", "grill-with-docs", "improve-harness", "onboard-repository", "tdd"];
 const EXPECTED_SKILL_ENTRIES = EXPECTED_SKILLS.map((name) => `./skills/${name}`);
 const TARGET_RELATIVE_PATH = `packages/${PACKAGE_NAME}`;
 const DEFAULT_TIMEOUT_MS = 10 * 60_000;
@@ -205,7 +205,7 @@ function verifyPackageDirectory(packagePath) {
 	if (!Array.isArray(manifest.pi?.extensions) || !manifest.pi.extensions.includes("./dist/extension.js")) {
 		fail("Package manifest does not load ./dist/extension.js");
 	}
-	if (JSON.stringify(manifest.pi?.skills) !== JSON.stringify(EXPECTED_SKILL_ENTRIES)) fail("Package manifest does not load exactly the six package skill directories");
+	if (JSON.stringify(manifest.pi?.skills) !== JSON.stringify(EXPECTED_SKILL_ENTRIES)) fail("Package manifest does not load exactly the ten package skill directories");
 	for (const skill of EXPECTED_SKILLS) {
 		if (!existsSync(resolve(root, "skills", skill, "SKILL.md"))) fail(`Package skill payload is missing: ${skill}`);
 	}

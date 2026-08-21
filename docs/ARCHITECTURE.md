@@ -8,7 +8,7 @@ which documents must change together.
 ## System Purpose And Boundaries
 
 The package combines one opt-in Pi extension with four cooperating runtime
-capabilities and six globally discoverable engineering skills:
+capabilities and ten globally discoverable engineering skills:
 
 1. **Managed repository workflow** — classifies work shape, gates agent-issued
    mutations, and safely creates or binds only the repository documents required
@@ -24,9 +24,11 @@ capabilities and six globally discoverable engineering skills:
    authority.
 
 The package-owned skills under `skills/` add alignment, codebase design,
-diagnosis, TDD, code review, and domain-modeling guidance. They are prompt
-resources, not extension code or authority. They use the same repository,
-managed-workflow, validation, delivery, and Alpine constraints as the extension.
+diagnosis, TDD, code review, domain modeling, accepted-invariant enforcement,
+read-only repository onboarding and proposal audit, and measured agent-workflow
+improvement. They are prompt resources, not extension code or authority. They
+use the same repository, managed-workflow, validation, delivery, and Alpine
+constraints as the extension.
 
 The package does not install or invoke Repository Harness. Its managed workflow
 is package-owned process scaffolding that supplements, but never replaces, the

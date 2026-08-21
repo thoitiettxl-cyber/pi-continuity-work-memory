@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, extname, join, relative, resolve } from "node:path";
 import test from "node:test";
 
 import { loadSkillsFromDir } from "@earendil-works/pi-coding-agent";
@@ -8,6 +8,18 @@ import { loadSkillsFromDir } from "@earendil-works/pi-coding-agent";
 const root = resolve(import.meta.dirname, "..", "..");
 const skillsRoot = join(root, "skills");
 const expectedSkills = [
+	"audit-onboarding-proposal",
+	"code-review",
+	"codebase-design",
+	"diagnosing-bugs",
+	"domain-modeling",
+	"encode-invariant",
+	"grill-with-docs",
+	"improve-harness",
+	"onboard-repository",
+	"tdd",
+] as const;
+const mattPocockSkills = [
 	"code-review",
 	"codebase-design",
 	"diagnosing-bugs",
@@ -15,8 +27,21 @@ const expectedSkills = [
 	"grill-with-docs",
 	"tdd",
 ] as const;
+const repositoryHarnessSkills = [
+	"audit-onboarding-proposal",
+	"encode-invariant",
+	"improve-harness",
+	"onboard-repository",
+] as const;
+const explicitOnlySkills = new Set([
+	"audit-onboarding-proposal",
+	"grill-with-docs",
+	"improve-harness",
+	"onboard-repository",
+]);
 const expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);
-const upstreamCommit = "5b15a47f2d7150f545fbcacbfe381787fc0230dc";
+const mattPocockCommit = "5b15a47f2d7150f545fbcacbfe381787fc0230dc";
+const repositoryHarnessCommit = "e765792b635b4d5e3e5fc0578f82f9ca5dea2681";
 
 function filesBelow(path: string): string[] {
 	return readdirSync(path, { withFileTypes: true }).flatMap((entry) => {
@@ -46,7 +71,11 @@ function markdownLinks(text: string): string[] {
 		.filter((target) => !target.startsWith("http") && !target.startsWith("#"));
 }
 
-test("package declares exactly the six shipped Pi skill directories", () => {
+function skillText(name: string): string {
+	return readFileSync(join(skillsRoot, name, "SKILL.md"), "utf8");
+}
+
+test("package declares exactly the ten shipped Pi skill directories", () => {
 	const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as {
 		files?: string[];
 		pi?: { extensions?: string[]; skills?: string[] };
@@ -76,7 +105,10 @@ test("skill inventory and frontmatter are Pi-compatible", () => {
 		assert.equal(typeof metadata.description, "string");
 		assert.ok(String(metadata.description).length > 20 && String(metadata.description).length <= 1_024);
 		assert.match(String(metadata.compatibility), /Pi >=0\.84\.1 <0\.85\.0/);
-		assert.ok(text.includes(upstreamCommit));
+		const sourceCommit = repositoryHarnessSkills.includes(name as typeof repositoryHarnessSkills[number])
+			? repositoryHarnessCommit
+			: mattPocockCommit;
+		assert.ok(text.includes(sourceCommit), `${name} omits its pinned source commit`);
 		assert.ok(statSync(path).size < 16_000);
 		const headings = text.match(/^#{1,6} .+$/gm) ?? [];
 		for (let index = 1; index < headings.length; index += 1) {
@@ -85,15 +117,13 @@ test("skill inventory and frontmatter are Pi-compatible", () => {
 		for (const target of markdownLinks(text)) {
 			assert.ok(existsSync(resolve(dirname(path), target)), `missing ${relative(root, resolve(dirname(path), target))}`);
 		}
-	}
-	assert.equal(frontmatter(readFileSync(join(skillsRoot, "grill-with-docs", "SKILL.md"), "utf8"))["disable-model-invocation"], true);
-	for (const name of expectedSkills.filter((candidate) => candidate !== "grill-with-docs")) {
-		assert.notEqual(frontmatter(readFileSync(join(skillsRoot, name, "SKILL.md"), "utf8"))["disable-model-invocation"], true);
+		assert.equal(metadata["disable-model-invocation"] === true, explicitOnlySkills.has(name), `${name} explicit-only policy drifted`);
 	}
 });
 
 test("adapted skills retain authority and avoid cross-harness or unsafe delivery assumptions", () => {
-	const text = filesBelow(skillsRoot)
+	const files = filesBelow(skillsRoot);
+	const text = files
 		.filter((path) => path.endsWith(".md") || path.endsWith(".txt"))
 		.map((path) => readFileSync(path, "utf8"))
 		.join("\n");
@@ -104,28 +134,79 @@ test("adapted skills retain authority and avoid cross-harness or unsafe delivery
 		"Commit your work to the current branch",
 		"spawn both sub-agents in parallel",
 	]) assert.ok(!text.includes(forbidden), `forbidden upstream assumption remains: ${forbidden}`);
-	for (const name of ["grill-with-docs", "diagnosing-bugs", "tdd", "domain-modeling"]) {
-		assert.ok(readFileSync(join(skillsRoot, name, "SKILL.md"), "utf8").includes("continuity_prepare_work"));
+	for (const name of ["grill-with-docs", "diagnosing-bugs", "tdd", "domain-modeling", "encode-invariant", "onboard-repository", "improve-harness"]) {
+		assert.ok(skillText(name).includes("continuity_prepare_work"), `${name} must explain managed preparation before mutation`);
 	}
-	const grill = readFileSync(join(skillsRoot, "grill-with-docs", "SKILL.md"), "utf8");
+	const grill = skillText("grill-with-docs");
 	assert.match(grill, /explicit invocation authorizes clarification only/);
 	assert.match(grill, /does not authorize\s+any repository mutation/);
-	const diagnosis = readFileSync(join(skillsRoot, "diagnosing-bugs", "SKILL.md"), "utf8");
+	const diagnosis = skillText("diagnosing-bugs");
 	assert.match(diagnosis, /Diagnose-only/);
 	assert.match(diagnosis, /Fix-authorized/);
 	assert.match(diagnosis, /Automatic skill loading never upgrades/);
-	const domain = readFileSync(join(skillsRoot, "domain-modeling", "SKILL.md"), "utf8");
+	const domain = skillText("domain-modeling");
 	assert.match(domain, /does not\s+authorize a repository edit/);
-	const review = readFileSync(join(skillsRoot, "code-review", "SKILL.md"), "utf8");
+	const review = skillText("code-review");
 	assert.match(review, /Review is read-only/);
 	assert.match(review, /calls may run sequentially/);
 	assert.ok(text.includes("safe checkpoint proves repository/operation safety only"));
 	assert.ok(text.includes("Do not commit, push"));
-	assert.ok(!filesBelow(skillsRoot).some((path) => path.endsWith("agents/openai.yaml")));
+	assert.ok(!files.some((path) => path.endsWith("agents/openai.yaml")));
+	assert.ok(files.every((path) => [".md", ".txt"].includes(extname(path))), "skills must remain prompt/reference-only resources");
+
+	const repositoryHarnessText = repositoryHarnessSkills.map((name) => skillText(name)).join("\n");
+	for (const forbidden of [
+		"ONBOARDING_EVIDENCE_CAPSULE",
+		"agents/openai.yaml",
+		"render_patch.py",
+		"emit_evidence_bundle.py",
+		"validate_evidence_capsule.py",
+	]) assert.ok(!repositoryHarnessText.includes(forbidden), `Repository Harness protocol leaked into Pi skill: ${forbidden}`);
+});
+
+test("repository workflow skills preserve their distinct authority and proof boundaries", () => {
+	const invariant = skillText("encode-invariant");
+	assert.match(invariant, /Automatic skill loading.*does not authorize/is);
+	assert.match(invariant, /code patterns.*tests.*defaults.*conventions.*do not establish/is);
+	assert.match(invariant, /positive proof/i);
+	assert.match(invariant, /negative proof/i);
+	for (const level of ["Local validation", "Optional hook", "CI", "Branch protection"]) assert.ok(invariant.includes(level));
+	assert.match(invariant, /human-only reconciliation/i);
+	assert.match(invariant, /checkpoint.*never.*completion/is);
+
+	const onboarding = skillText("onboard-repository");
+	assert.match(onboarding, /first pass is always read-only/i);
+	assert.match(onboarding, /does not authorize.*repository mutation/is);
+	for (const classification of ["Authoritative", "Observed", "Derived", "Decision required", "Unknown"]) assert.ok(onboarding.includes(classification));
+	for (const finding of ["Enforced", "Partially enforced", "Unenforced rule", "Check lacking authority"]) assert.ok(onboarding.includes(finding));
+	assert.match(onboarding, /exact approved.*hunk/is);
+	assert.match(onboarding, /base.*drift/is);
+	assert.match(onboarding, /do not call `continuity_prepare_work`.*first pass/is);
+
+	const audit = skillText("audit-onboarding-proposal");
+	assert.match(audit, /independent.*fresh/is);
+	assert.match(audit, /read-only/i);
+	assert.match(audit, /exact hunk IDs/i);
+	assert.match(audit, /counterexample pass/i);
+	for (const disposition of ["SUPPORTED", "SPLIT_OR_REISSUE", "UNSUPPORTED"]) assert.ok(audit.includes(disposition));
+	assert.match(audit, /does not.*approval/is);
+	assert.match(audit, /do not call `continuity_prepare_work`/i);
+
+	const improve = skillText("improve-harness");
+	assert.match(improve, /observed baseline/i);
+	assert.match(improve, /one.*bound execution plan/is);
+	assert.match(improve, /fresh Pi.*rerun/is);
+	assert.match(improve, /Pending fresh rerun/);
+	assert.match(improve, /available.*retrieved.*relevant/is);
+	assert.match(improve, /rerun that never exercised[\s\S]*cannot support an improvement\s+claim/i);
+	assert.match(improve, /\*\*Keep\*\*[\s\S]*rerun exercised/i);
+	assert.match(improve, /continuity_finalize_work/);
+	assert.match(improve, /fresh post-move validation/i);
+	assert.match(improve, /human-only reconciliation/i);
 });
 
 test("domain-modeling uses Continuity without creating parallel authority", () => {
-	const domain = readFileSync(join(skillsRoot, "domain-modeling", "SKILL.md"), "utf8");
+	const domain = skillText("domain-modeling");
 	for (const tool of [
 		"continuity_workflow_status",
 		"continuity_status",
@@ -148,11 +229,16 @@ test("domain-modeling uses Continuity without creating parallel authority", () =
 	assert.match(domain, /checkpoint.*never.*completion/is);
 });
 
-test("upstream provenance and MIT notice are shipped", () => {
+test("source provenance and both MIT notices are shipped", () => {
 	const provenance = readFileSync(join(skillsRoot, "UPSTREAM.md"), "utf8");
-	const license = readFileSync(join(skillsRoot, "UPSTREAM_LICENSE.txt"), "utf8");
-	assert.ok(provenance.includes(upstreamCommit));
-	for (const name of expectedSkills) assert.ok(provenance.includes(`\`${name}\``));
-	assert.match(license, /Copyright \(c\) 2026 Matt Pocock/);
-	assert.match(license, /Permission is hereby granted/);
+	const mattLicense = readFileSync(join(skillsRoot, "UPSTREAM_LICENSE.txt"), "utf8");
+	const repositoryHarnessLicense = readFileSync(join(skillsRoot, "REPOSITORY_HARNESS_LICENSE.txt"), "utf8");
+	assert.ok(provenance.includes(mattPocockCommit));
+	assert.ok(provenance.includes(repositoryHarnessCommit));
+	for (const name of mattPocockSkills) assert.ok(provenance.includes(`\`${name}\``));
+	for (const name of repositoryHarnessSkills) assert.ok(provenance.includes(`\`${name}\``));
+	assert.match(mattLicense, /Copyright \(c\) 2026 Matt Pocock/);
+	assert.match(mattLicense, /Permission is hereby granted/);
+	assert.match(repositoryHarnessLicense, /Copyright \(c\) 2025 Hoang Nguyen/);
+	assert.match(repositoryHarnessLicense, /Permission is hereby granted/);
 });

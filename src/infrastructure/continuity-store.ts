@@ -7,6 +7,7 @@ import { verifyValidationEvidence } from "../domain/validation-receipt.js";
 import {
 	CONTINUITY_DATABASE_SCHEMA_VERSION,
 	cloneWorkState,
+	migrateWorkState,
 	type CheckpointRecord,
 	type MutationConsequence,
 	type OperationReconciliation,
@@ -301,7 +302,7 @@ function placeholders(length: number): string {
 }
 
 function parseState(row: StateRow): WorkState {
-	return JSON.parse(String(row.state_json)) as WorkState;
+	return migrateWorkState(JSON.parse(String(row.state_json)));
 }
 
 export interface BeginTrackedCallResult {

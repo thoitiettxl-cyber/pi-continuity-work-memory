@@ -48,3 +48,13 @@ for (const command of [
 		assert.equal(isExecutableValidationCommand(command), false);
 	});
 }
+
+test("managed workflow document tools retain their authority and mutation boundaries", () => {
+	assert.equal(classifyTool("continuity_workflow_status", {}), "ignored");
+	assert.equal(classifyTool("continuity_workflow_read", { document: "workflow" }), "ignored");
+	assert.equal(classifyTool("continuity_bind_work_document", { path: "docs/plans/active/x.md" }), "ignored");
+	assert.equal(classifyTool("continuity_prepare_work", { requestedMutation: true }), "mutation");
+	assert.equal(classifyMutationConsequence("continuity_prepare_work", { requestedMutation: true }), "local");
+	assert.equal(classifyTool("continuity_finalize_work", {}), "mutation");
+	assert.equal(classifyMutationConsequence("continuity_finalize_work", {}), "local");
+});

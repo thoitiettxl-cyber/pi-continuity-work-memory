@@ -201,3 +201,26 @@ test("memory reset does not touch the independent Continuity database", async ()
 	memoryStore.close();
 	continuity.close();
 });
+
+test("work-item memory is absent until an explicit work item or repository document binding exists", () => {
+	const root = temporaryDirectory("memory-explicit-work-item");
+	const store = new MemoryStore(join(root, "memory.sqlite"));
+	const state = emptyWorkState();
+	const service = new MemoryService(identity(), () => state, store);
+	assert.deepEqual(service.selectors().map((selector) => selector.scope), ["global-user", "repository", "session"]);
+	assert.deepEqual(service.allowedExtractionScopes(), ["repository", "session"]);
+	assert.throws(() => service.add("unbound work item", "work-item", "agent-tool"), /explicit work item|bound repository/);
+
+	state.workflow.binding = {
+		kind: "execution-plan",
+		status: "active",
+		workItemId: "5a5933b7-9dd2-45b5-a34e-90ab699ba912",
+		relativePath: "docs/plans/active/work.md",
+		templateVersion: 1,
+		digest: "b".repeat(64),
+	};
+	assert.deepEqual(service.selectors().map((selector) => selector.scope), ["global-user", "repository", "work-item", "session"]);
+	assert.deepEqual(service.allowedExtractionScopes(), ["repository", "work-item", "session"]);
+	assert.doesNotThrow(() => service.add("bound work item", "work-item", "agent-tool"));
+	store.close();
+});

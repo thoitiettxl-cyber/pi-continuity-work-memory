@@ -1,13 +1,14 @@
 {
   "name": "pi-continuity-work-memory",
   "version": "1.0.0-rc.2",
-  "description": "Branch-correct Pi work continuity, evidence-backed safe checkpoints, and scoped persistent memory.",
+  "description": "Managed repository workflow, branch-correct Pi continuity, evidence-backed checkpoints, and scoped persistent memory.",
   "type": "module",
   "license": "MIT",
   "keywords": [
     "pi-package",
     "pi-extension",
     "continuity",
+    "workflow",
     "work-memory",
     "checkpoint"
   ],
@@ -21,6 +22,7 @@
   },
   "files": [
     "dist",
+    "workflow",
     "scripts/validate-install.mjs",
     "scripts/pi-version.mjs",
     "scripts/validate-provider.mjs",

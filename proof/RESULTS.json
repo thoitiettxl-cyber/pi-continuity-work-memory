@@ -58,34 +58,39 @@
   "deferred": [],
   "developmentValidation": {
     "status": "PASS_SOURCE_LOCAL",
-    "generatedAt": "2026-08-15T07:09:21Z",
-    "scope": "P0 authority hardening on dev-next",
+    "generatedAt": "2026-08-21T12:11:34+00:00",
+    "scope": "Package-owned Managed Workflow Engine on dev-next",
     "commands": [
       "npm run validate",
-      "scripts/validate-premerge.sh"
+      "scripts/validate-premerge.sh",
+      "PI_VALIDATION_PI=/usr/local/bin/pi npm run validate:install",
+      "npm run release --"
     ],
     "observations": {
-      "tests": "104/104",
+      "tests": "145/145",
       "typecheck": "PASS",
       "build": "PASS",
-      "piInstallProof": "PASS on Pi 0.84.1 in two isolated workspaces",
+      "piInstallProof": "PASS on Pi 0.84.1 and Pi 0.84.2 in two isolated AGENTS-bearing workspaces",
+      "workflowAssets": "PASS: 4 checksum/inventory-bound package assets; no Harness runtime/install dependency",
+      "managedWorkflowRuntime": "PASS: public Pi events/tools, eligibility, mutation gate, read-only/bounded no-doc behavior, durable intent/create/bind/drift/finalize/recovery, and non-interactive safety",
       "releaseStaticValidation": "PASS",
+      "packagedRelease": "PASS on Pi 0.84.1: 112-file sanitized inventory, isolated install, unzip test, SHA-256 11228132bcd0325eee33d9650ca8950d1997e0d4f337d419430b8a0e51425ff0",
       "diffCheck": "PASS",
       "sealedValidationReceipts": "PASS",
       "consequentialOperationLedger": "PASS",
-      "orderedSqliteMigrations": "PASS"
+      "orderedSqliteMigrations": "PASS",
+      "workStateMigration": "PASS: schema v1 external and embedded context migrate to v2 advisory workflow without fabricating repository authority"
     },
     "notRevalidated": [
       "real-provider execution",
-      "Alpine device matrix",
-      "packaged release archive"
+      "Alpine device matrix"
     ],
-    "authority": "This development result applies only to the changed source-local worktree. Historical RC2 external proofs are not reused as authority for these changes."
+    "authority": "This development result applies only to the changed source-local worktree and packaged artifact generated from it. Historical RC2 provider/Alpine proofs are not reused as authority for Managed Workflow Engine behavior."
   },
   "releaseIdentity": {
     "status": "selected",
     "version": "1.0.0-rc.2",
     "reason": "The owner explicitly selected 1.0.0-rc.2 so the hardened source and artifacts remain distinct from immutable canonical 1.0.0-rc.1."
   },
-  "policy": "All mandatory source, native, real-provider, supported-Pi, Alpine ARM64, and release-artifact gates passed for 1.0.0-rc.2. No commit, push, publication, or deployment was performed."
+  "policy": "Historical RC2 source, provider, Alpine ARM64, and release gates remain recorded separately. The current Managed Workflow Engine source passed native, supported-Pi install, premerge, and packaged-release gates; it was not deployed or published by these proofs."
 }

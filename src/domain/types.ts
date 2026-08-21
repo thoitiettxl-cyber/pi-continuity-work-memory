@@ -1,4 +1,6 @@
-export const CONTINUITY_STATE_SCHEMA_VERSION = 1;
+import { emptyWorkflowProjection, type WorkflowProjection } from "./managed-workflow.js";
+
+export const CONTINUITY_STATE_SCHEMA_VERSION = 2;
 export const CONTINUITY_DATABASE_SCHEMA_VERSION = 2;
 export const MEMORY_DATABASE_SCHEMA_VERSION = 2;
 export const CONTINUITY_SCHEMA_VERSION = CONTINUITY_STATE_SCHEMA_VERSION;
@@ -94,6 +96,7 @@ export interface WorkState {
 	decisions: string[];
 	blockers: string[];
 	constraints: string[];
+	workflow: WorkflowProjection;
 	validationEvidence: ValidationEvidence[];
 	checkpointId: string | null;
 	checkpointAncestry: string[];
@@ -226,6 +229,7 @@ export function emptyWorkState(now = Date.now()): WorkState {
 		decisions: [],
 		blockers: [],
 		constraints: [],
+		workflow: emptyWorkflowProjection(now),
 		validationEvidence: [],
 		checkpointId: null,
 		checkpointAncestry: [],
@@ -234,6 +238,23 @@ export function emptyWorkState(now = Date.now()): WorkState {
 		mutationUncertain: false,
 		updatedAt: now,
 	};
+}
+
+export function migrateWorkState(value: unknown, now = Date.now()): WorkState {
+	if (!value || typeof value !== "object") return emptyWorkState(now);
+	const candidate = value as Partial<WorkState> & { schemaVersion?: number };
+	if (candidate.schemaVersion !== 1 && candidate.schemaVersion !== CONTINUITY_STATE_SCHEMA_VERSION) {
+		throw new Error(`Unsupported Continuity WorkState schema version: ${String(candidate.schemaVersion)}`);
+	}
+	const base = emptyWorkState(typeof candidate.updatedAt === "number" ? candidate.updatedAt : now);
+	return {
+		...base,
+		...structuredClone(candidate),
+		schemaVersion: CONTINUITY_STATE_SCHEMA_VERSION,
+		workflow: candidate.schemaVersion === CONTINUITY_STATE_SCHEMA_VERSION && candidate.workflow
+			? { ...emptyWorkflowProjection(base.updatedAt), ...structuredClone(candidate.workflow) }
+			: emptyWorkflowProjection(base.updatedAt, "advisory"),
+	} as WorkState;
 }
 
 export function cloneWorkState(state: WorkState): WorkState {

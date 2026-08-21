@@ -2,6 +2,13 @@ import { randomUUID } from "node:crypto";
 
 import { boundedStrings, canonicalJson, redactSecrets, sha256 } from "../domain/canonical.js";
 import {
+	emptyWorkflowProjection,
+	type WorkPreparation,
+	type WorkflowDocumentBinding,
+	type WorkflowDocumentIntent,
+	type WorkflowMode,
+} from "../domain/managed-workflow.js";
+import {
 	buildCheckpointHashes,
 	parseCheckpointPayload,
 	verifyCheckpointChain,
@@ -12,6 +19,7 @@ import {
 	CONTINUITY_SCHEMA_VERSION,
 	cloneWorkState,
 	emptyWorkState,
+	migrateWorkState,
 	type CheckpointRecord,
 	type ContinuityStatus,
 	type EmbeddedState,
@@ -34,6 +42,7 @@ import {
 	classifyMutationConsequence,
 	classifyTool,
 	isExecutableValidationCommand,
+	isManagedWorkflowMutationTool,
 	splitSimpleCommand,
 	splitValidationCommand,
 } from "./tool-classifier.js";
@@ -62,6 +71,7 @@ export interface ToolCallObservation {
 	input: Record<string, unknown>;
 	branch: BranchContext;
 	actor?: "agent-tool" | "user-bash";
+	enforceWorkflow?: boolean;
 	signal?: AbortSignal | undefined;
 }
 
@@ -95,14 +105,16 @@ function normalizePlan(plan: readonly PlanStep[] | undefined): PlanStep[] {
 function latestEmbedded(branch: BranchContext): EmbeddedState | undefined {
 	for (let index = branch.embeddedStates.length - 1; index >= 0; index -= 1) {
 		const embedded = branch.embeddedStates[index];
-		if (embedded?.schemaVersion === CONTINUITY_SCHEMA_VERSION) return embedded;
+		if (embedded && (embedded.schemaVersion === 1 || embedded.schemaVersion === CONTINUITY_SCHEMA_VERSION)) {
+			return { ...embedded, schemaVersion: CONTINUITY_SCHEMA_VERSION, state: migrateWorkState(embedded.state) };
+		}
 	}
 	return undefined;
 }
 
 function payloadState(record: CheckpointRecord): WorkState {
 	const payload = parseCheckpointPayload(record);
-	const state = cloneWorkState(payload.state);
+	const state = migrateWorkState(payload.state);
 	state.checkpointId = record.id;
 	state.checkpointAncestry = [record.id, ...state.checkpointAncestry.filter((item) => item !== record.id)].slice(0, 200);
 	return state;
@@ -178,6 +190,11 @@ export class ContinuityService {
 
 	update(patch: WorkStatePatch, branch: BranchContext): WorkState {
 		this.requireStarted();
+		if (this.state.workflow.mode === "managed" && this.state.workflow.binding
+			&& (patch.workItemId !== undefined || patch.plan !== undefined || patch.currentStepId !== undefined
+				|| patch.decisions !== undefined || patch.completedWork !== undefined)) {
+			throw new Error(`Repository plan ${this.state.workflow.binding.relativePath} is authoritative; update it instead of duplicating work-item identity, durable plan, current step, decision, or completion state in Continuity`);
+		}
 		this.state = this.store.mutateState(this.identity.sessionKey, branch.currentNodeId, this.state, (state) => {
 			if (patch.goal !== undefined) state.goal = patch.goal.trim().slice(0, 16_000);
 			if (patch.workItemId !== undefined) state.workItemId = patch.workItemId.trim().slice(0, 500) || "default";
@@ -192,16 +209,181 @@ export class ContinuityService {
 		return this.currentState();
 	}
 
+	configureWorkflow(mode: WorkflowMode, branch: BranchContext): WorkState {
+		this.requireStarted();
+		this.state = this.store.mutateState(this.identity.sessionKey, branch.currentNodeId, this.state, (state) => {
+			state.workflow = { ...state.workflow, mode, updatedAt: Date.now() };
+		});
+		return this.currentState();
+	}
+
+	recordWorkflowIntent(
+		preparation: WorkPreparation,
+		intent: WorkflowDocumentIntent,
+		resumeHint: string | null,
+		branch: BranchContext,
+	): WorkState {
+		this.requireStarted();
+		this.state = this.store.mutateState(this.identity.sessionKey, branch.currentNodeId, this.state, (state) => {
+			state.workflow = {
+				...state.workflow,
+				shape: preparation.shape,
+				phase: "materializing",
+				intent: structuredClone(intent),
+				binding: null,
+				resumeHint,
+				updatedAt: Date.now(),
+			};
+			state.workItemId = intent.workItemId;
+		});
+		return this.currentState();
+	}
+
+	recordWorkflowFinalizationIntent(binding: WorkflowDocumentBinding, branch: BranchContext): WorkState {
+		this.requireStarted();
+		if (binding.kind !== "execution-plan" || binding.status !== "active") throw new Error("Only an active execution plan can enter finalization");
+		if (!binding.relativePath.startsWith("docs/plans/active/") || !binding.relativePath.endsWith(".md")) throw new Error("Active execution plan binding path is invalid");
+		const completedPath = `docs/plans/completed/${binding.relativePath.slice("docs/plans/active/".length)}`;
+		this.state = this.store.mutateState(this.identity.sessionKey, branch.currentNodeId, this.state, (state) => {
+			state.workflow = {
+				...state.workflow,
+				phase: "materializing",
+				intent: {
+					kind: "execution-plan",
+					workItemId: binding.workItemId,
+					relativePath: completedPath,
+					templateVersion: 1,
+					expectedDigest: binding.digest,
+				},
+				updatedAt: Date.now(),
+			};
+		});
+		return this.currentState();
+	}
+
+	recordWorkPreparation(
+		preparation: WorkPreparation,
+		binding: WorkflowDocumentBinding | null,
+		resumeHint: string | null,
+		branch: BranchContext,
+	): WorkState {
+		this.requireStarted();
+		this.state = this.store.mutateState(this.identity.sessionKey, branch.currentNodeId, this.state, (state) => {
+			const previousManagedWorkItemId = state.workflow.binding?.workItemId ?? state.workflow.intent?.workItemId;
+			state.workflow = {
+				...state.workflow,
+				shape: preparation.shape,
+				phase: binding ? binding.status === "active" ? "bound" : "finalized" : "prepared",
+				intent: null,
+				binding: binding ? structuredClone(binding) : null,
+				resumeHint,
+				updatedAt: Date.now(),
+			};
+			if (binding) {
+				state.workItemId = binding.workItemId;
+				if (state.workflow.mode === "managed") {
+					state.plan = [];
+					state.currentStepId = null;
+					state.completedWork = [];
+					state.decisions = [];
+				}
+			} else if (previousManagedWorkItemId && state.workItemId === previousManagedWorkItemId) state.workItemId = "default";
+		});
+		return this.currentState();
+	}
+
+	bindWorkflowDocument(binding: WorkflowDocumentBinding, branch: BranchContext, resumeHint?: string | null): WorkState {
+		return this.recordWorkPreparation({
+			shape: "durable",
+			documentKind: "execution-plan",
+			mutationDisposition: "requires-execution-plan",
+			reason: "An explicit repository execution plan is bound as durable work truth.",
+		}, binding, resumeHint ?? this.state.workflow.resumeHint, branch);
+	}
+
+	recordWorkflowAlignment(
+		phase: "bound" | "drifted" | "conflict" | "finalized" | "recovery-required",
+		binding: WorkflowDocumentBinding | null,
+		branch: BranchContext,
+	): WorkState {
+		this.requireStarted();
+		this.state = this.store.mutateState(this.identity.sessionKey, branch.currentNodeId, this.state, (state) => {
+			state.workflow = {
+				...state.workflow,
+				phase,
+				intent: phase === "recovery-required" || phase === "conflict" ? state.workflow.intent : null,
+				binding: binding ? structuredClone(binding) : state.workflow.binding,
+				updatedAt: Date.now(),
+			};
+			if (binding) state.workItemId = binding.workItemId;
+		});
+		return this.currentState();
+	}
+
+	resetWorkflowPreparation(branch: BranchContext): WorkState {
+		this.requireStarted();
+		if (this.state.workflow.phase === "materializing" || this.state.workflow.phase === "recovery-required") {
+			const unresolvedWorkflow = this.store.unresolvedForBranch(this.identity.sessionKey, branch.nodeIds)
+				.find((operation) => isManagedWorkflowMutationTool(operation.toolName));
+			if (unresolvedWorkflow) {
+				throw new Error(`Workflow preparation cannot be reset while ${unresolvedWorkflow.toolCallId} is ${unresolvedWorkflow.status}; inspect and reconcile first`);
+			}
+		}
+		const mode = this.state.workflow.mode;
+		const managedWorkItemId = this.state.workflow.binding?.workItemId ?? this.state.workflow.intent?.workItemId;
+		this.state = this.store.mutateState(this.identity.sessionKey, branch.currentNodeId, this.state, (state) => {
+			state.workflow = emptyWorkflowProjection(Date.now(), mode);
+			if (managedWorkItemId && state.workItemId === managedWorkItemId) state.workItemId = "default";
+		});
+		return this.currentState();
+	}
+
+	private workflowGate(observation: ToolCallObservation, classification: ReturnType<typeof classifyTool>): ToolCallDecision | undefined {
+		if (!observation.enforceWorkflow || classification !== "mutation") return undefined;
+		const workflow = this.state.workflow;
+		if (workflow.mode !== "managed") return undefined;
+		if (isManagedWorkflowMutationTool(observation.toolName)) {
+			const unresolvedWorkflow = this.store.unresolvedForBranch(this.identity.sessionKey, observation.branch.nodeIds)
+				.find((operation) => isManagedWorkflowMutationTool(operation.toolName));
+			if (unresolvedWorkflow) {
+				return { block: true, reason: `Managed workflow operation ${unresolvedWorkflow.toolCallId} is ${unresolvedWorkflow.status}; inspect and reconcile it before another workflow document mutation` };
+			}
+			if (observation.toolName === "continuity_prepare_work" && (workflow.phase === "materializing" || workflow.phase === "recovery-required" || workflow.phase === "conflict")) {
+				return { block: true, reason: "A managed workflow document operation is unresolved or conflicted; inspect, bind, reconcile, or explicitly reset it before preparing another work document" };
+			}
+			return undefined;
+		}
+		if (workflow.shape === "unclassified") {
+			return { block: true, reason: "Managed workflow requires continuity_prepare_work before the first repository mutation" };
+		}
+		if (workflow.shape === "read-only") {
+			return { block: true, reason: "Current work is classified read-only; repository mutation is not authorized" };
+		}
+		if (workflow.shape === "authority-blocked") {
+			return { block: true, reason: "Current mutative work has ambiguous or missing authority; obtain the smallest missing decision before mutation" };
+		}
+		if (workflow.shape === "durable" && (workflow.phase !== "bound" || !workflow.binding)) {
+			return { block: true, reason: "Durable work must create or bind one execution plan before repository mutation" };
+		}
+		if (workflow.shape === "bounded" && workflow.phase !== "prepared") {
+			return { block: true, reason: "Bounded work preparation is not current" };
+		}
+		return undefined;
+	}
+
 	private refreshMutationProjection(branch: BranchContext): void {
 		const unresolved = this.store.unresolvedForBranch(this.identity.sessionKey, branch.nodeIds);
 		const hasUncertain = unresolved.some((operation) => operation.status === "uncertain");
 		const hasPending = unresolved.some((operation) => operation.status === "pending");
 		const nextStatus = hasUncertain ? "uncertain" : hasPending ? "pending" : this.state.mutationSequence > 0 ? "determined" : "none";
 		const nextUncertain = hasUncertain;
-		if (this.state.mutationStatus === nextStatus && this.state.mutationUncertain === nextUncertain) return;
+		const workflowRecovery = unresolved.some((operation) => operation.status === "uncertain" && isManagedWorkflowMutationTool(operation.toolName));
+		const nextWorkflowPhase = workflowRecovery ? "recovery-required" : this.state.workflow.phase;
+		if (this.state.mutationStatus === nextStatus && this.state.mutationUncertain === nextUncertain && this.state.workflow.phase === nextWorkflowPhase) return;
 		this.state = this.store.mutateState(this.identity.sessionKey, branch.currentNodeId, this.state, (state) => {
 			state.mutationStatus = nextStatus;
 			state.mutationUncertain = nextUncertain;
+			if (workflowRecovery) state.workflow = { ...state.workflow, phase: "recovery-required", updatedAt: Date.now() };
 		});
 	}
 
@@ -222,6 +404,8 @@ export class ContinuityService {
 	async observeToolCall(observation: ToolCallObservation): Promise<ToolCallDecision | undefined> {
 		this.requireStarted();
 		const classification = classifyTool(observation.toolName, observation.input);
+		const workflowDecision = this.workflowGate(observation, classification);
+		if (workflowDecision) return workflowDecision;
 		if (classification !== "mutation" && classification !== "validation") return undefined;
 		const rawCommand = observation.toolName === "bash" && typeof observation.input.command === "string"
 			? observation.input.command
@@ -240,7 +424,7 @@ export class ContinuityService {
 		const preOperationLedgerDigest = this.store.operationLedgerDigest(this.identity.sessionKey, observation.branch.nodeIds);
 		let preFingerprint: string | null = null;
 		let preHead: string | null = null;
-		if ((classification === "validation" || consequence === "external") && this.identity.trusted) {
+		if ((classification === "validation" || consequence === "external" || observation.toolName === "continuity_finalize_work") && this.identity.trusted) {
 			const captured = await this.fingerprints.captureStable(this.cwd, true, observation.signal);
 			preFingerprint = captured.combined;
 			preHead = captured.head;
@@ -289,10 +473,19 @@ export class ContinuityService {
 			observation.branch.nodeIds,
 			observation.isError,
 			sha256(redactSecrets(observation.contentText)),
-			trackedBefore.kind === "mutation" && trackedBefore.consequence === "external",
+			trackedBefore.kind === "mutation" && (
+				trackedBefore.consequence === "external"
+				|| (trackedBefore.toolName === "continuity_finalize_work" && /uncertain/i.test(observation.contentText))
+			),
 		);
 		if (!tracked) return undefined;
 		if (tracked.kind === "mutation") {
+			if (observation.isError && isManagedWorkflowMutationTool(tracked.toolName)
+				&& (this.state.workflow.intent !== null || this.state.workflow.phase === "materializing")) {
+				this.state = this.store.mutateState(this.identity.sessionKey, observation.branch.currentNodeId, this.state, (state) => {
+					state.workflow = { ...state.workflow, phase: "recovery-required", updatedAt: Date.now() };
+				});
+			}
 			this.state.mutationSequence = Math.max(this.state.mutationSequence, tracked.sequence);
 			this.refreshMutationProjection(observation.branch);
 			return undefined;
@@ -322,6 +515,38 @@ export class ContinuityService {
 			provider: "observed-tool",
 		});
 		this.recordEvidence(evidence, observation.branch);
+		return evidence;
+	}
+
+	async workflowFinalizationEvidence(toolCallId: string, branch: BranchContext, signal?: AbortSignal): Promise<ValidationEvidence> {
+		this.requireStarted();
+		if (!this.identity.trusted) throw new Error("Managed finalization requires trusted Git and validation authority");
+		const tracked = this.store.getTrackedCall(toolCallId, this.identity.sessionKey, branch.nodeIds);
+		if (!tracked || tracked.toolName !== "continuity_finalize_work" || tracked.kind !== "mutation" || tracked.status !== "pending") {
+			throw new Error("Managed finalization is not the current durably tracked operation");
+		}
+		if (!tracked.preFingerprint || !tracked.preOperationLedgerDigest) {
+			throw new Error("Managed finalization lacks its pre-operation Git fingerprint or ledger binding");
+		}
+		const preFinalizeSequence = Math.max(0, tracked.sequence - 1);
+		const evidence = this.store.latestValidation(
+			this.identity.sessionKey,
+			branch.nodeIds,
+			preFinalizeSequence,
+			tracked.preOperationLedgerDigest,
+		);
+		if (!evidence) throw new Error("No receipt-bound executable validation exists immediately before this finalization operation");
+		const receipt = verifyValidationEvidence(evidence);
+		if (!receipt.valid || !evidence.receiptDigest) throw new Error(`Pre-finalization validation receipt is not authoritative: ${receipt.reason}`);
+		if (evidence.repositoryFingerprint !== tracked.preFingerprint) {
+			throw new Error("Repository state differs from the authoritative pre-finalization validation receipt");
+		}
+		if (this.store.operationIntegrityIssues(this.identity.sessionKey, branch.nodeIds).length > 0) {
+			throw new Error("Operation-ledger integrity failed before managed finalization");
+		}
+		if (this.state.mutationSequence !== tracked.sequence) throw new Error("Mutation state changed after finalization preflight");
+		const current = await this.fingerprints.captureStable(this.cwd, true, signal);
+		if (current.combined !== tracked.preFingerprint) throw new Error("Repository changed after pre-finalization validation");
 		return evidence;
 	}
 
@@ -636,15 +861,21 @@ export class ContinuityService {
 	contextSummary(): string {
 		const state = this.state;
 		const currentStep = state.plan.find((step) => step.id === state.currentStepId);
+		const repositoryBound = state.workflow.mode === "managed" && state.workflow.binding !== null;
+		const binding = state.workflow.binding;
 		return [
 			"<continuity-work-state authority=\"external-extension-only\">",
 			`Goal: ${state.goal || "(unset)"}`,
 			`Work item: ${state.workItemId}`,
-			`Current step: ${currentStep ? `${currentStep.id}: ${currentStep.text}` : state.currentStepId || "(unset)"}`,
-			`Plan: ${state.plan.map((step) => `[${step.status}] ${step.id}: ${step.text}`).join(" | ") || "(empty)"}`,
+			`Managed workflow: mode=${state.workflow.mode}; shape=${state.workflow.shape}; phase=${state.workflow.phase}.`,
+			`Managed document intent: ${state.workflow.intent ? `${state.workflow.intent.relativePath} (sha256:${state.workflow.intent.expectedDigest.slice(0, 12)})` : "(none)"}.`,
+			`Authoritative repository work document: ${binding ? `${binding.relativePath} (${binding.status}, sha256:${binding.digest.slice(0, 12)})` : "(none)"}.`,
+			`Operational resume hint: ${state.workflow.resumeHint || "(none)"}`,
+			`Current step: ${repositoryBound ? "read the repository work document" : currentStep ? `${currentStep.id}: ${currentStep.text}` : state.currentStepId || "(unset)"}`,
+			`Plan: ${repositoryBound ? "repository document owns durable plan truth; Continuity copy intentionally empty" : state.plan.map((step) => `[${step.status}] ${step.id}: ${step.text}`).join(" | ") || "(empty)"}`,
 			`Next actions: ${state.nextActions.join(" | ") || "(none)"}`,
-			`Completed: ${state.completedWork.join(" | ") || "(none)"}`,
-			`Decisions: ${state.decisions.join(" | ") || "(none)"}`,
+			`Completed: ${repositoryBound ? "repository document and executable evidence own completion" : state.completedWork.join(" | ") || "(none)"}`,
+			`Decisions: ${repositoryBound ? "repository documents own durable decisions" : state.decisions.join(" | ") || "(none)"}`,
 			`Blockers: ${state.blockers.join(" | ") || "(none)"}`,
 			`Constraints: ${state.constraints.join(" | ") || "(none)"}`,
 			`Session lineage: current=${this.identity.sessionKey}; parent=${this.identity.parentSessionKey || "(none)"}`,
@@ -652,6 +883,7 @@ export class ContinuityService {
 			`Checkpoint ancestry: ${state.checkpointAncestry.join(" -> ") || "(none)"}`,
 			`Unresolved operations: ${state.mutationUncertain || state.mutationStatus === "pending" ? "present; inspect continuity_status" : "0"}`,
 			"Only receipt-bound executable validation plus the extension's Git fingerprint, operation ledger, and checkpoint hash-chain can mark a checkpoint safe.",
+			"A safe checkpoint proves repository/operation safety only; it never marks the repository work document or task complete.",
 			"</continuity-work-state>",
 		].join("\n");
 	}

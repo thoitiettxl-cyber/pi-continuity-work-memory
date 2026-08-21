@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "assets": [
+    {
+      "path": "WORKFLOW.md",
+      "sha256": "1cee312c3bb4550d02be1f468fb91200322e67b0f24706bc35ee21ab94f231a0"
+    },
+    {
+      "path": "templates/application-runbook.md",
+      "sha256": "642142d713d9168efd5a98af6e8e5e12bd0bd10b765bc8ce1cfaa483911ff8f9"
+    },
+    {
+      "path": "templates/decision-record.md",
+      "sha256": "65820ae7e4ae03818f6dec8fa79ada188253bdf19206f55b864ff32c58cf2653"
+    },
+    {
+      "path": "templates/execution-plan.md",
+      "sha256": "ea62bf490e521b946c9719c0959d0eb13db590623a8571a5a797444b19f0e561"
+    }
+  ]
+}

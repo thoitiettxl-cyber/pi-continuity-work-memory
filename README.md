@@ -1,8 +1,8 @@
 # Pi Continuity + Work Memory
 
-One opt-in Pi extension for versions `>=0.84.1 <0.85.0`, providing branch-correct work continuity, evidence-backed safe checkpoints, and scoped persistent learning memory.
+One opt-in Pi extension for versions `>=0.84.1 <0.85.0`, providing branch-correct work continuity, a package-owned managed repository workflow, evidence-backed safe checkpoints, and scoped persistent learning memory.
 
-The implementation combines three design inputs: Harness-style clean architecture and transactional recovery, Pi compaction/session lifecycle handling, and a two-stage provider-backed memory pipeline. Harness itself is neither a runtime dependency nor part of the package payload.
+The implementation combines clean architecture and transactional recovery, Pi compaction/session lifecycle handling, a package-owned workflow and template bundle, and a two-stage provider-backed memory pipeline. Consumer repositories do not need `repository-harness` installed, and the extension never invokes or installs it.
 
 ## Requirements
 
@@ -10,6 +10,7 @@ The implementation combines three design inputs: Harness-style clean architectur
 - Pi `>=0.84.1 <0.85.0`
 - Built-in `node:sqlite`; no native SQLite npm addon
 - Git for verified safe checkpoints
+- A loaded in-repository `AGENTS.md` or `AGENTS.override.md` plus project trust for managed auto-document behavior
 - `unzip`/`zipinfo` when deploying a release ZIP; `zip` only when building one from source
 
 ## Install globally, opt in explicitly
@@ -73,7 +74,9 @@ For isolated tests, override them with `PI_CONTINUITY_HOME` and `PI_WORK_MEMORY_
 
 Commands:
 
-- `/continuity status|show|checkpoint|recover [checkpoint-id]|operations`
+- `/continuity status|show|workflow|workflow-mode <off|advisory|managed>`
+- `/continuity workflow-bind <docs/plans/active/file.md>|workflow-reset`
+- `/continuity checkpoint|recover [checkpoint-id]|operations`
 - `/continuity reconcile <operation-id> <applied|not_applied|partially_applied> <evidence-note>`
 - `/memory status|run|reset|remember <global-user|repository|work-item|session> <text>`
 
@@ -81,6 +84,11 @@ Structured tools:
 
 - `continuity_status`
 - `continuity_update`
+- `continuity_workflow_status`
+- `continuity_workflow_read`
+- `continuity_prepare_work`
+- `continuity_bind_work_document`
+- `continuity_finalize_work`
 - `continuity_validate`
 - `continuity_checkpoint`
 - `continuity_recover`
@@ -90,6 +98,27 @@ Structured tools:
 - `memory_add`
 
 `/memory reset` resets only the memory store. It cannot delete Continuity state.
+
+## Managed repository workflow
+
+The release payload contains checksum-verified package assets under `workflow/`, including `WORKFLOW.md` plus execution-plan, proposed-decision, and application-runbook templates. These assets are process defaults and scaffolding; applicable repository `AGENTS.md` files, explicit user authority, repository documents, code, tests, runtime evidence, and Git history remain the system of record.
+
+The workflow is lazy and observable:
+
+1. `session_start`, user input, agent completion, and `agent_settled` never create or finalize repository documents.
+2. A trusted Git repository must have an in-repository `AGENTS.md` or `AGENTS.override.md` loaded by Pi before managed auto-document behavior is eligible.
+3. In `managed` mode, an agent calls `continuity_prepare_work` before its first repository mutation. The tool derives the work shape from structured authority and durability signals.
+4. Read-only and bounded work create no lifecycle document. Ambiguous or missing authority creates nothing and keeps mutation blocked.
+5. Durable work records an exact branch-bound intent, then exclusively creates one identity-bearing execution plan under `docs/plans/active/`, or explicitly binds an existing plan. Root/path/symlink checks, Pi's file-mutation queue, and exclusive creation prevent escape, lost updates, and overwrite; interrupted operations remain recoverable rather than pretending the database and filesystem form one transaction.
+6. Once bound, the repository plan owns durable progress, decisions, validation, and result. Continuity stores only its path, work-item identity, template version, digest, phase, and operational resume hint.
+7. Repository changes win over the stored binding. Drift requires re-reading and explicit rebinding; recovery never restores an older template, recreates a missing document, or retries an uncertain write.
+8. `continuity_finalize_work` accepts only a bound active plan whose status is `Ready for completion` or `Completed`, whose Result is no longer pending, and whose immediately preceding receipt-bound executable validation still matches the pre-operation ledger and stable repository fingerprint. It moves the file to `docs/plans/completed/` without claiming task completion and requires fresh post-move validation.
+
+The preparation gate applies to agent-issued repository tools. Direct user `!`/`!!` commands remain explicit human actions: they are operation-ledger tracked and invalidate stale evidence, but are not reinterpreted or blocked as agent workflow decisions.
+
+New WorkState defaults to `managed`; state migrated from schema v1 defaults to `advisory` so an upgrade never silently enables repository writes. Use `/continuity workflow-mode managed` once to opt an upgraded work item into enforcement. `off` keeps only Continuity/Memory behavior, while `advisory` supplies guidance without mutation gating or automatic materialization.
+
+Package removal never deletes consumer documents. Existing plans are ordinary repository files and are not rewritten when workflow templates are upgraded.
 
 ## Safe-boundary authority
 
@@ -102,6 +131,8 @@ A checkpoint becomes `verified` only when all of these hold:
 5. The repository fingerprint was identical before and after that validation.
 6. A provisional checkpoint is inserted, then a final stable fingerprint still matches before promotion to `verified`.
 7. The promotion transaction revalidates the parent hash-chain, checkpoint column projections, validation receipt, mutation state, and operation-ledger digest.
+
+A verified checkpoint means only that repository and operation safety evidence is valid for the captured fingerprint. It never marks a managed execution plan, product outcome, or work item complete; repository documents and behavior-appropriate proof retain that authority.
 
 The fingerprint covers HEAD, branch, porcelain-v2 status, staged binary diff, worktree binary diff, and content hashes for every untracked file. Two consecutive captures must match. Repository changes after checkpoint yield `drifted`. Corrupt payloads, missing parents, or cycles are quarantined.
 
@@ -136,6 +167,8 @@ Continuity and learning-memory databases use ordered database schema migrations 
 
 A failed migration rolls back the transaction and retains the pre-migration backup. A database newer than the runtime, an unknown migration checksum, a malformed claimed legacy schema, or schema drift fails closed. Stop older Pi processes before first opening a persistent store with the upgraded runtime; an RC2 process does not understand the v2 database schema.
 
+The managed workflow uses WorkState schema v2 inside the existing branch-state/checkpoint JSON and reuses the consequential-operation ledger for durable document intent. Supported WorkState v1 rows and embedded entries migrate to schema v2 with workflow mode `advisory`; unsupported future WorkState versions fail closed. No extra task database or parallel plan table is introduced.
+
 ## Persistent memory
 
 Automatic memory work starts only from `agent_settled`, never `agent_end`. Session/tree replacement cancels timers and provider controllers. A source hash and lifecycle generation prevent an old worker from publishing over a new session state.
@@ -167,10 +200,10 @@ Scopes are independent:
 
 - `global-user`: shared across repositories; only an explicit user command can create it.
 - `repository`: keyed by canonical repository identity.
-- `work-item`: keyed by repository plus work item.
+- `work-item`: keyed by repository plus an explicit work item or bound repository work-document identity; the implicit `default` bucket is not injected or extracted.
 - `session`: keyed by Pi session file identity.
 
-Learning memory is untrusted context. It cannot mark validation passed, complete work, create a safe checkpoint, or change Continuity authority.
+Learning memory is untrusted context. It cannot mark validation passed, complete work, accept a product decision, create a safe checkpoint, or change Continuity authority. Active-plan progress and task-local completion are not published as repository truth.
 
 ## Project trust
 
@@ -181,6 +214,7 @@ When `ctx.isProjectTrusted()` is false, the extension:
 - injects no repository/work-item memory;
 - writes only session-scoped extracted memory;
 - cannot create safe checkpoints;
+- disables the extension-owned create, bind, and finalize workflow operations; project trust is not a sandbox and does not prevent ordinary built-in tools from acting under separate user/model authority;
 - still loads safely in TUI, RPC, JSON, and print modes.
 
 Only TUI mode calls status/notification APIs. RPC, JSON, and print modes do not open dialogs or call TUI APIs.

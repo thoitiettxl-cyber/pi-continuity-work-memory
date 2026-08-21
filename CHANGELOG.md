@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added
+
+- Added a package-owned managed repository workflow with checksum-verified guidance/templates, trust-and-`AGENTS.md` eligibility, structured work-shape preparation, document-free read-only/bounded work, intent-first exclusive execution-plan creation, recoverable binding/finalization, branch-correct recovery metadata, and explicit separation between repository completion and safe checkpoints.
+- Added explicit work-document identities for work-item memory so unbound tasks no longer share an implicit repository-wide `default` work-item bucket.
+
 ### Fixed
 
 - Prevented automatic memory extraction from starting after an aborted assistant run.

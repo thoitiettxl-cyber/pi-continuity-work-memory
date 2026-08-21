@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import type { ExtensionContext, SessionEntry } from "@earendil-works/pi-coding-agent";
 
 import { PROVIDER_SOURCE_MAX_CHARS, sanitizeProviderBoundText, sha256 } from "../domain/canonical.js";
-import { CONTINUITY_SCHEMA_VERSION, type EmbeddedState } from "../domain/types.js";
+import { CONTINUITY_SCHEMA_VERSION, migrateWorkState, type EmbeddedState } from "../domain/types.js";
 import type { BranchContext } from "../application/continuity-service.js";
 import type { SessionMemorySource } from "../application/memory-service.js";
 
@@ -12,8 +12,8 @@ export const CONTINUITY_ENTRY_TYPE = "pi-continuity-state-v1";
 function embeddedEntry(entry: SessionEntry): EmbeddedState | undefined {
 	if (entry.type !== "custom" || entry.customType !== CONTINUITY_ENTRY_TYPE) return undefined;
 	const data = entry.data as Partial<EmbeddedState> | undefined;
-	if (!data || data.schemaVersion !== CONTINUITY_SCHEMA_VERSION || data.authority !== "embedded" || !data.state) return undefined;
-	return data as EmbeddedState;
+	if (!data || data.authority !== "embedded" || !data.state || (data.schemaVersion !== 1 && data.schemaVersion !== CONTINUITY_SCHEMA_VERSION)) return undefined;
+	return { ...data, schemaVersion: CONTINUITY_SCHEMA_VERSION, state: migrateWorkState(data.state) } as EmbeddedState;
 }
 
 export function branchContext(ctx: ExtensionContext): BranchContext {

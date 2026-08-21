@@ -8,7 +8,12 @@ const EXCLUDED_TOOLS = new Set([
 	"memory_read",
 	"memory_search",
 	"memory_add",
+	"continuity_workflow_status",
+	"continuity_workflow_read",
+	"continuity_bind_work_document",
 ]);
+
+const MANAGED_WORKFLOW_MUTATION_TOOLS = new Set(["continuity_prepare_work", "continuity_finalize_work"]);
 
 const READ_ONLY_TOOLS = new Set(["read", "grep", "find", "ls"]);
 const MUTATION_TOOLS = new Set(["write", "edit", "apply_patch"]);
@@ -41,6 +46,10 @@ const SENSITIVE_VALIDATION_ARGUMENT = /(?:^|\s)--(?:api[_-]?key|access[_-]?token
 
 export type ToolClassification = "ignored" | "read" | "mutation" | "validation";
 export type MutationConsequence = "none" | "local" | "external";
+
+export function isManagedWorkflowMutationTool(toolName: string): boolean {
+	return MANAGED_WORKFLOW_MUTATION_TOOLS.has(toolName);
+}
 
 export function splitSimpleCommand(command: string): { program: string; args: string[]; tokens: string[] } {
 	if (!command.trim() || /[\n\r\0]/.test(command)) throw new Error("Command is empty or contains a line boundary");
@@ -103,6 +112,7 @@ export function splitValidationCommand(command: string): { program: string; args
 
 export function classifyTool(toolName: string, input: Record<string, unknown>): ToolClassification {
 	if (EXCLUDED_TOOLS.has(toolName)) return "ignored";
+	if (MANAGED_WORKFLOW_MUTATION_TOOLS.has(toolName)) return "mutation";
 	if (READ_ONLY_TOOLS.has(toolName)) return "read";
 	if (MUTATION_TOOLS.has(toolName)) return "mutation";
 	if (toolName !== "bash") return "mutation";
@@ -121,6 +131,7 @@ export function classifyTool(toolName: string, input: Record<string, unknown>): 
 export function classifyMutationConsequence(toolName: string, input: Record<string, unknown>): MutationConsequence {
 	const classification = classifyTool(toolName, input);
 	if (classification !== "mutation") return "none";
+	if (MANAGED_WORKFLOW_MUTATION_TOOLS.has(toolName)) return "local";
 	if (MUTATION_TOOLS.has(toolName)) return "local";
 	return "external";
 }

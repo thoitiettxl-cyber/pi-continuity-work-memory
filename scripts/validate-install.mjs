@@ -1,7 +1,8 @@
+import { createHash } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, dirname, join, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
 import { SUPPORTED_PI_RANGE, assertSupportedPiVersion } from "./pi-version.mjs";
@@ -32,7 +33,8 @@ function run(args, cwd, environment) {
 function initializeGit(path) {
 	mkdirSync(path, { recursive: true });
 	writeFileSync(join(path, "README.md"), `${basename(path)}\n`, "utf8");
-	for (const args of [["init", "-q"], ["config", "user.email", "proof@example.invalid"], ["config", "user.name", "Proof"], ["add", "README.md"], ["commit", "-qm", "initial"]]) {
+	writeFileSync(join(path, "AGENTS.md"), "# Isolated install proof instructions\n", "utf8");
+	for (const args of [["init", "-q"], ["config", "user.email", "proof@example.invalid"], ["config", "user.name", "Proof"], ["add", "README.md", "AGENTS.md"], ["commit", "-qm", "initial"]]) {
 		const result = spawnSync("git", args, { cwd: path, encoding: "utf8" });
 		if (result.status !== 0) fail(`git ${args.join(" ")} failed: ${result.stderr}`);
 	}
@@ -50,6 +52,45 @@ function copyInstallPayload() {
 		const target = resolve(packageRoot, relative);
 		mkdirSync(dirname(target), { recursive: true });
 		cpSync(source, target, { recursive: true });
+	}
+}
+
+function workflowFiles(path) {
+	return readdirSync(path, { withFileTypes: true }).flatMap((entry) => {
+		const full = join(path, entry.name);
+		return entry.isDirectory() ? workflowFiles(full) : [full];
+	});
+}
+
+function verifyWorkflowPayload() {
+	const workflowRoot = join(packageRoot, "workflow");
+	const manifestPath = join(workflowRoot, "manifest.json");
+	if (!existsSync(manifestPath)) fail("Installed package workflow manifest is missing");
+	const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+	if (manifest.schemaVersion !== 1 || manifest.algorithm !== "sha256" || !Array.isArray(manifest.assets)) {
+		fail("Installed package workflow manifest is invalid");
+	}
+	const actual = workflowFiles(workflowRoot)
+		.map((path) => path.slice(workflowRoot.length + 1).replaceAll("\\", "/"))
+		.filter((path) => path !== "manifest.json")
+		.sort();
+	const declared = manifest.assets.map((entry) => entry.path);
+	const requiredWorkflowAssets = ["WORKFLOW.md", "templates/application-runbook.md", "templates/decision-record.md", "templates/execution-plan.md"];
+	if (JSON.stringify(declared) !== JSON.stringify(requiredWorkflowAssets)) fail("Installed package workflow set is incomplete");
+	if (new Set(declared).size !== declared.length || JSON.stringify([...declared].sort()) !== JSON.stringify(declared)) {
+		fail("Installed package workflow paths must be unique and sorted");
+	}
+	if (JSON.stringify(actual) !== JSON.stringify(declared)) fail("Installed package workflow inventory does not match its manifest");
+	for (const entry of manifest.assets) {
+		if (typeof entry.path !== "string" || !entry.path || entry.path.includes("\\") || entry.path.includes("\0") || isAbsolute(entry.path)
+			|| entry.path.split("/").some((segment) => !segment || segment === "." || segment === "..")) {
+			fail("Installed package workflow manifest contains an unsafe path");
+		}
+		const path = resolve(workflowRoot, entry.path);
+		const fromRoot = relative(workflowRoot, path);
+		if (fromRoot === ".." || fromRoot.startsWith(`..${sep}`) || isAbsolute(fromRoot)) fail(`Installed workflow asset escapes its root: ${entry.path}`);
+		const digest = existsSync(path) ? createHash("sha256").update(readFileSync(path)).digest("hex") : "missing";
+		if (digest !== entry.sha256) fail(`Installed package workflow checksum mismatch: ${entry.path}`);
 	}
 }
 
@@ -111,6 +152,7 @@ try {
 	const piVersion = assertSupportedPiVersion(versionResult.stdout);
 
 	copyInstallPayload();
+	verifyWorkflowPayload();
 	const workspaceA = join(proofRoot, "workspace-a");
 	const workspaceB = join(proofRoot, "workspace-b");
 	initializeGit(workspaceA);
@@ -132,9 +174,12 @@ try {
 	}
 	const commandsA = await rpc(workspaceA, environment, [
 		{ id: "commands-a", type: "get_commands" },
+		{ id: "workflow-a", type: "prompt", message: "/continuity workflow" },
 		{ id: "repo-a", type: "prompt", message: "/memory remember repository repo-A-e2e-marker" },
 		{ id: "global-a", type: "prompt", message: "/memory remember global-user global-e2e-marker" },
 	]);
+	const workflowResponse = commandsA.find((response) => response.id === "workflow-a");
+	if (!workflowResponse?.success || workflowResponse.command !== "prompt") fail("Installed workflow status command was not accepted by Pi RPC");
 	const commandsB = await rpc(workspaceB, environment, [
 		{ id: "commands-b", type: "get_commands" },
 		{ id: "repo-b", type: "prompt", message: "/memory remember repository repo-B-e2e-marker" },
@@ -175,6 +220,8 @@ try {
 		repositoryScopeKeysDistinct: true,
 		globalMemoryShared: true,
 		storesSurviveRemove: true,
+		workflowAssetsVerified: true,
+		workflowCommandAccepted: true,
 	})}\n`);
 } finally {
 	rmSync(proofRoot, { recursive: true, force: true });

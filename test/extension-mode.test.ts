@@ -194,6 +194,11 @@ for (const mode of ["rpc", "json", "print"] as const) {
 			extension(runtime.api);
 			await emit(runtime, "session_start", { type: "session_start", reason: "startup" });
 			assert.ok(runtime.toolNames.includes("continuity_status"));
+			assert.ok(runtime.toolNames.includes("continuity_workflow_status"));
+			assert.ok(runtime.toolNames.includes("continuity_workflow_read"));
+			assert.ok(runtime.toolNames.includes("continuity_prepare_work"));
+			assert.ok(runtime.toolNames.includes("continuity_bind_work_document"));
+			assert.ok(runtime.toolNames.includes("continuity_finalize_work"));
 			assert.ok(runtime.toolNames.includes("memory_search"));
 			assert.deepEqual(runtime.commandNames.sort(), ["continuity", "memory"]);
 			assert.equal(runtime.gitCalls, 0);

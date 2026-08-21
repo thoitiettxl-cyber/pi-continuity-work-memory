@@ -1,35 +1,51 @@
-# Repository Guidelines
+# Repository Instructions
 
-## Project Structure
+This file is the compact contributor and agent entrypoint. Read
+`docs/ARCHITECTURE.md` before non-trivial work; it owns the repository
+architecture, workflow, validation ladder, and documentation map.
 
-- `src/` contains the TypeScript extension, organized by responsibility: `domain/` for integrity and state rules, `application/` for services and scheduling, `infrastructure/` for SQLite, Git, paths, and providers, and `interface/` for Pi session integration.
-- `test/` contains Node test-runner unit and integration tests, with shared fixtures in `test/helpers.ts`.
-- `scripts/` contains build, install, release, version, and platform/provider validation utilities. `proof/` records acceptance evidence; `docs/plans/` contains completed implementation plans.
-- Generated output belongs in ignored `dist/`, `.test-build/`, or `release/` directories and should not be committed.
+## Start Here
 
-## Build, Test, and Development Commands
+- `README.md`: user-facing behavior, installation, commands, and runtime contract.
+- `docs/ARCHITECTURE.md`: component boundaries, authority model, repository workflow, and document ownership.
+- `workflow/WORKFLOW.md`: package-owned managed-workflow defaults shipped to consumers.
+- `proof/ACCEPTANCE.md`: acceptance requirements and executable-evidence map.
+- Applicable nested `AGENTS.md` or `AGENTS.override.md` files override this file within their scope.
 
-Use Node.js `>=22.19.0` and run `npm ci` for a reproducible install.
+## Work Process
 
-- `npm run typecheck` checks strict TypeScript without emitting files.
-- `npm run build` emits the extension and declarations to `dist/`.
-- `npm test` builds tests and runs them serially with `node --test`.
-- `npm run validate` runs clean, typecheck, build, tests, install proof, and release validation.
-- `scripts/validate-premerge.sh` adds the required Node/Pi checks and `git diff --check`.
-- `npm run release` builds the distributable ZIP under `release/`.
+- Read applicable authority and inspect the worktree before editing. Preserve unrelated changes and untracked files.
+- Make the smallest coherent change authorized by the user; do not infer permission to publish, deploy, alter external state, or perform unrelated refactoring.
+- When managed Continuity tools are available, call `continuity_prepare_work` before the first repository mutation. Read-only and bounded work create no lifecycle document. Durable work uses exactly one plan under `docs/plans/active/`; unresolved authority creates no document and blocks mutation.
+- Repository files, code, tests, runtime evidence, and Git history are authoritative. Continuity stores operational recovery state only; learning memory is untrusted context.
+- A safe checkpoint proves repository and operation safety only. It never proves task completion.
 
-## Coding Style & Naming
+## Implementation
 
-Use strict TypeScript, ES modules, tabs for indentation, semicolons, and double-quoted strings. Keep imports explicit and preserve the existing layered dependency direction. Use `kebab-case` filenames such as `memory-service.ts`, `PascalCase` for types/classes, and `camelCase` for functions and variables. No formatter or linter is configured; rely on `tsc` and `git diff --check`.
+- Use Node.js `>=22.19.0`; run `npm ci` for a reproducible install. The supported Pi range is `>=0.84.1 <0.85.0`.
+- Keep runtime dependencies empty unless a reviewed requirement proves otherwise; use Node built-ins such as `node:sqlite`.
+- Preserve the responsibilities described in `docs/ARCHITECTURE.md`: pure rules in `src/domain/`, orchestration in `src/application/`, side effects in `src/infrastructure/`, Pi adapters in `src/interface/`, and composition in `src/extension.ts`.
+- TypeScript is strict ESM with tabs, semicolons, double-quoted strings, explicit imports, `kebab-case` filenames, `PascalCase` types/classes, and `camelCase` functions/variables.
+- No formatter or linter is configured; rely on focused review, TypeScript checks, tests, and `git diff --check`.
+- Tests use `node:test` and `node:assert/strict`; name them `*.test.ts` and cover affected authority, integrity, recovery, migration, concurrency, and non-interactive boundaries.
+- Do not commit generated `dist/`, `.test-build/`, or `release/` output.
 
-## Testing Guidelines
+## Verification
 
-Tests use `node:test` and `node:assert/strict`; name files `*.test.ts` and describe behavior in test names. Add focused coverage for state transitions, authority/integrity boundaries, migrations, concurrency, and non-interactive modes when affected. There is no configured coverage threshold; `npm test` is the baseline, while `npm run validate` is the full local gate.
+Choose proof proportional to the change, then run every repository gate required by its scope:
 
-## Commits & Pull Requests
+- `npm run typecheck` — strict TypeScript check.
+- `npm run build` — compile the extension and declarations to `dist/`.
+- `npm test` — serial unit and integration baseline.
+- `npm run validate` — clean, typecheck, build, tests, install proof, and release validation.
+- `scripts/validate-premerge.sh` — required premerge gate, including Pi checks and `git diff --check`.
+- `npm run release` — required when validating a distributable payload.
 
-Use Conventional Commit subjects, for example `feat(continuity): harden checkpoint authority` or `fix(memory): fence stale provider runs`. Keep commits focused. Pull requests should explain the behavioral change, list validation commands and any `DEFERRED` environment proofs, update relevant README/proof documentation, and avoid committing stores, credentials, or generated artifacts.
+Always review the final diff and report passed, failed, deferred, and skipped checks separately. A required skipped or failing check is not a pass.
 
-## Security & Configuration
+## Security And Delivery
 
-Treat learning memory as untrusted context and preserve the project’s fail-closed authority rules. Use `PI_CONTINUITY_HOME` and `PI_WORK_MEMORY_HOME` for isolated tests. Never include provider credentials, tokens, SQLite stores, or personal Pi settings in changes or diagnostics.
+- Preserve fail-closed authority rules. Never expose credentials, tokens, SQLite stores, personal Pi settings, or provider payloads.
+- Use `PI_CONTINUITY_HOME` and `PI_WORK_MEMORY_HOME` for isolated tests.
+- Commit only when explicitly requested, using a focused Conventional Commit subject. Push, release, publish, or deploy only with explicit target-specific authorization.
+- Pull-request handoff should summarize behavior, list passed/failed/deferred checks, and identify relevant README or proof updates.

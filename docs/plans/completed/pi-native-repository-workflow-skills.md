@@ -6,7 +6,7 @@ Date: 2026-08-21
 
 ## Status
 
-Active
+Completed
 
 ## Outcome
 
@@ -62,8 +62,8 @@ Out of scope:
 
 - [x] Implement the four Pi-native skills, ten-skill package contract, dual-source provenance, RC5 identity, tests, and user-facing documentation.
 - [x] Run focused skill proof, `npm run validate`, Alpine ARM64 proof, preliminary release packaging, and managed-installer dry-run.
-- [ ] Run final premerge proof, generate and reverify the definitive artifact, and complete final diff review.
-- [ ] Commit and push `dev-next`, deploy the verified RC5 archive, verify fresh installed discovery, and record the final result before finalization.
+- [x] Run final premerge proof, generate and reverify the definitive artifact, and complete final diff review.
+- [x] Commit and push `dev-next`, deploy the verified RC5 archive, verify fresh installed discovery, and record the final result before finalization.
 
 ## Decisions
 
@@ -95,8 +95,18 @@ Observed candidate evidence:
 - PASS — independent fixed-point review found no architecture, authority, provenance, inventory, or cross-harness defect; its three focused findings are being resolved before premerge.
 - FAIL — first `scripts/validate-premerge.sh` attempt reached 151/152 tests; the new fresh-rerun assertion was line-wrap-sensitive (`improvement claim`) while the skill behavior and all other gates passed. The assertion was corrected to accept Markdown whitespace and requires a fresh full run at a new Git fixed point.
 
-Pending: final premerge, definitive artifact/dry-run, commit, remote push, managed deployment, installed-file identity, and fresh Pi 0.84.2 discovery.
+Final delivery evidence:
+
+- PASS — feature commit `0b1e016876dcc24666a41726a5c9efb890fee1e2` contains the complete 20-file implementation and active execution plan.
+- PASS — post-commit `scripts/validate-premerge.sh`, receipt `dae31f42-45d7-4b9c-a40e-45842ad93b65`: 152/152 tests, typecheck, build, isolated Pi 0.84.1 ten-skill install/source proof, release static validation, and `git diff --check`.
+- PASS — definitive RC5 archive `release/pi-continuity-work-memory-1.0.0-rc.5.zip`: SHA-256 `21e0aea0b718ff5403997d93b37064327548bce983ecf09d41f39e25cea4e664`, sanitized 132-file release report, 153 ZIP entries, exact staged install, and `unzip -t`.
+- PASS — checksum-pinned definitive installer dry-run reverified the archive, 131 inventory files, target path, and `storesChanged: false`.
+- PASS — feature commit was pushed to `origin/dev-next`; `git ls-remote` observed the same full remote SHA.
+- PASS — package-owned installer atomically deployed RC5 to `/root/.pi/agent/packages/pi-continuity-work-memory`, retained registration `packages/pi-continuity-work-memory`, reported `storesChanged: false` and `restartRequired: true`, and created rollback backup `/root/.pi/agent/backups/pi-continuity-work-memory/2026-08-21T16-35-49-236Z-12002-fcd787ea`.
+- PASS — installed `package.json` reports `1.0.0-rc.5` and the exact ten skill paths; all ten installed `SKILL.md` files exist and `pi list` observes the stable package registration.
+- PASS — fresh Pi 0.84.2 install proof executed from the deployed package and reported `skillsLoaded: 10`, `skillSourcesVerified: true`, two isolated workspaces, checksum-bound workflow assets, separate repository memory identities, shared explicit global memory, preserved stores, and accepted workflow command.
+- NOT RERUN — real-provider memory execution, because extension/provider runtime behavior did not change; historical RC2 evidence remains history rather than current RC5 authority.
 
 ## Result
 
-Implementation and candidate validation are complete. Final delivery and post-delivery verification remain pending.
+Completed. `pi-continuity-work-memory@1.0.0-rc.5` ships ten globally discoverable Pi-native engineering skills, including the four authorized Repository Harness-derived adaptations with prompt-only resources, explicit authority boundaries, dual MIT provenance, install/release checks, and managed Continuity semantics. Source, focused skill proof, full validation, premerge, Alpine ARM64, definitive artifact, checksum-pinned dry-run, feature commit/push, managed deployment, installed manifest/files, and fresh Pi 0.84.2 discovery all passed. Persistent stores were preserved. Existing Pi processes must restart to load RC5. Recovery is redeployment of the trusted RC4 archive or restoration from the recorded installer backup without deleting stores.

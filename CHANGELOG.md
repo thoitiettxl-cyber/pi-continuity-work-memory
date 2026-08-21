@@ -12,4 +12,5 @@
 
 - Prevented automatic memory extraction from starting after an aborted assistant run.
 - Ensured session replacement and shutdown cancel and await automatic and manual memory pipelines before closing SQLite stores, so canceled jobs become superseded instead of leaving stale leases.
+- Strengthened `domain-modeling` with managed-workflow status and drift inspection, memory-as-leads boundaries, explicit clarification handoff, uncertain-operation recovery, receipt-aware plan finalization, and duplicate-heading regression coverage.
 - Kept recoverable Continuity policy blocks fail-closed without terminating the Pi agent run, allowing the model to handle duplicate, uncertain, or unsafe-command errors without requiring a new user message.

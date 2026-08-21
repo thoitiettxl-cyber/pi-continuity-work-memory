@@ -21,7 +21,7 @@ directory:
 
 ```sh
 node scripts/manage-user-install.mjs deploy \
-  --archive release/pi-continuity-work-memory-1.0.0-rc.3.zip
+  --archive release/pi-continuity-work-memory-1.0.0-rc.4.zip
 ```
 
 Use this command only with a trusted release: verification executes the

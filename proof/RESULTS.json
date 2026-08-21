@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "status": "RC3ReleaseValidated",
-  "generatedAt": "2026-08-21T14:27:52+00:00",
-  "packageVersion": "1.0.0-rc.3",
-  "worktree": "validated 1.0.0-rc.3 source with package-owned Pi engineering skills, based on the original 1.0.0-rc.1 source snapshot",
+  "status": "RC4ReleaseValidated",
+  "generatedAt": "2026-08-21T15:21:38+00:00",
+  "packageVersion": "1.0.0-rc.4",
+  "worktree": "validated 1.0.0-rc.4 source with the refined Pi-native domain-modeling skill, based on the original 1.0.0-rc.1 source snapshot",
   "environment": {
     "node": "v24.18.1",
     "npm": "11.12.1",
@@ -20,15 +20,15 @@
     },
     {
       "gate": "npm run validate",
-      "evidence": "Typecheck, build, 150/150 tests, isolated two-workspace global install on Pi 0.84.1, exact six-skill package discovery, and release static validation passed."
+      "evidence": "Typecheck, build, 151/151 tests, isolated two-workspace global install on Pi 0.84.1, exact six-skill package discovery, and release static validation passed for version 1.0.0-rc.4."
     },
     {
       "gate": "scripts/validate-premerge.sh",
-      "evidence": "The supported-Pi check, complete validate gate, and git diff --check passed on dev-next for the RC3 source worktree."
+      "evidence": "The supported-Pi check, complete validate gate, and git diff --check passed on dev-next for the RC4 source worktree."
     },
     {
       "gate": "package-owned Pi engineering skills",
-      "evidence": "Pi loaded exactly six manifest-declared skill directories with zero loader diagnostics; grill-with-docs remained explicit-only; authority regressions covered clarification-only, diagnose-only, domain discussion, managed preparation, and non-completion semantics; the isolated install proof verified each command source path under an isolated HOME; MIT provenance and references shipped in the exact release inventory."
+      "evidence": "Pi loaded exactly six manifest-declared skill directories with zero loader diagnostics and no adjacent duplicate headings. domain-modeling now inspects workflow and operation status, treats memory as untrusted leads, hands broad ambiguity to explicit grill-with-docs invocation, separates glossary/decision/plan ownership, refuses uncertain-operation retries, and uses receipt-aware finalization without elevating checkpoints to completion authority."
     },
     {
       "gate": "provider-bound privacy and cost boundary",
@@ -36,7 +36,7 @@
     },
     {
       "gate": "historical RC2 modified-source real provider",
-      "evidence": "Historical RC2 evidence: with explicit owner authorization, cliproxy/gpt-5.6-sol on Pi 0.84.2 completed Stage 1 and Stage 2, published one record and one baseline, accounted usage/citations, and passed the secret scan. The RC3 skill-only change did not rerun or reuse this as current provider authority."
+      "evidence": "Historical RC2 evidence: with explicit owner authorization, cliproxy/gpt-5.6-sol on Pi 0.84.2 completed Stage 1 and Stage 2, published one record and one baseline, accounted usage/citations, and passed the secret scan. The RC4 skill-only change did not rerun or reuse this as current provider authority."
     },
     {
       "gate": "pipeline crash and lease recovery",
@@ -47,41 +47,41 @@
       "evidence": "Version fixtures accept 0.84.1 and 0.84.2, reject 0.85.0 with the peer-range diagnostic, and reports that reach a Pi binary include the detected version plus >=0.84.1 <0.85.0."
     },
     {
-      "gate": "global install on current Pi",
-      "evidence": "PI_VALIDATION_PI=/usr/local/bin/pi passed the isolated two-workspace global-install proof on Pi 0.84.2; six skill commands resolved to the candidate package paths under an isolated HOME, repository scopes remained distinct, global-user memory crossed, and stores survived remove."
+      "gate": "global install on supported Pi versions",
+      "evidence": "The isolated two-workspace global-install proof passed on Pi 0.84.1 and Pi 0.84.2. Six skill commands resolved to the candidate package paths under an isolated HOME, repository scopes remained distinct, global-user memory crossed, and stores survived remove."
     },
     {
       "gate": "Alpine Linux 3.24 ARM64",
-      "evidence": "scripts/validate-alpine-arm64.sh passed on Alpine 3.24.1 aarch64 with Node v24.18.1 and Pi 0.84.2, including exact extension and six-skill global-install discovery proof."
+      "evidence": "scripts/validate-alpine-arm64.sh passed for RC4 on Alpine 3.24.1 aarch64 with Node v24.18.1 and Pi 0.84.2, including exact extension and six-skill global-install discovery proof."
     },
     {
-      "gate": "release artifact",
-      "evidence": "npm run release built a sanitized RC3 ZIP from package.json files, generated an exact inventory, installed the staged payload with six verified skill sources, passed unzip -t, and wrote SHA-256 plus release-report.json; the managed installer dry-run independently reverified it."
+      "gate": "release artifact workflow",
+      "evidence": "A preliminary npm run release built a sanitized RC4 ZIP from package.json files, generated an exact inventory, installed the staged payload with six verified skill sources, passed unzip -t, and wrote SHA-256 plus release-report.json. The definitive artifact checksum and managed-installer result are recorded outside the payload in the bound execution plan to avoid a self-referential claim."
     }
   ],
   "deferred": [],
   "developmentValidation": {
     "status": "PASS_SOURCE_LOCAL",
-    "generatedAt": "2026-08-21T14:27:52+00:00",
-    "scope": "RC3 package-owned Pi engineering skills plus existing extension on dev-next",
+    "generatedAt": "2026-08-21T15:21:38+00:00",
+    "scope": "RC4 domain-modeling refinement plus the existing package extension and six-skill inventory on dev-next",
     "commands": [
+      "python3 <Pi skill validator> skills/domain-modeling",
       "npm run validate",
       "scripts/validate-premerge.sh",
       "scripts/validate-alpine-arm64.sh",
       "npm run release",
-      "node scripts/manage-user-install.mjs deploy --archive <RC3 archive> --dry-run",
-      "python3 <Pi skill validator> skills/<each shipped skill>"
+      "node scripts/manage-user-install.mjs deploy --archive <RC4 archive> --dry-run"
     ],
     "observations": {
-      "tests": "150/150",
+      "tests": "151/151",
       "typecheck": "PASS",
       "build": "PASS",
       "piInstallProof": "PASS on Pi 0.84.1 and Pi 0.84.2 in two isolated AGENTS-bearing workspaces with isolated HOME and exact package skill source paths",
       "workflowAssets": "PASS: 4 checksum/inventory-bound package assets; no Harness runtime/install dependency",
       "managedWorkflowRuntime": "PASS: public Pi events/tools, eligibility, mutation gate, read-only/bounded no-doc behavior, durable intent/create/bind/drift/finalize/recovery, and non-interactive safety",
-      "engineeringSkills": "PASS: six exact Pi skill directories, zero loader diagnostics, explicit-only grill-with-docs, diagnose-only/fix-authorized separation, repository-native domain authority, sequential optional subagents, resolved references, and MIT provenance",
+      "engineeringSkills": "PASS: six exact Pi skill directories, zero loader diagnostics, no adjacent duplicate headings, explicit-only grill-with-docs, diagnosis authority separation, Continuity-integrated domain modeling, resolved references, and MIT provenance",
       "releaseStaticValidation": "PASS",
-      "packagedRelease": "PASS on Pi 0.84.1: sanitized RC3 inventory, exact staged install, six skill source paths, unzip test, and external SHA-256 release report",
+      "packagedRelease": "PASS on preliminary Pi 0.84.1 candidate packaging: sanitized RC4 inventory, exact staged install, six skill source paths, unzip test, and external SHA-256 release report",
       "diffCheck": "PASS",
       "sealedValidationReceipts": "PASS",
       "consequentialOperationLedger": "PASS",
@@ -91,12 +91,17 @@
     "notRevalidated": [
       "real-provider memory execution"
     ],
-    "authority": "This development result applies to the RC3 source-local worktree, packaged skill discovery, and Alpine/install evidence. Historical RC2 real-provider proof is retained only as history because the provider runtime was unchanged."
+    "authority": "This development result applies to the RC4 source-local worktree, package discovery, supported-Pi install, Alpine, and candidate packaging evidence. Historical RC2 real-provider proof is retained only as history because provider runtime was unchanged. Managed RC4 deployment completion belongs exclusively to the repository execution plan and installer receipt."
   },
   "releaseIdentity": {
     "status": "selected",
-    "version": "1.0.0-rc.3",
-    "reason": "The user explicitly authorized a final commit, push, and global deployment; RC3 gives the changed package and skill payload an identity distinct from historical immutable RC2 evidence."
+    "version": "1.0.0-rc.4",
+    "reason": "The user explicitly authorized versioning, commit, push, and managed global deployment of the domain-modeling refinement; RC4 preserves the immutable RC3 artifact and gives the refined payload a distinct identity."
   },
-  "policy": "Historical RC2 source and real-provider evidence remain separate. RC3 source, skill discovery, supported-Pi install, premerge, Alpine ARM64, release, and dry-run evidence are recorded here. Managed deployment completion belongs to the repository execution plan and installer receipt outside the release payload, avoiding a self-referential artifact claim."
+  "previousRelease": {
+    "version": "1.0.0-rc.3",
+    "artifactSha256": "e64cfd5dcaac2319ec3c4ffd363c25298f61007f7dcc939cd194bf9e3086766b",
+    "evidence": "docs/plans/completed/pi-native-global-engineering-skills.md"
+  },
+  "policy": "Historical RC2 provider evidence and immutable RC3 release/deployment evidence remain separate. RC4 source, skill discovery, supported-Pi install, premerge, Alpine ARM64, and release-workflow evidence are recorded here. Definitive artifact and managed deployment completion belong to the repository execution plan and installer receipt outside the release payload."
 }

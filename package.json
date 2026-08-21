@@ -1,6 +1,6 @@
 {
   "name": "pi-continuity-work-memory",
-  "version": "1.0.0-rc.3",
+  "version": "1.0.0-rc.4",
   "description": "Managed repository workflow, branch-correct Pi continuity, evidence-backed checkpoints, scoped persistent memory, and Pi-native engineering skills.",
   "type": "module",
   "license": "MIT",

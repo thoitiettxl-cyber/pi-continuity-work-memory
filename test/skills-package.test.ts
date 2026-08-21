@@ -78,6 +78,10 @@ test("skill inventory and frontmatter are Pi-compatible", () => {
 		assert.match(String(metadata.compatibility), /Pi >=0\.84\.1 <0\.85\.0/);
 		assert.ok(text.includes(upstreamCommit));
 		assert.ok(statSync(path).size < 16_000);
+		const headings = text.match(/^#{1,6} .+$/gm) ?? [];
+		for (let index = 1; index < headings.length; index += 1) {
+			assert.notEqual(headings[index], headings[index - 1], `${name} has an adjacent duplicate heading: ${headings[index]}`);
+		}
 		for (const target of markdownLinks(text)) {
 			assert.ok(existsSync(resolve(dirname(path), target)), `missing ${relative(root, resolve(dirname(path), target))}`);
 		}
@@ -118,6 +122,30 @@ test("adapted skills retain authority and avoid cross-harness or unsafe delivery
 	assert.ok(text.includes("safe checkpoint proves repository/operation safety only"));
 	assert.ok(text.includes("Do not commit, push"));
 	assert.ok(!filesBelow(skillsRoot).some((path) => path.endsWith("agents/openai.yaml")));
+});
+
+test("domain-modeling uses Continuity without creating parallel authority", () => {
+	const domain = readFileSync(join(skillsRoot, "domain-modeling", "SKILL.md"), "utf8");
+	for (const tool of [
+		"continuity_workflow_status",
+		"continuity_status",
+		"continuity_prepare_work",
+		"continuity_bind_work_document",
+		"continuity_recover",
+		"memory_search",
+		"continuity_validate",
+		"continuity_finalize_work",
+		"continuity_checkpoint",
+	]) assert.ok(domain.includes(`\`${tool}\``), `domain-modeling must explain ${tool}`);
+	assert.match(domain, /grill-with-docs/);
+	assert.match(domain, /do not retry/i);
+	assert.match(domain, /human-only\s+reconciliation/i);
+	assert.match(domain, /fresh post-move validation/i);
+	assert.match(domain, /glossary.*reusable domain truth/is);
+	assert.match(domain, /decision record.*lasting accepted trade-off/is);
+	assert.match(domain, /execution plan.*task-local progress/is);
+	assert.match(domain, /Memory.*untrusted leads/is);
+	assert.match(domain, /checkpoint.*never.*completion/is);
 });
 
 test("upstream provenance and MIT notice are shipped", () => {

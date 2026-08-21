@@ -6,7 +6,7 @@ Date: 2026-08-21
 
 ## Status
 
-Active
+Ready for completion
 
 ## Outcome
 
@@ -67,8 +67,8 @@ Out of scope:
 
 - [x] Implement the refined skill, regression coverage, RC4 package identity, and release/proof documentation.
 - [x] Run focused, full, premerge, Alpine, release, archive-inspection, and managed-installer dry-run proof.
-- [ ] Commit and push the RC4 source, deploy the checksum-pinned archive, and verify the installed package from fresh Pi.
-- [ ] Record the verified delivery result before finalization.
+- [x] Commit and push the RC4 source, deploy the checksum-pinned archive, and verify the installed package from fresh Pi.
+- [x] Record the verified delivery result before finalization.
 
 ## Decisions
 
@@ -86,7 +86,7 @@ Promote lasting product or architecture decisions into repository-owned decision
 - npm run release produces a sanitized independent RC4 archive whose checksum and inventory pass inspection.
 - The managed installer dry-run passes against the exact RC4 archive with stores unchanged.
 - After deployment, pi list reports the stable package registration, installed package.json reports 1.0.0-rc.4 and exactly six skill paths, and the installed validate-install script passes on fresh Pi 0.84.2.
-- git ls-remote confirms both pushed commits on origin/dev-next and the final worktree is clean and aligned.
+- `git ls-remote` confirms the source commit and, after this document is finalized, the non-self-referential finalization commit on `origin/dev-next`; the final worktree is clean and aligned.
 
 Observed before delivery:
 
@@ -95,8 +95,12 @@ Observed before delivery:
 - PASS — `scripts/validate-alpine-arm64.sh` on Alpine Linux 3.24.1 ARM64, Node v24.18.1, and Pi 0.84.2, including six exact package skill source paths.
 - PASS — definitive `release/pi-continuity-work-memory-1.0.0-rc.4.zip` packaging: 127 files, sanitized independent payload, exact staged install, six skill files, and `unzip -t`; SHA-256 `83d17834af73149e426e168709731321736d7e64b72dcd1ad4e40cde43fb8b4e`.
 - PASS — managed-installer dry-run reverified the exact checksum-pinned RC4 archive, targeted `/root/.pi/agent/packages/pi-continuity-work-memory`, and reported `storesChanged: false`.
-- PASS — GitHub CLI authentication and repository resolution observed `thoitiettxl-cyber/pi-continuity-work-memory` with default branch `dev-next`; no GitHub state beyond the authorized upcoming branch push was changed.
+- PASS — source commit `6eaf4c75e2f1b36b50d1920c866a28e17a7cc464` was pushed to `origin/dev-next`; `git ls-remote` observed the same remote SHA and the local tracking branch aligned.
+- PASS — the package-owned installer deployed the checksum-pinned RC4 archive to `/root/.pi/agent/packages/pi-continuity-work-memory`, preserved both persistent stores (`storesChanged: false`), reported `restartRequired: true`, retained stable registration `packages/pi-continuity-work-memory`, and created rollback backup `/root/.pi/agent/backups/pi-continuity-work-memory/2026-08-21T15-27-09-464Z-12754-c2818c5b`.
+- PASS — the installed manifest reports `1.0.0-rc.4` and exactly six skill directories; installed package and `domain-modeling` files byte-match the release stage, all six `SKILL.md` files exist, and `pi list` observes the stable registration.
+- PASS — the installed package's isolated validation passed from fresh Pi 0.84.2 in two AGENTS-bearing workspaces, with all six commands resolving to managed package paths, workflow assets verified, repository scopes isolated, global-user memory shared, and stores surviving remove.
+- NOTE — the final plan-move commit SHA is verified only after this document is sealed and moved, avoiding a self-referential result; it belongs to Git history and final delivery reporting.
 
 ## Result
 
-Pending implementation and executable proof.
+Completed. `pi-continuity-work-memory@1.0.0-rc.4` contains the refined Continuity-aware `domain-modeling` skill and duplicate-heading regression coverage. Source, supported-Pi install, premerge, Alpine ARM64, release, checksum, dry-run, branch push, managed deployment, installed file identity, and fresh Pi 0.84.2 discovery all passed. The deployment preserved persistent stores and created the recorded rollback backup. Existing Pi processes must restart to load RC4; recovery is redeployment of the trusted RC3 archive or restoration from the installer backup without deleting stores. Real-provider memory execution was intentionally not rerun because provider/runtime behavior did not change.

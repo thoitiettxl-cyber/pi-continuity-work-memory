@@ -366,6 +366,7 @@ test("duplicate consequential operations are blocked unless the prior attempt wa
 	await service.observeToolResult({ toolCallId: "push-success", isError: false, contentText: "pushed", branch: active });
 	const duplicate = await service.observeToolCall({ toolCallId: "push-duplicate", toolName: "bash", input, branch: active });
 	assert.equal(duplicate?.block, true);
+	assert.equal(Object.hasOwn(duplicate ?? {}, "terminate"), false);
 
 	const failedInput = { command: "npm publish" };
 	await service.observeToolCall({ toolCallId: "publish-uncertain", toolName: "bash", input: failedInput, branch: active });
@@ -400,6 +401,7 @@ test("duplicate tool-call IDs are blocked without advancing mutation sequence or
 	const sequence = service.currentState().mutationSequence;
 	const duplicate = await service.observeToolCall({ toolCallId: "duplicate", toolName: "write", input, branch: active });
 	assert.equal(duplicate?.block, true);
+	assert.equal(Object.hasOwn(duplicate ?? {}, "terminate"), false);
 	assert.equal(service.currentState().mutationSequence, sequence);
 	assert.equal((store.db.prepare("SELECT COUNT(*) AS count FROM pending_mutations WHERE tool_call_id = 'duplicate'").get() as Record<string, unknown>).count, 1);
 	store.close();
@@ -428,6 +430,7 @@ test("changing agent-controlled work metadata cannot bypass an uncertain operati
 	service.update({ workItemId: "different-work", currentStepId: "different-step" }, active);
 	const retry = await service.observeToolCall({ toolCallId: "publish-retry", toolName: "bash", input, branch: active });
 	assert.equal(retry?.block, true);
+	assert.equal(Object.hasOwn(retry ?? {}, "terminate"), false);
 	assert.match(retry?.reason ?? "", /uncertain|reconcile/);
 	store.close();
 });
@@ -564,6 +567,7 @@ test("agent compound shell commands are blocked before any side effect can escap
 	service.initialize(active);
 	const decision = await service.observeToolCall({ toolCallId: "compound", toolName: "bash", input: { command: "node --test\nnpm publish" }, branch: active });
 	assert.equal(decision?.block, true);
+	assert.equal(Object.hasOwn(decision ?? {}, "terminate"), false);
 	assert.equal((store.db.prepare("SELECT COUNT(*) AS count FROM pending_mutations").get() as Record<string, unknown>).count, 0);
 	store.close();
 });

@@ -68,7 +68,6 @@ export interface ToolCallObservation {
 export interface ToolCallDecision {
 	block: true;
 	reason: string;
-	terminate?: boolean;
 }
 
 export interface ToolResultObservation {
@@ -233,7 +232,7 @@ export class ContinuityService {
 				parsedCommand = splitSimpleCommand(rawCommand);
 			} catch (error) {
 				if (observation.actor !== "user-bash") {
-					return { block: true, terminate: true, reason: `Compound or expanding shell commands cannot be tracked safely; run one simple command at a time (${String(error)})` };
+					return { block: true, reason: `Compound or expanding shell commands cannot be tracked safely; run one simple command at a time (${String(error)})` };
 				}
 			}
 		}
@@ -274,7 +273,7 @@ export class ContinuityService {
 			preOperationLedgerDigest,
 			state: this.state,
 		});
-		if (!begun.inserted) return { block: true, terminate: true, reason: begun.reason || "Tool call could not be atomically tracked" };
+		if (!begun.inserted) return { block: true, reason: begun.reason || "Tool call could not be atomically tracked" };
 		this.state = begun.state;
 		this.refreshMutationProjection(observation.branch);
 		return undefined;

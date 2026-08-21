@@ -7,14 +7,14 @@ being inferred from source or prior artifacts.
 
 ## Current development validation
 
-`PASS (source-local)` — the P0 authority-hardening worktree passed
-`npm run validate` and `scripts/validate-premerge.sh` on 2026-08-15. The run
-included typecheck, build, 104/104 tests, the isolated two-workspace Pi 0.84.1
-install proof, release static validation, and `git diff --check`. It specifically
-proved receipt tamper detection, provisional checkpoint promotion, crash and
-cross-session operation fencing, reconciliation integrity, exact RC2 schema
-adoption, backup/rollback, migration checksum/future-version guards, and
-multi-process migration convergence.
+`PASS (source-local)` — the current worktree passed `npm run validate` and
+`scripts/validate-premerge.sh` on 2026-08-21. The run included typecheck, build,
+108/108 tests, the isolated two-workspace Pi 0.84.1 install proof, release static
+validation, required Node/Pi checks, and `git diff --check`. It specifically
+proved that duplicate, uncertain, and unsafe-command policy blocks remain
+fail-closed while a single blocked tool result still permits Pi's follow-up model
+turn, alongside the existing receipt, checkpoint, reconciliation, migration, and
+multi-process integrity coverage.
 
 Real-provider, Alpine-device, and packaged-release execution were not rerun for
 this source-local change. Their rows below remain historical RC2 release
@@ -33,7 +33,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | Area | Executable evidence | Required observation | Current result |
 |---|---|---|---|
 | Sealed validation receipts | `test/continuity.test.ts`, `src/domain/validation-receipt.ts` | Every authority-relevant evidence field and full executable/argv digest is receipt-bound; persisted display text cannot retain arbitrary secret-bearing arguments; evidence or checkpoint projection tamper quarantines authority. | PASS in current source-local run |
-| Consequential operation ledger | `test/continuity.test.ts`, `test/tool-classifier.test.ts`, `src/domain/operation-ledger.ts` | External operations are claimed atomically across processes, equivalent simple argv quoting deduplicates, compound shell constructs fail closed, results cannot cross sessions/branches, crashes become uncertain, reconciliation is human-only and digest-bound, and unresolved operations block checkpoints. | PASS in current source-local run |
+| Consequential operation ledger | `test/continuity.test.ts`, `test/continuity-agent-loop.test.ts`, `test/tool-classifier.test.ts`, `src/domain/operation-ledger.ts` | External operations are claimed atomically across processes, equivalent simple argv quoting deduplicates, compound shell constructs fail closed, blocked operations do not execute or terminate the agent run, results cannot cross sessions/branches, crashes become uncertain, recovery does not infer outcomes, reconciliation is human-only and digest-bound, and unresolved operations block checkpoints. | PASS in current source-local run |
 | Ordered SQLite migrations | `test/sqlite-migrations.test.ts`, `src/infrastructure/sqlite-migrations.ts` | Literal RC2 continuity/memory stores migrate without data loss after exact schema verification and private checksum backup; gaps, future versions, history/checksum/schema drift, malformed v1, failed apply, and concurrent open fail closed or converge safely. | PASS in current source-local run |
 | Source provenance and release alignment | `SOURCE_MANIFEST.json`, `RECONSTRUCTION_NOTES.md`, `test/release-alignment.test.ts` | Original archive hashes remain historical; reconstructed OpenAI compatibility, included/excluded bash evidence, and real npm-test provider seed match the documented canonical repairs without claiming they existed in the supplied source. | PASS |
 | Global, opt-in install | `node scripts/validate-install.mjs` | User-scope `pi install`; two independent Git workspaces load `/continuity` and `/memory` without `-e`/`-l`; repository keys differ; global memory crosses; stores survive remove; report actual Pi version/range. | PASS on Pi 0.84.1 and 0.84.2 |

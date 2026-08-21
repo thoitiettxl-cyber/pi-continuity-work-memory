@@ -10,6 +10,8 @@ const manifest = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"))
 const failures = [];
 const piCandidate = resolve(root, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
 const pi = process.env.PI_VALIDATION_PI || (existsSync(piCandidate) ? piCandidate : "pi");
+const expectedSkills = ["code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-with-docs", "tdd"];
+const expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);
 const piResult = spawnSync(pi, ["--version"], { encoding: "utf8", timeout: 30_000 });
 let piVersion = "unavailable";
 if (piResult.status !== 0) failures.push(`Pi version check failed: ${piResult.stderr || piResult.stdout}`);
@@ -34,6 +36,7 @@ if (manifest.peerDependencies?.["@earendil-works/pi-ai"] !== SUPPORTED_PI_RANGE)
 if (manifest.dependencies && Object.keys(manifest.dependencies).length) failures.push("Runtime dependencies must remain empty");
 const requiredPayload = [
 	"dist",
+	"skills",
 	"workflow",
 	"scripts/validate-install.mjs",
 	"scripts/pi-version.mjs",
@@ -48,6 +51,30 @@ const requiredPayload = [
 if (!Array.isArray(manifest.files)) failures.push("package.json files must define the release payload");
 else for (const path of requiredPayload) if (!manifest.files.includes(path)) failures.push(`Release payload is missing ${path}`);
 if (JSON.stringify(manifest.pi).includes("harness")) failures.push("Harness appears in Pi payload");
+if (JSON.stringify(manifest.pi?.skills) !== JSON.stringify(expectedSkillEntries)) failures.push("Pi manifest must load exactly the six package skill directories");
+const skillsRoot = resolve(root, "skills");
+let skillCount = 0;
+if (!existsSync(skillsRoot)) failures.push("Package skill root is missing");
+else {
+	const actualSkills = readdirSync(skillsRoot, { withFileTypes: true })
+		.filter((entry) => entry.isDirectory() && existsSync(resolve(skillsRoot, entry.name, "SKILL.md")))
+		.map((entry) => entry.name)
+		.sort();
+	skillCount = actualSkills.length;
+	if (JSON.stringify(actualSkills) !== JSON.stringify(expectedSkills)) failures.push("Package skill inventory is incomplete or unexpected");
+	for (const name of expectedSkills) {
+		const text = readFileSync(resolve(skillsRoot, name, "SKILL.md"), "utf8");
+		if (!text.startsWith("---\n") || !text.includes(`\nname: ${name}\n`) || !/\ndescription:\s*"[^\n]+"\n/.test(text)) {
+			failures.push(`Pi skill frontmatter is invalid: ${name}`);
+		}
+		if (!text.includes("5b15a47f2d7150f545fbcacbfe381787fc0230dc")) failures.push(`Upstream provenance is missing: ${name}`);
+	}
+	const skillText = walk(skillsRoot).filter((path) => /\.(?:md|txt)$/.test(path)).map((path) => readFileSync(path, "utf8")).join("\n");
+	for (const forbidden of ["Call the Skill tool", "/clear", "xdg-open", "Commit your work to the current branch", "spawn both sub-agents in parallel"]) {
+		if (skillText.includes(forbidden)) failures.push(`Cross-harness or unsafe skill assumption remains: ${forbidden}`);
+	}
+	if (!skillText.includes("Copyright (c) 2026 Matt Pocock")) failures.push("Upstream skill license notice is missing");
+}
 const workflowRoot = resolve(root, "workflow");
 const workflowManifestPath = resolve(workflowRoot, "manifest.json");
 let workflowAssetCount = 0;
@@ -100,4 +127,4 @@ if (failures.length) {
 	for (const failure of failures) process.stderr.write(`FAIL: ${failure}\n`);
 	process.exit(1);
 }
-process.stdout.write(`${JSON.stringify({ status: "PASS", node: process.version, pi: piVersion, piRange: SUPPORTED_PI_RANGE, sqlite: "node:sqlite", harnessRuntimeDependency: false, harnessInPiManifest: false, workflowAssets: workflowAssetCount })}\n`);
+process.stdout.write(`${JSON.stringify({ status: "PASS", node: process.version, pi: piVersion, piRange: SUPPORTED_PI_RANGE, sqlite: "node:sqlite", harnessRuntimeDependency: false, harnessInPiManifest: false, workflowAssets: workflowAssetCount, skills: skillCount })}\n`);

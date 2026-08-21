@@ -21,6 +21,8 @@ import { temporaryDirectory } from "./helpers.js";
 const projectRoot = resolve(import.meta.dirname, "..", "..");
 const managerScript = resolve(projectRoot, "scripts", "manage-user-install.mjs");
 const pi = resolve(projectRoot, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
+const expectedSkills = ["code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-with-docs", "tdd"];
+const expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);
 
 function writeJson(path: string, value: unknown): void {
 	writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, "utf8");
@@ -36,13 +38,17 @@ function walk(path: string): string[] {
 function createInstallPackage(root: string, version: string): void {
 	mkdirSync(resolve(root, "dist"), { recursive: true });
 	mkdirSync(resolve(root, "scripts"), { recursive: true });
+	for (const skill of expectedSkills) mkdirSync(resolve(root, "skills", skill), { recursive: true });
 	writeJson(resolve(root, "package.json"), {
 		name: "pi-continuity-work-memory",
 		version,
 		type: "module",
-		pi: { extensions: ["./dist/extension.js"] },
+		pi: { extensions: ["./dist/extension.js"], skills: expectedSkillEntries },
 	});
 	writeFileSync(resolve(root, "dist", "extension.js"), "export default function () {}\n", "utf8");
+	for (const skill of expectedSkills) {
+		writeFileSync(resolve(root, "skills", skill, "SKILL.md"), `---\nname: ${skill}\ndescription: Test skill.\n---\n\n# Test\n`, "utf8");
+	}
 	writeFileSync(
 		resolve(root, "scripts", "validate-install.mjs"),
 		'process.stdout.write(JSON.stringify({ status: "PASS" }) + "\\n");\n',

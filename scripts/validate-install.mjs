@@ -19,6 +19,8 @@ const memoryRoot = join(proofRoot, "memory-store");
 const packageRoot = suppliedPackage ? resolve(suppliedPackage) : join(proofRoot, "extracted-package", "pi-continuity-work-memory");
 const piCandidate = resolve(projectRoot, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
 const pi = process.env.PI_VALIDATION_PI || (existsSync(piCandidate) ? piCandidate : "pi");
+const expectedSkills = ["code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-with-docs", "tdd"];
+const expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);
 
 function fail(message) {
 	throw new Error(message);
@@ -94,6 +96,27 @@ function verifyWorkflowPayload() {
 	}
 }
 
+function verifySkillsPayload() {
+	const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
+	if (JSON.stringify(manifest.pi?.skills) !== JSON.stringify(expectedSkillEntries)) fail("Installed package does not load exactly the six package skill directories");
+	const skillsRoot = join(packageRoot, "skills");
+	if (!existsSync(skillsRoot)) fail("Installed package skill root is missing");
+	const actual = readdirSync(skillsRoot, { withFileTypes: true })
+		.filter((entry) => entry.isDirectory() && existsSync(join(skillsRoot, entry.name, "SKILL.md")))
+		.map((entry) => entry.name)
+		.sort();
+	if (JSON.stringify(actual) !== JSON.stringify(expectedSkills)) fail("Installed package skill inventory is incomplete or unexpected");
+	for (const name of expectedSkills) {
+		const text = readFileSync(join(skillsRoot, name, "SKILL.md"), "utf8");
+		if (!text.startsWith("---\n") || !text.includes(`\nname: ${name}\n`) || !/\ndescription:\s*"[^\n]+"\n/.test(text)) {
+			fail(`Installed Pi skill frontmatter is invalid: ${name}`);
+		}
+	}
+	if (!readFileSync(join(skillsRoot, "UPSTREAM_LICENSE.txt"), "utf8").includes("Copyright (c) 2026 Matt Pocock")) {
+		fail("Installed package skill license notice is missing");
+	}
+}
+
 function rpc(workspace, environment, messages) {
 	return new Promise((resolvePromise, reject) => {
 		const child = spawn(pi, ["--mode", "rpc", "--approve", "--offline", "--session-dir", sessionDir], {
@@ -153,14 +176,18 @@ try {
 
 	copyInstallPayload();
 	verifyWorkflowPayload();
+	verifySkillsPayload();
 	const workspaceA = join(proofRoot, "workspace-a");
+	const proofHome = join(proofRoot, "home");
 	const workspaceB = join(proofRoot, "workspace-b");
 	initializeGit(workspaceA);
 	initializeGit(workspaceB);
 	mkdirSync(agentDir, { recursive: true });
+	mkdirSync(proofHome, { recursive: true });
 	mkdirSync(sessionDir, { recursive: true });
 	const environment = {
 		...process.env,
+		HOME: proofHome,
 		PI_CODING_AGENT_DIR: agentDir,
 		PI_CONTINUITY_HOME: continuityRoot,
 		PI_WORK_MEMORY_HOME: memoryRoot,
@@ -188,6 +215,14 @@ try {
 		const commandResponse = responses.find((response) => response.command === "get_commands");
 		const names = new Set(commandResponse?.data?.commands?.map((command) => command.name));
 		if (!names.has("continuity") || !names.has("memory")) fail(`Extension namespaces not loaded in workspace ${label}`);
+		for (const skill of expectedSkills) {
+			const command = commandResponse?.data?.commands?.find((candidate) => candidate.name === `skill:${skill}`);
+			if (!command) fail(`Packaged skill ${skill} not loaded in workspace ${label}`);
+			const expectedPath = resolve(packageRoot, "skills", skill, "SKILL.md");
+			if (command.source !== "skill" || resolve(String(command.sourceInfo?.path || "")) !== expectedPath) {
+				fail(`Packaged skill ${skill} was shadowed or loaded from the wrong source in workspace ${label}`);
+			}
+		}
 	}
 	const memoryDb = new DatabaseSync(join(memoryRoot, "memory.sqlite"), { readOnly: true });
 	memoryDb.exec("PRAGMA busy_timeout = 5000");
@@ -221,6 +256,9 @@ try {
 		globalMemoryShared: true,
 		storesSurviveRemove: true,
 		workflowAssetsVerified: true,
+		skillsLoaded: expectedSkills.length,
+		isolatedHome: true,
+		skillSourcesVerified: true,
 		workflowCommandAccepted: true,
 	})}\n`);
 } finally {

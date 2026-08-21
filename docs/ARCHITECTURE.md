@@ -7,7 +7,8 @@ which documents must change together.
 
 ## System Purpose And Boundaries
 
-The package is one opt-in Pi extension with four cooperating capabilities:
+The package combines one opt-in Pi extension with four cooperating runtime
+capabilities and six globally discoverable engineering skills:
 
 1. **Managed repository workflow** — classifies work shape, gates agent-issued
    mutations, and safely creates or binds only the repository documents required
@@ -21,6 +22,11 @@ The package is one opt-in Pi extension with four cooperating capabilities:
 4. **Persistent learning memory** — extracts and consolidates scoped, sanitized
    lessons without granting those records task, validation, or completion
    authority.
+
+The package-owned skills under `skills/` add alignment, codebase design,
+diagnosis, TDD, code review, and domain-modeling guidance. They are prompt
+resources, not extension code or authority. They use the same repository,
+managed-workflow, validation, delivery, and Alpine constraints as the extension.
 
 The package does not install or invoke Repository Harness. Its managed workflow
 is package-owned process scaffolding that supplements, but never replaces, the
@@ -45,6 +51,9 @@ Different artifacts answer different questions:
 - Learning memory is untrusted context. It may preserve reusable lessons, but it
   cannot accept decisions, prove behavior, reconcile operations, create safe
   authority, or complete work.
+- Package-owned engineering skills are optional process guidance. They cannot
+  grant mutation or external-action authority, create parallel durable task
+  truth, or override repository instructions and evidence.
 
 A verified checkpoint means only that its repository fingerprint, executable
 receipt, operation ledger, and hash chain are safe. Task completion remains a
@@ -94,6 +103,7 @@ stay at the boundaries.
 | Repository evidence | Canonical repository identity and complete stable Git fingerprinting | `src/infrastructure/git-fingerprint.ts` |
 | Managed files | Root-confined plan create/bind/finalize and crash-state recovery | `src/infrastructure/execution-plan-files.ts` |
 | Package assets | Manifest-verified workflow asset loading | `src/infrastructure/workflow-assets.ts`, `workflow/` |
+| Engineering skills | Pi-discovered alignment/design/diagnosis/TDD/review/domain guidance with source provenance | `skills/`, `test/skills-package.test.ts` |
 | Provider boundary | Pi-backed Stage 1/Stage 2 memory provider | `src/infrastructure/pi-memory-provider.ts` |
 | Store locations | Default and isolated-test paths | `src/infrastructure/paths.ts` |
 
@@ -187,6 +197,7 @@ files, reconcile uncertainty, replay side effects, or authorize a retry.
 | Active durable work | `docs/plans/active/<slug>.md`, created lazily | Repository task truth |
 | Completed durable work | `docs/plans/completed/<slug>.md` | Historical repository task record |
 | Workflow defaults | `workflow/WORKFLOW.md` and `workflow/templates/` | Package process scaffolding |
+| Engineering skills | `skills/<name>/SKILL.md` and bounded references | Optional process guidance; never product or completion authority |
 | Workflow asset integrity | `workflow/manifest.json` | Package asset inventory/checksums |
 | Acceptance evidence map | `proof/ACCEPTANCE.md` | Required observations and evidence locations |
 | Recorded release results | `proof/RESULTS.json` | Historical observed results, not a substitute for rerunning checks |
@@ -265,6 +276,7 @@ deferred, and skipped checks separately.
 | SQLite schema | Ordered migrations, exact legacy schema verification, stores, fixtures, proof docs | Backup/checksum, rollback, drift/future/gap rejection, concurrent open |
 | Pi API integration | `src/extension.ts`, session adapter, mode tests, install proof, peer range | Public API behavior on supported Pi versions and non-interactive modes |
 | Package or release payload | `package.json.files`, release/install scripts, workflow manifest, README, proof docs | Exact inventory, isolated install, sanitization, `unzip -t`, checksum |
+| Package engineering skills | Skill frontmatter/references, `package.json` Pi manifest, install/release proof, README, provenance/license | Exact discovery set, command registration in two workspaces, no cross-harness/unsafe side effects, license and payload inventory |
 | Historical source provenance | `SOURCE_MANIFEST.json`, `BUILD_PROVENANCE.md`, `ORIGINAL_SOURCE_STATUS.txt`, `RECONSTRUCTION_NOTES.md` | Preserve immutable historical claims; never rewrite later work into the original snapshot |
 
 ## Documentation Map
@@ -277,6 +289,8 @@ deferred, and skipped checks separately.
 | `workflow/WORKFLOW.md` | Package-owned managed-workflow process defaults shipped to consumer repositories |
 | `workflow/templates/*.md` | Deterministic process scaffolding; templates do not establish product facts |
 | `workflow/manifest.json` | Sorted checksum inventory for package workflow assets |
+| `skills/README.md`, `skills/UPSTREAM.md` | Shipped skill inventory, shared authority contract, source provenance, and adaptation/update process |
+| `skills/*/SKILL.md` | Pi-discovered engineering workflows and bounded optional references |
 | `docs/plans/active/*.md` | Lazily created authoritative records for current durable work |
 | `docs/plans/completed/*.md` | Completed durable-work history and task-local decisions/results |
 | `proof/ACCEPTANCE.md` | Acceptance criteria, executable evidence map, and PASS/DEFERRED policy |

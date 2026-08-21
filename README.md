@@ -1,6 +1,6 @@
 # Pi Continuity + Work Memory
 
-One opt-in Pi extension for versions `>=0.84.1 <0.85.0`, providing branch-correct work continuity, a package-owned managed repository workflow, evidence-backed safe checkpoints, and scoped persistent learning memory.
+One opt-in Pi package for versions `>=0.84.1 <0.85.0`, providing a Pi extension for branch-correct work continuity, a package-owned managed repository workflow, evidence-backed safe checkpoints, and scoped persistent learning memory, plus six global engineering skills adapted for the same authority and runtime contract.
 
 The implementation combines clean architecture and transactional recovery, Pi compaction/session lifecycle handling, a package-owned workflow and template bundle, and a two-stage provider-backed memory pipeline. Consumer repositories do not need `repository-harness` installed, and the extension never invokes or installs it.
 
@@ -21,7 +21,7 @@ directory:
 
 ```sh
 node scripts/manage-user-install.mjs deploy \
-  --archive release/pi-continuity-work-memory-1.0.0-rc.2.zip
+  --archive release/pi-continuity-work-memory-1.0.0-rc.3.zip
 ```
 
 Use this command only with a trusted release: verification executes the
@@ -69,6 +69,41 @@ Default stores:
 - Learning memory: `~/.pi/work-memory/memory.sqlite`
 
 For isolated tests, override them with `PI_CONTINUITY_HOME` and `PI_WORK_MEMORY_HOME`.
+
+## Bundled global engineering skills
+
+The managed package ships `skills/` as a Pi package resource. A global managed
+install makes these skills available in every repository without copying them
+into each workspace:
+
+- `/skill:grill-with-docs` — explicitly clarify uncertain intent and preserve
+  confirmed shared understanding in the correct repository-owned document.
+- `/skill:codebase-design` — design deep modules, interfaces, seams, and
+  adapters with locality and leverage.
+- `/skill:diagnosing-bugs` — diagnose difficult failures from a red-capable
+  feedback loop through regression proof.
+- `/skill:tdd` — implement behavior test-first in focused red/green slices.
+- `/skill:code-review` — perform read-only Standards and Intent/Behavior review
+  from a fixed Git point.
+- `/skill:domain-modeling` — sharpen domain terminology and record only lasting,
+  accepted trade-off decisions.
+
+`grill-with-docs` is explicit-only. The other five may be loaded automatically
+when their Pi descriptions match, or invoked explicitly. They are process
+guidance rather than authority: applicable instructions and user scope still
+control work; read-only work remains document-free; mutative work prepares its
+managed work shape; durable task truth stays in one execution plan; memory and
+checkpoints cannot establish completion; and commits, pushes, publication,
+deployment, credentials, or external state always require explicit authority.
+
+The skills use no executable helper or runtime dependency. Their MIT-licensed
+upstream provenance and Pi/Alpine adaptation are documented in
+`skills/UPSTREAM.md`. Do not install an unadapted copy with the same skill names,
+because Pi resolves a name collision to only one discovered skill.
+
+After deploying or updating the managed package, start a fresh Pi process. Pi's
+`/reload` can rescan skills during development, but a fresh process is the
+deployment proof for the extension and package resources together.
 
 ## Commands and tools
 

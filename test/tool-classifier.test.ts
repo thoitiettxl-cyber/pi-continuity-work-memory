@@ -49,6 +49,41 @@ for (const command of [
 	});
 }
 
+test("web search and non-interactive browser discovery remain read-only for repository workflow", () => {
+	assert.equal(classifyTool("web_search", { query: "Codex web_search documentation", max_results: 5 }), "read");
+	assert.equal(classifyMutationConsequence("web_search", { query: "Codex web_search documentation", max_results: 5 }), "none");
+	for (const action of [
+		"health",
+		"navigate",
+		"get_readable",
+		"get_text",
+		"find_elements",
+		"observe",
+		"hover",
+		"scroll",
+		"screenshot",
+		"get_page_info",
+		"go_back",
+		"go_forward",
+		"reload",
+		"wait_for_selector",
+		"console",
+		"network",
+	] as const) {
+		assert.equal(classifyTool("eta_browser_use", { action }), "read");
+		assert.equal(classifyMutationConsequence("eta_browser_use", { action }), "none");
+	}
+});
+
+test("interactive or unknown browser actions remain external mutations", () => {
+	for (const action of ["click", "type", "select", "press", "request_help", "reset", "unknown"] as const) {
+		assert.equal(classifyTool("eta_browser_use", { action }), "mutation");
+		assert.equal(classifyMutationConsequence("eta_browser_use", { action }), "external");
+	}
+	assert.equal(classifyTool("eta_browser_use", {}), "mutation");
+	assert.equal(classifyMutationConsequence("eta_browser_use", {}), "external");
+});
+
 test("managed workflow document tools retain their authority and mutation boundaries", () => {
 	assert.equal(classifyTool("continuity_workflow_status", {}), "ignored");
 	assert.equal(classifyTool("continuity_workflow_read", { document: "workflow" }), "ignored");

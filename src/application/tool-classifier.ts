@@ -15,8 +15,27 @@ const EXCLUDED_TOOLS = new Set([
 
 const MANAGED_WORKFLOW_MUTATION_TOOLS = new Set(["continuity_prepare_work", "continuity_finalize_work"]);
 
-const READ_ONLY_TOOLS = new Set(["read", "grep", "find", "ls"]);
+const READ_ONLY_TOOLS = new Set(["read", "grep", "find", "ls", "web_search"]);
 const MUTATION_TOOLS = new Set(["write", "edit", "apply_patch"]);
+
+const ETA_BROWSER_READ_ACTIONS = new Set([
+	"health",
+	"navigate",
+	"get_readable",
+	"get_text",
+	"find_elements",
+	"observe",
+	"hover",
+	"scroll",
+	"screenshot",
+	"get_page_info",
+	"go_back",
+	"go_forward",
+	"reload",
+	"wait_for_selector",
+	"console",
+	"network",
+]);
 
 const VALIDATION_COMMANDS = [
 	/^npm\s+(?:test|run\s+(?:test|validate|check|lint|typecheck|build))(?:\s+--[^;&|]*)?$/,
@@ -114,6 +133,7 @@ export function classifyTool(toolName: string, input: Record<string, unknown>): 
 	if (EXCLUDED_TOOLS.has(toolName)) return "ignored";
 	if (MANAGED_WORKFLOW_MUTATION_TOOLS.has(toolName)) return "mutation";
 	if (READ_ONLY_TOOLS.has(toolName)) return "read";
+	if (toolName === "eta_browser_use" && ETA_BROWSER_READ_ACTIONS.has(typeof input.action === "string" ? input.action : "")) return "read";
 	if (MUTATION_TOOLS.has(toolName)) return "mutation";
 	if (toolName !== "bash") return "mutation";
 	const rawCommand = typeof input.command === "string" ? input.command : "";

@@ -160,6 +160,8 @@ The workflow is lazy and observable:
 
 The preparation gate applies to agent-issued repository tools. Direct user `!`/`!!` commands remain explicit human actions: they are operation-ledger tracked and invalidate stale evidence, but are not reinterpreted or blocked as agent workflow decisions.
 
+Simple information discovery is not repository mutation. `web_search` and explicitly non-interactive Eta Browser observation/navigation actions are classified as read-only for managed workflow gating, even though they may use the network or leave the shared browser on a results or document page. Interactive browser actions such as clicking, typing, selecting, pressing keys, resetting the browser, or requesting human help remain external mutations and fail closed unless the current workflow state authorizes them.
+
 New WorkState defaults to `managed`; state migrated from schema v1 defaults to `advisory` so an upgrade never silently enables repository writes. Use `/continuity workflow-mode managed` once to opt an upgraded work item into enforcement. `off` keeps only Continuity/Memory behavior, while `advisory` supplies guidance without mutation gating or automatic materialization.
 
 Package removal never deletes consumer documents. Existing plans are ordinary repository files and are not rewritten when workflow templates are upgraded.

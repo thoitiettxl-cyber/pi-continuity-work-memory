@@ -248,3 +248,42 @@ test("untrusted runtime exposes guidance but creates no repository document", as
 		else process.env.PI_WORK_MEMORY_HOME = oldMemory;
 	}
 });
+
+test("web_search and x_search stay unblocked before managed workflow preparation", async () => {
+	const root = temporaryDirectory("managed-extension-search-discovery");
+	await writeFile(join(root, "AGENTS.md"), "# Repository instructions\n", "utf8");
+	const oldContinuity = process.env.PI_CONTINUITY_HOME;
+	const oldMemory = process.env.PI_WORK_MEMORY_HOME;
+	process.env.PI_CONTINUITY_HOME = join(root, ".proof-continuity");
+	process.env.PI_WORK_MEMORY_HOME = join(root, ".proof-memory");
+	try {
+		const proof = runtime(root);
+		extension(proof.api);
+		await emit(proof, "session_start", { type: "session_start", reason: "startup" });
+		for (const [toolCallId, toolName, input] of [
+			["discover-web", "web_search", { query: "Continuity managed workflow" }],
+			["discover-x", "x_search", { query: "public posts about Continuity search gating" }],
+		] as const) {
+			const decision = (await emit(proof, "tool_call", {
+				type: "tool_call",
+				toolCallId,
+				toolName,
+				input,
+			}))[0];
+			assert.equal(decision, undefined, `${toolName} must not be blocked as repository mutation`);
+		}
+		const blockedWrite = (await emit(proof, "tool_call", {
+			type: "tool_call",
+			toolCallId: "write-still-gated",
+			toolName: "write",
+			input: { path: "src/new.ts", content: "x" },
+		}))[0];
+		assert.equal(blockedWrite?.block, true);
+		await emit(proof, "session_shutdown", { type: "session_shutdown", reason: "quit" });
+	} finally {
+		if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;
+		else process.env.PI_CONTINUITY_HOME = oldContinuity;
+		if (oldMemory === undefined) delete process.env.PI_WORK_MEMORY_HOME;
+		else process.env.PI_WORK_MEMORY_HOME = oldMemory;
+	}
+});

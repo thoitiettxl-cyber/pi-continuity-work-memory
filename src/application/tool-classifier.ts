@@ -15,7 +15,7 @@ const EXCLUDED_TOOLS = new Set([
 
 const MANAGED_WORKFLOW_MUTATION_TOOLS = new Set(["continuity_prepare_work", "continuity_finalize_work"]);
 
-const READ_ONLY_TOOLS = new Set(["read", "grep", "find", "ls", "web_search"]);
+const READ_ONLY_TOOLS = new Set(["read", "grep", "find", "ls", "web_search", "x_search"]);
 const MUTATION_TOOLS = new Set(["write", "edit", "apply_patch"]);
 
 const ETA_BROWSER_READ_ACTIONS = new Set([

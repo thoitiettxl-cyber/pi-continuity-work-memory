@@ -11,6 +11,7 @@
 
 ### Fixed
 
+- Classified `web_search` and `x_search` as read-only discovery so Continuity no longer treats basic agent search as a managed-workflow mutation or retry-blocking external operation.
 - Prevented automatic memory extraction from starting after an aborted assistant run.
 - Ensured session replacement and shutdown cancel and await automatic and manual memory pipelines before closing SQLite stores, so canceled jobs become superseded instead of leaving stale leases.
 - Strengthened `domain-modeling` with managed-workflow status and drift inspection, memory-as-leads boundaries, explicit clarification handoff, uncertain-operation recovery, receipt-aware plan finalization, and duplicate-heading regression coverage.

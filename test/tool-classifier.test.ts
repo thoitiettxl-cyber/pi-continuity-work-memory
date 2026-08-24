@@ -49,9 +49,11 @@ for (const command of [
 	});
 }
 
-test("web search and non-interactive browser discovery remain read-only for repository workflow", () => {
+test("web search, X search, and non-interactive browser discovery remain read-only for repository workflow", () => {
 	assert.equal(classifyTool("web_search", { query: "Codex web_search documentation", max_results: 5 }), "read");
 	assert.equal(classifyMutationConsequence("web_search", { query: "Codex web_search documentation", max_results: 5 }), "none");
+	assert.equal(classifyTool("x_search", { query: "public posts about Continuity search gating" }), "read");
+	assert.equal(classifyMutationConsequence("x_search", { query: "public posts about Continuity search gating" }), "none");
 	for (const action of [
 		"health",
 		"navigate",

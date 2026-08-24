@@ -49,11 +49,26 @@ for (const command of [
 	});
 }
 
-test("web search, X search, and non-interactive browser discovery remain read-only for repository workflow", () => {
+test("web search, X search, MCP discovery, and non-interactive browser discovery remain read-only for repository workflow", () => {
 	assert.equal(classifyTool("web_search", { query: "Codex web_search documentation", max_results: 5 }), "read");
 	assert.equal(classifyMutationConsequence("web_search", { query: "Codex web_search documentation", max_results: 5 }), "none");
 	assert.equal(classifyTool("x_search", { query: "public posts about Continuity search gating" }), "read");
 	assert.equal(classifyMutationConsequence("x_search", { query: "public posts about Continuity search gating" }), "none");
+	for (const input of [
+		{},
+		{ search: "openai responses api" },
+		{ describe: "search_openai_docs" },
+		{ instructions: "openai-docs" },
+		{ server: "openai-docs" },
+		{ connect: "openai-docs" },
+		{ tool: "search_openai_docs", args: { query: "responses api" } },
+		{ action: "ui-messages" },
+	]) {
+		assert.equal(classifyTool("mcp", input), "read");
+		assert.equal(classifyMutationConsequence("mcp", input), "none");
+	}
+	assert.equal(classifyTool("mcpScript", { code: "emit(1)" }), "read");
+	assert.equal(classifyMutationConsequence("mcpScript", { code: "emit(1)" }), "none");
 	for (const action of [
 		"health",
 		"navigate",
@@ -84,6 +99,13 @@ test("interactive or unknown browser actions remain external mutations", () => {
 	}
 	assert.equal(classifyTool("eta_browser_use", {}), "mutation");
 	assert.equal(classifyMutationConsequence("eta_browser_use", {}), "external");
+});
+
+test("MCP auth actions remain external mutations", () => {
+	for (const action of ["auth-start", "auth-complete"] as const) {
+		assert.equal(classifyTool("mcp", { action }), "mutation");
+		assert.equal(classifyMutationConsequence("mcp", { action }), "external");
+	}
 });
 
 test("managed workflow document tools retain their authority and mutation boundaries", () => {

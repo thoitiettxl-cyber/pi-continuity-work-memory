@@ -249,7 +249,7 @@ test("untrusted runtime exposes guidance but creates no repository document", as
 	}
 });
 
-test("web_search and x_search stay unblocked before managed workflow preparation", async () => {
+test("web search, X search, and MCP discovery stay unblocked before managed workflow preparation", async () => {
 	const root = temporaryDirectory("managed-extension-search-discovery");
 	await writeFile(join(root, "AGENTS.md"), "# Repository instructions\n", "utf8");
 	const oldContinuity = process.env.PI_CONTINUITY_HOME;
@@ -263,6 +263,9 @@ test("web_search and x_search stay unblocked before managed workflow preparation
 		for (const [toolCallId, toolName, input] of [
 			["discover-web", "web_search", { query: "Continuity managed workflow" }],
 			["discover-x", "x_search", { query: "public posts about Continuity search gating" }],
+			["discover-mcp-status", "mcp", {}],
+			["discover-mcp-tool", "mcp", { tool: "search_openai_docs", args: { query: "responses api" } }],
+			["discover-mcp-script", "mcpScript", { code: "emit(1)" }],
 		] as const) {
 			const decision = (await emit(proof, "tool_call", {
 				type: "tool_call",
@@ -279,6 +282,13 @@ test("web_search and x_search stay unblocked before managed workflow preparation
 			input: { path: "src/new.ts", content: "x" },
 		}))[0];
 		assert.equal(blockedWrite?.block, true);
+		const blockedAuth = (await emit(proof, "tool_call", {
+			type: "tool_call",
+			toolCallId: "mcp-auth-still-gated",
+			toolName: "mcp",
+			input: { action: "auth-start", server: "openai-docs" },
+		}))[0];
+		assert.equal(blockedAuth?.block, true);
 		await emit(proof, "session_shutdown", { type: "session_shutdown", reason: "quit" });
 	} finally {
 		if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;

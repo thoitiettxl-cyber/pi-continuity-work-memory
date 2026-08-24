@@ -15,8 +15,9 @@ const EXCLUDED_TOOLS = new Set([
 
 const MANAGED_WORKFLOW_MUTATION_TOOLS = new Set(["continuity_prepare_work", "continuity_finalize_work"]);
 
-const READ_ONLY_TOOLS = new Set(["read", "grep", "find", "ls", "web_search", "x_search"]);
+const READ_ONLY_TOOLS = new Set(["read", "grep", "find", "ls", "web_search", "x_search", "mcpScript"]);
 const MUTATION_TOOLS = new Set(["write", "edit", "apply_patch"]);
+const MCP_AUTH_ACTIONS = new Set(["auth-start", "auth-complete"]);
 
 const ETA_BROWSER_READ_ACTIONS = new Set([
 	"health",
@@ -132,6 +133,7 @@ export function splitValidationCommand(command: string): { program: string; args
 export function classifyTool(toolName: string, input: Record<string, unknown>): ToolClassification {
 	if (EXCLUDED_TOOLS.has(toolName)) return "ignored";
 	if (MANAGED_WORKFLOW_MUTATION_TOOLS.has(toolName)) return "mutation";
+	if (toolName === "mcp") return MCP_AUTH_ACTIONS.has(typeof input.action === "string" ? input.action : "") ? "mutation" : "read";
 	if (READ_ONLY_TOOLS.has(toolName)) return "read";
 	if (toolName === "eta_browser_use" && ETA_BROWSER_READ_ACTIONS.has(typeof input.action === "string" ? input.action : "")) return "read";
 	if (MUTATION_TOOLS.has(toolName)) return "mutation";

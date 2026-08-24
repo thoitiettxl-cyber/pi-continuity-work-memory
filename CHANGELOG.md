@@ -11,6 +11,7 @@
 
 ### Fixed
 
+- Classified `mcp` discovery/status/tool calls and `mcpScript` as read-only discovery so Continuity no longer treats ordinary MCP docs lookup as a managed-workflow mutation. MCP `auth-start` and `auth-complete` remain external mutations.
 - Classified `web_search` and `x_search` as read-only discovery so Continuity no longer treats basic agent search as a managed-workflow mutation or retry-blocking external operation.
 - Prevented automatic memory extraction from starting after an aborted assistant run.
 - Ensured session replacement and shutdown cancel and await automatic and manual memory pipelines before closing SQLite stores, so canceled jobs become superseded instead of leaving stale leases.

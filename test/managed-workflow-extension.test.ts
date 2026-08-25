@@ -6,6 +6,9 @@ import test from "node:test";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 import extension from "../src/extension.js";
+import { repositoryIdForRoot } from "../src/infrastructure/git-fingerprint.js";
+import { MemoryStore } from "../src/infrastructure/memory-store.js";
+import { sessionKey } from "../src/interface/session-adapter.js";
 import { temporaryDirectory } from "./helpers.js";
 
 interface ToolDefinitionLike {
@@ -266,6 +269,12 @@ test("web search, X search, and MCP discovery stay unblocked before managed work
 			["discover-mcp-status", "mcp", {}],
 			["discover-mcp-tool", "mcp", { tool: "search_openai_docs", args: { query: "responses api" } }],
 			["discover-mcp-script", "mcpScript", { code: "emit(1)" }],
+			["discover-command-v", "bash", { command: "command -v gh" }],
+			["discover-git-remote", "bash", { command: "git remote -v" }],
+			["discover-gh-auth", "bash", { command: "gh auth status" }],
+			["discover-gh-pr", "bash", { command: "gh pr view 1 --json number,title" }],
+			["discover-find", "bash", { command: "find test -name '*.test.ts' -print" }],
+			["discover-rg-literal", "bash", { command: "rg -n 'memory|classifier' src test" }],
 		] as const) {
 			const decision = (await emit(proof, "tool_call", {
 				type: "tool_call",
@@ -289,6 +298,163 @@ test("web search, X search, and MCP discovery stay unblocked before managed work
 			input: { action: "auth-start", server: "openai-docs" },
 		}))[0];
 		assert.equal(blockedAuth?.block, true);
+		await emit(proof, "session_shutdown", { type: "session_shutdown", reason: "quit" });
+	} finally {
+		if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;
+		else process.env.PI_CONTINUITY_HOME = oldContinuity;
+		if (oldMemory === undefined) delete process.env.PI_WORK_MEMORY_HOME;
+		else process.env.PI_WORK_MEMORY_HOME = oldMemory;
+	}
+});
+
+test("before_agent_start conditions memory recall on the current event prompt", async () => {
+	const root = temporaryDirectory("managed-extension-query-memory");
+	await writeFile(join(root, "AGENTS.md"), "# Repository instructions\n", "utf8");
+	const oldContinuity = process.env.PI_CONTINUITY_HOME;
+	const oldMemory = process.env.PI_WORK_MEMORY_HOME;
+	process.env.PI_CONTINUITY_HOME = join(root, ".proof-continuity");
+	const memoryHome = join(root, ".proof-memory");
+	process.env.PI_WORK_MEMORY_HOME = memoryHome;
+	try {
+		const proof = runtime(root);
+		const seed = new MemoryStore(join(memoryHome, "memory.sqlite"));
+		const sourceSessionKey = sessionKey(proof.ctx);
+		for (const [id, content] of [
+			["00000000-0000-4000-8000-000000000001", "needle query-conditioned repository atom"],
+			["00000000-0000-4000-8000-000000000002", "unrelated formatting repository atom"],
+		] as const) {
+			seed.addPublished({
+				id,
+				scope: "repository",
+				scopeKey: repositoryIdForRoot(root),
+				kind: "fact",
+				content,
+				citation: "seed evidence",
+				sourceSessionKey,
+				sourceHash: `source-${id}`,
+			});
+		}
+		seed.close();
+		extension(proof.api);
+		await emit(proof, "session_start", { type: "session_start", reason: "startup" });
+		const before = await emit(proof, "before_agent_start", {
+			type: "before_agent_start",
+			prompt: "find the needle",
+			systemPrompt: "base",
+			systemPromptOptions: { contextFiles: [{ path: join(root, "AGENTS.md"), content: "# Repository instructions" }] },
+		});
+		assert.match(before[0]?.systemPrompt ?? "", /needle query-conditioned repository atom/);
+		assert.doesNotMatch(before[0]?.systemPrompt ?? "", /unrelated formatting repository atom/);
+		await emit(proof, "session_shutdown", { type: "session_shutdown", reason: "quit" });
+	} finally {
+		if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;
+		else process.env.PI_CONTINUITY_HOME = oldContinuity;
+		if (oldMemory === undefined) delete process.env.PI_WORK_MEMORY_HOME;
+		else process.env.PI_WORK_MEMORY_HOME = oldMemory;
+	}
+});
+
+test("streaming steer and follow-up input preserve assessed workflow eligibility for the active run", async () => {
+	const root = temporaryDirectory("managed-extension-streaming-input");
+	await writeFile(join(root, "AGENTS.md"), "# Repository instructions\n", "utf8");
+	const oldContinuity = process.env.PI_CONTINUITY_HOME;
+	const oldMemory = process.env.PI_WORK_MEMORY_HOME;
+	process.env.PI_CONTINUITY_HOME = join(root, ".proof-continuity");
+	process.env.PI_WORK_MEMORY_HOME = join(root, ".proof-memory");
+	try {
+		const proof = runtime(root);
+		extension(proof.api);
+		await emit(proof, "session_start", { type: "session_start", reason: "startup" });
+		await emit(proof, "before_agent_start", {
+			type: "before_agent_start",
+			prompt: "Implement bounded work",
+			systemPrompt: "base",
+			systemPromptOptions: { contextFiles: [{ path: join(root, "AGENTS.md"), content: "# Repository instructions" }] },
+		});
+
+		const boundedParams = {
+			requestedMutation: true,
+			authority: "resolved",
+			spansSessions: false,
+			coordinatesContributors: false,
+			hasMeaningfulDependencies: false,
+			recoverySensitive: false,
+			externalSideEffects: false,
+			cannotResumeSafelyFromDiff: false,
+			resumeHint: "Finish the bounded change in this run.",
+		};
+		const prepare = proof.tools.get("continuity_prepare_work")!;
+		assert.equal((await emit(proof, "tool_call", {
+			type: "tool_call",
+			toolCallId: "prepare-bounded-streaming",
+			toolName: "continuity_prepare_work",
+			input: boundedParams,
+		}))[0], undefined);
+		const prepared = await prepare.execute("prepare-bounded-streaming", boundedParams, new AbortController().signal, undefined, proof.ctx);
+		await emit(proof, "tool_result", {
+			type: "tool_result",
+			toolCallId: "prepare-bounded-streaming",
+			toolName: "continuity_prepare_work",
+			input: boundedParams,
+			isError: false,
+			content: prepared.content,
+		});
+		assert.match(prepared.content[0]?.text ?? "", /bounded/);
+
+		for (const [streamingBehavior, toolCallId] of [["steer", "write-after-steer"], ["followUp", "write-after-follow-up"]] as const) {
+			await emit(proof, "input", {
+				type: "input",
+				text: `additional ${streamingBehavior} authority`,
+				source: "interactive",
+				streamingBehavior,
+			});
+			const decision = (await emit(proof, "tool_call", {
+				type: "tool_call",
+				toolCallId,
+				toolName: "write",
+				input: { path: `src/${streamingBehavior}.ts`, content: "x" },
+			}))[0];
+			assert.equal(decision, undefined, `${streamingBehavior} must preserve current-run eligibility`);
+			await emit(proof, "tool_result", {
+				type: "tool_result",
+				toolCallId,
+				toolName: "write",
+				input: {},
+				isError: false,
+				content: [{ type: "text", text: "written" }],
+			});
+		}
+
+		await emit(proof, "input", {
+			type: "input",
+			text: "unknown streaming mode",
+			source: "interactive",
+			streamingBehavior: "future-mode" as "steer",
+		});
+		const unknownStreaming = (await emit(proof, "tool_call", {
+			type: "tool_call",
+			toolCallId: "write-after-unknown-streaming",
+			toolName: "write",
+			input: { path: "src/future.ts", content: "x" },
+		}))[0];
+		assert.equal(unknownStreaming?.block, true);
+		assert.match(unknownStreaming?.reason ?? "", /eligibility was not established/);
+
+		await emit(proof, "before_agent_start", {
+			type: "before_agent_start",
+			prompt: "Start a fresh assessed run",
+			systemPrompt: "base",
+			systemPromptOptions: { contextFiles: [{ path: join(root, "AGENTS.md"), content: "# Repository instructions" }] },
+		});
+		await emit(proof, "input", { type: "input", text: "new idle run", source: "interactive" });
+		const stale = (await emit(proof, "tool_call", {
+			type: "tool_call",
+			toolCallId: "write-after-idle-input",
+			toolName: "write",
+			input: { path: "src/idle.ts", content: "x" },
+		}))[0];
+		assert.equal(stale?.block, true);
+		assert.match(stale?.reason ?? "", /eligibility was not established/);
 		await emit(proof, "session_shutdown", { type: "session_shutdown", reason: "quit" });
 	} finally {
 		if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;

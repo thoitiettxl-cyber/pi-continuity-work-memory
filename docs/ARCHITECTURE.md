@@ -153,6 +153,12 @@ Direct user `!`/`!!` commands remain explicit human actions. They are recorded
 and invalidate stale evidence, but the agent preparation gate does not
 reinterpret them as workflow decisions.
 
+Read-only shell discovery is recognized from parsed argv, including narrow Git
+and GitHub CLI views; output-writing, executable, credential-revealing,
+ambiguous, and mutating forms remain fail-closed external operations. Streaming
+steer/follow-up input preserves the current run's assessed eligibility because
+Pi does not emit a second `before_agent_start` for that queued input.
+
 ### Consequential Operations And Checkpoints
 
 1. Before a mutation, validation, or unknown external operation executes,
@@ -183,16 +189,20 @@ files, reconcile uncertainty, replay side effects, or authorize a retry.
    start from a per-session cursor plus one background entry.
 3. Stage 1 extracts scoped typed atoms (`preference`, `constraint`, `lesson`,
    `fact`). Stage 2 consolidates candidates into a new baseline generation.
-   Exact-content duplicates in the same scope are dropped before publish.
+   Exact-content duplicates in the same scope are dropped within the batch and
+   transactionally at publish so concurrent sessions cannot expose duplicates.
 4. Unique owner tokens, renewable leases, generation/source checks, and atomic
    publication prevent stale or crashed workers from publishing over current
    state. After warmup, automatic extract waits for three new user/assistant
-   turns unless `/memory run` forces it.
+   turns unless `/memory run` forces it. Cursor advancement shares the publish
+   transaction with records, baselines, and the run state.
 5. Visible scopes are isolated as `global-user`, `repository`, explicit/bound
    `work-item`, and `session`. There is no implicit repository-wide `default`
    work-item bucket.
 6. `before_agent_start` injects published baselines plus at most 12
-   query-matched atoms from `event.prompt`. Search ranks token overlap.
+   query-matched atoms from `event.prompt`. Search scores the latest 500 visible
+   records by token overlap, and the 64,000-character renderer reserves bounded
+   space for both baselines and atoms while retaining its closing delimiter.
    Memory remains untrusted learning context.
 
 ## Persistence And Generated Data

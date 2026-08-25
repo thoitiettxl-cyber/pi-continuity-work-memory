@@ -381,12 +381,12 @@ export default function extension(pi: ExtensionAPI): void {
 		await refreshTuiStatus(ctx);
 	});
 
-	pi.on("input", async (_event, ctx) => {
+	pi.on("input", async (event, ctx) => {
 		context = ctx;
 		scheduler.invalidate();
 		cancelManualPipelines("new input invalidated memory generation");
 		generationToken = `${Date.now()}:${ctx.sessionManager.getSessionId()}:input`;
-		workflowEligibilityAssessedForRun = false;
+		if (event.streamingBehavior !== "steer" && event.streamingBehavior !== "followUp") workflowEligibilityAssessedForRun = false;
 	});
 
 	pi.on("agent_start", async (_event, ctx) => {

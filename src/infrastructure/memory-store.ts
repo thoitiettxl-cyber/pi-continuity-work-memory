@@ -380,6 +380,7 @@ WHERE id = ? AND owner = ? AND status = 'running'`).run(inputs.length, JSON.stri
 		baselines: readonly BaselineInput[],
 		usage: PipelineUsage,
 		now?: number,
+		cursor?: MemoryExtractCursor,
 	): boolean {
 		return this.db.transaction(() => {
 			const effectiveNow = now ?? Date.now();
@@ -391,6 +392,20 @@ WHERE id = ? AND owner = ? AND status = 'running'`).run(inputs.length, JSON.stri
   id, scope, scope_key, content, source_generation, run_id, status, created_at
 ) VALUES (?, ?, ?, ?, ?, ?, 'building', ?)`);
 			for (const baseline of baselines) insert.run(baseline.id, baseline.scope, baseline.scopeKey, baseline.content, lease.generation, lease.runId, effectiveNow);
+			this.db.prepare(`DELETE FROM memory_records
+WHERE run_id = ? AND status = 'pending' AND EXISTS (
+  SELECT 1 FROM memory_records AS keeper
+  WHERE keeper.run_id = memory_records.run_id AND keeper.status = 'pending'
+    AND keeper.scope = memory_records.scope AND keeper.scope_key = memory_records.scope_key
+    AND keeper.content = memory_records.content AND keeper.id < memory_records.id
+)`).run(lease.runId);
+			this.db.prepare(`DELETE FROM memory_records
+WHERE run_id = ? AND status = 'pending' AND EXISTS (
+  SELECT 1 FROM memory_records AS published
+  WHERE published.status = 'published'
+    AND published.scope = memory_records.scope AND published.scope_key = memory_records.scope_key
+    AND published.content = memory_records.content
+)`).run(lease.runId);
 			this.db.prepare("UPDATE memory_records SET status = 'published', updated_at = ? WHERE run_id = ? AND status = 'pending'")
 				.run(effectiveNow, lease.runId);
 			for (const baseline of baselines) {
@@ -400,6 +415,7 @@ VALUES (?, ?, ?, ?)
 ON CONFLICT(scope, scope_key) DO UPDATE SET baseline_id = excluded.baseline_id, updated_at = excluded.updated_at`)
 					.run(baseline.scope, baseline.scopeKey, baseline.id, effectiveNow);
 			}
+			if (cursor) this.putCursor(lease.sessionKey, cursor, effectiveNow);
 			this.db.prepare(`UPDATE pipeline_runs SET
   status = 'published', owner = NULL, lease_until = NULL, stage2_baselines = ?, usage_json = ?, reason = 'published', updated_at = ?
 WHERE id = ? AND owner = ? AND status = 'running'`).run(baselines.length, JSON.stringify(usage), effectiveNow, lease.runId, lease.owner);
@@ -450,6 +466,15 @@ ORDER BY usage_count DESC, updated_at DESC, id ASC LIMIT ?`).all(...clause.param
 		return rows.map(rowToMemory);
 	}
 
+	private latestRecords(selectors: readonly ScopeSelector[], limit: number): MemoryRecord[] {
+		const clause = scopeClause(selectors);
+		if (!clause.params.length) return [];
+		const rows = this.db.prepare(`SELECT * FROM memory_records
+WHERE status = 'published' AND (${clause.sql})
+ORDER BY updated_at DESC, id ASC LIMIT ?`).all(...clause.params, Math.max(1, Math.min(limit, 500))) as Array<Record<string, unknown>>;
+		return rows.map(rowToMemory);
+	}
+
 	read(id: string, selectors: readonly ScopeSelector[]): MemoryRecord | undefined {
 		const allowed = new Set(selectors.map((selector) => `${selector.scope}\0${selector.scopeKey}`));
 		const row = this.db.prepare("SELECT * FROM memory_records WHERE id = ? AND status = 'published'").get(id) as Record<string, unknown> | undefined;
@@ -460,7 +485,7 @@ ORDER BY usage_count DESC, updated_at DESC, id ASC LIMIT ?`).all(...clause.param
 	search(query: string, selectors: readonly ScopeSelector[], limit = 50): MemoryRecord[] {
 		const tokens = uniqueTokens(query);
 		if (tokens.length === 0) return [];
-		return this.list(selectors, 500)
+		return this.latestRecords(selectors, 500)
 			.map((record) => ({ record, score: tokenOverlapScore(tokens, `${record.content}\n${record.citation}`) }))
 			.filter((item) => item.score > 0)
 			.sort((left, right) => right.score - left.score

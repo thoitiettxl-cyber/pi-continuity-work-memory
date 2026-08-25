@@ -12,6 +12,9 @@
 
 ### Fixed
 
+- Hardened query-conditioned memory after PR review: matched atoms retain a reserved prompt budget and closing delimiter, search scores the latest 500 candidates before usage tie-breaks, batch/concurrent exact-content duplicates are removed, and cursor advancement is atomic with publication.
+- Classified ordinary tokenized shell, Git, and read-only GitHub CLI discovery without reopening mutating/output-writing/executable/credential forms; steering and follow-up input no longer erase managed-workflow eligibility for the active run.
+
 - Classified `mcp` discovery/status/tool calls and `mcpScript` as read-only discovery so Continuity no longer treats ordinary MCP docs lookup as a managed-workflow mutation. MCP `auth-start` and `auth-complete` remain external mutations.
 - Classified `web_search` and `x_search` as read-only discovery so Continuity no longer treats basic agent search as a managed-workflow mutation or retry-blocking external operation.
 - Refined the explicit-only `grill-with-docs` intake with dependency-aware adaptive questioning, proportional Shared Understanding correction loops, and fail-closed handling of material uncertainty and out-of-scope process friction.

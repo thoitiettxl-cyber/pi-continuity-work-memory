@@ -275,11 +275,13 @@ export default function extension(pi: ExtensionAPI): void {
 
 	const runMemoryPipeline = async (ctx: ExtensionContext, signal: AbortSignal, schedulerGeneration: number) => {
 		if (!memory) return;
-		const source = memorySource(ctx);
+		const activeMemory = memory;
+		const afterEntryId = activeMemory.cursor()?.lastEntryId;
+		const source = memorySource(ctx, afterEntryId);
 		const expectedGeneration = generationToken;
-		const result = await memory.runPipeline(source, expectedGeneration, provider, {
+		const result = await activeMemory.runPipeline(source, expectedGeneration, provider, {
 			isCurrentGeneration: () => scheduler.currentGeneration() === schedulerGeneration && generationToken === expectedGeneration,
-			currentSourceHash: () => context ? memorySource(context).hash : "replaced",
+			currentSourceHash: () => context ? memorySource(context, afterEntryId).hash : "replaced",
 		}, signal);
 		if (result.status === "failed") safeNotify(ctx, `Memory pipeline failed: ${result.reason}`, "warning");
 	};
@@ -550,7 +552,7 @@ export default function extension(pi: ExtensionAPI): void {
 				`Package workflow ${workflowAsset.path} is checksum-verified at sha256:${workflowAsset.digest.slice(0, 12)}. Use continuity_workflow_read when the full workflow or a template is needed.`,
 			)
 			: "";
-		const memoryPrompt = memory.contextPrompt();
+		const memoryPrompt = memory.contextPrompt(event.prompt);
 		return { systemPrompt: `${event.systemPrompt}\n\n${continuity.contextSummary()}${workflowPrompt ? `\n\n${workflowPrompt}` : ""}${memoryPrompt ? `\n\n${memoryPrompt}` : ""}` };
 	});
 
@@ -954,13 +956,14 @@ export default function extension(pi: ExtensionAPI): void {
 				if (subcommand === "run") {
 					const controller = new AbortController();
 					manualPipelineControllers.add(controller);
-					const source = memorySource(ctx);
+					const afterEntryId = services.memory.cursor()?.lastEntryId;
+					const source = memorySource(ctx, afterEntryId);
 					const token = generationToken;
 					const run = (async () => {
 						const result = await services.memory.runPipeline(source, token, provider, {
 							isCurrentGeneration: () => generationToken === token,
-							currentSourceHash: () => context ? memorySource(context).hash : "replaced",
-						}, controller.signal);
+							currentSourceHash: () => context ? memorySource(context, afterEntryId).hash : "replaced",
+						}, controller.signal, { force: true });
 						safeNotify(ctx, `Memory pipeline: ${result.status} — ${result.reason}`, result.status === "failed" ? "error" : "info");
 					})();
 					manualPipelineRuns.add(run);

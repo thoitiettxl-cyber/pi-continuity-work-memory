@@ -161,15 +161,34 @@ function sessionPrivatePaths(sessionFile: string | undefined): string[] {
 	return sessionFile ? [sessionFile, dirname(sessionFile)] : [];
 }
 
-export function memorySource(ctx: ExtensionContext): SessionMemorySource {
-	const serialized = ctx.sessionManager.getBranch().map(serializeEntry).filter((value) => value !== undefined);
+function isCountedTurn(entry: SessionEntry): boolean {
+	if (entry.type !== "message") return false;
+	const role = (entry.message as { role?: unknown }).role;
+	return role === "user" || role === "assistant";
+}
+
+export function memorySource(ctx: ExtensionContext, afterEntryId?: string | null): SessionMemorySource {
+	const branch = ctx.sessionManager.getBranch();
 	const privatePaths = sessionPrivatePaths(ctx.sessionManager.getSessionFile());
+	let start = 0;
+	let resync = false;
+	if (afterEntryId) {
+		const index = branch.findIndex((entry) => entry.id === afterEntryId);
+		if (index >= 0) start = index + 1;
+		else resync = true;
+	}
+	const selected = resync || start === 0 ? branch : branch.slice(Math.max(0, start - 1));
+	const serialized = selected.map(serializeEntry).filter((value) => value !== undefined);
 	const text = sanitizeProviderBoundText(boundedSource(serialized), PROVIDER_SOURCE_MAX_CHARS, privatePaths);
+	const newEntries = resync ? branch : branch.slice(start);
 	return {
 		text,
 		hash: sha256(text),
 		citation: `session:${ctx.sessionManager.getSessionId()}#${ctx.sessionManager.getLeafId() || "root"}`,
 		privatePaths,
+		lastEntryId: ctx.sessionManager.getLeafId() || branch.at(-1)?.id || null,
+		newTurnCount: newEntries.filter(isCountedTurn).length,
+		resync,
 	};
 }
 

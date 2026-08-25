@@ -12,7 +12,7 @@ import { identity, temporaryDirectory } from "./helpers.js";
 const usage: PipelineUsage = { inputTokens: 1, outputTokens: 1, cacheReadTokens: 0, cacheWriteTokens: 0, cost: 0 };
 
 function pending(id: string, content: string) {
-	return { id, scope: "session" as const, scopeKey: "session:a:file-a", content, citation: "test" };
+	return { id, scope: "session" as const, scopeKey: "session:a:file-a", kind: "fact" as const, content, citation: "test" };
 }
 
 function baseline(id: string, content: string) {
@@ -125,9 +125,9 @@ test("MemoryService heartbeats across both provider stages and publishes after t
 	};
 	const service = new MemoryService(identity(), () => emptyWorkState(), store, { leaseMs: 50, heartbeatMs: 5 });
 	const provider: MemoryProvider = {
-		async extract(_input: MemoryExtractionInput): Promise<ProviderResult<Array<{ scope: "session"; content: string; citation: string }>>> {
+		async extract(_input: MemoryExtractionInput): Promise<ProviderResult<Array<{ scope: "session"; kind: "fact"; content: string; citation: string }>>> {
 			await delay(40);
-			return { value: [{ scope: "session", content: "heartbeat record", citation: "test" }], usage };
+			return { value: [{ scope: "session", kind: "fact", content: "heartbeat record", citation: "test" }], usage };
 		},
 		async consolidate(_input: MemoryConsolidationInput): Promise<ProviderResult<Array<{ scope: "session"; content: string }>>> {
 			await delay(40);
@@ -155,11 +155,11 @@ test("concurrent runs from one MemoryService do not share an owner token", async
 	const released = new Promise<void>((resolve) => { releaseExtraction = resolve; });
 	let extractCalls = 0;
 	const provider: MemoryProvider = {
-		async extract(): Promise<ProviderResult<Array<{ scope: "session"; content: string; citation: string }>>> {
+		async extract(): Promise<ProviderResult<Array<{ scope: "session"; kind: "fact"; content: string; citation: string }>>> {
 			extractCalls += 1;
 			extractionStarted?.();
 			await released;
-			return { value: [{ scope: "session", content: "single owner", citation: "test" }], usage };
+			return { value: [{ scope: "session", kind: "fact", content: "single owner", citation: "test" }], usage };
 		},
 		async consolidate(): Promise<ProviderResult<Array<{ scope: "session"; content: string }>>> {
 			return { value: [{ scope: "session", content: "single baseline" }], usage };

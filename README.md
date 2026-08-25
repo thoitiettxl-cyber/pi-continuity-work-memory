@@ -221,9 +221,18 @@ Automatic memory work starts only from `agent_settled`, never `agent_end`. Sessi
 
 The provider pipeline is:
 
-1. Stage 1 extracts scoped, redacted candidate memories.
+1. Stage 1 extracts scoped, redacted candidate memories as typed atoms
+   (`preference`, `constraint`, `lesson`, or `fact`; missing or invalid kinds
+   become `fact`).
 2. Stage 2 consolidates candidates into a published baseline.
-3. Pending records and building baselines become visible in one transaction.
+3. Exact-content duplicates in the same scope are not published again. Pending
+   records and building baselines become visible in one transaction.
+
+Automatic extract uses a per-session cursor rather than a raw conversation
+warehouse. The first eligible settled run may extract; later automatic runs wait
+until at least three new user/assistant turns, unless `/memory run` forces an
+extract. Compaction that removes the cursor entry falls back to a full bounded
+resync only when the remaining source hash changed.
 
 Before Stage 1, session evidence is structurally sanitized and bounded. Ordinary
 text, tool metadata, project paths, and included bash command/result evidence
@@ -231,7 +240,15 @@ remain available. Raw image bytes, long base64/opaque payloads, secret fields,
 opaque signatures, hidden thinking content, personal Pi session paths, and
 `bashExecution` entries marked `excludeFromContext` are omitted or redacted.
 Each serialized entry is bounded, and the complete provider source is capped at
-120,000 characters while retaining the newest contiguous evidence.
+120,000 characters while retaining the newest contiguous evidence. Incremental
+windows include one previous entry as background.
+
+Injection at `before_agent_start` keeps the learning-only preamble and published
+baselines, then adds at most 12 query-matched atoms from the current user
+prompt. With no prompt, only baselines are injected. Search ranks token overlap
+instead of requiring a contiguous substring. Recall failures omit atoms and
+keep the agent running. The complete injected block remains capped at 64,000
+characters.
 
 Each pipeline attempt receives a unique owner token and a renewable lease. The
 default 120-second lease is heartbeated every 30 seconds across both provider

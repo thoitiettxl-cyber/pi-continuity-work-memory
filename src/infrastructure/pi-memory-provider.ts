@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type { Usage } from "@earendil-works/pi-ai";
+import { clampThinkingLevel, type Usage } from "@earendil-works/pi-ai";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 import { redactSecrets } from "../domain/canonical.js";
@@ -46,7 +46,27 @@ function isScope(value: unknown, allowed: readonly MemoryScope[]): value is Memo
 
 function deferred(error: unknown): boolean {
 	if (!(error instanceof Error)) return false;
-	return /api key|oauth|credential|auth(?:entication|orization)?|login|required provider|no model|unavailable model/i.test(error.message);
+	return /api key|oauth|credential|auth(?:entication|orization)?|login|required provider|no model|unavailable model|connection error|fetch failed|network error|socket|timed? out|timeout|econn(?:reset|refused|aborted)/i.test(error.message);
+}
+
+const REASONING_EFFORT_APIS = new Set([
+	"azure-openai-responses",
+	"openai-codex-responses",
+	"openai-completions",
+	"openai-responses",
+]);
+
+function completionOptions(ctx: ExtensionContext, model: NonNullable<ExtensionContext["model"]>, signal: AbortSignal) {
+	const clampedThinkingLevel = model.reasoning && REASONING_EFFORT_APIS.has(model.api)
+		? clampThinkingLevel(model, ctx.thinkingLevel ?? "off")
+		: "off";
+	return {
+		maxTokens: Math.min(8_192, model.maxTokens),
+		signal,
+		cacheRetention: "none" as const,
+		sessionId: randomUUID(),
+		...(clampedThinkingLevel === "off" ? {} : { reasoningEffort: clampedThinkingLevel }),
+	};
 }
 
 export class PiMemoryProvider implements MemoryProvider {
@@ -85,12 +105,7 @@ ${input.sourceText}
 		try {
 			const response = await ctx.modelRegistry.complete(model, {
 				messages: [{ role: "user", content: [{ type: "text", text: prompt }], timestamp: Date.now() }],
-			}, {
-				maxTokens: Math.min(8_192, model.maxTokens),
-				signal,
-				cacheRetention: "none",
-				sessionId: randomUUID(),
-			});
+			}, completionOptions(ctx, model, signal));
 			if (response.stopReason === "error" || response.stopReason === "aborted") {
 				throw new Error(response.errorMessage || `Stage 1 stopped: ${response.stopReason}`);
 			}
@@ -135,12 +150,7 @@ ${JSON.stringify(input.records)}`;
 		try {
 			const response = await ctx.modelRegistry.complete(model, {
 				messages: [{ role: "user", content: [{ type: "text", text: prompt }], timestamp: Date.now() }],
-			}, {
-				maxTokens: Math.min(8_192, model.maxTokens),
-				signal,
-				cacheRetention: "none",
-				sessionId: randomUUID(),
-			});
+			}, completionOptions(ctx, model, signal));
 			if (response.stopReason === "error" || response.stopReason === "aborted") {
 				throw new Error(response.errorMessage || `Stage 2 stopped: ${response.stopReason}`);
 			}

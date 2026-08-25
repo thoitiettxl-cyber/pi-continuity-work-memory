@@ -3,7 +3,7 @@ import test from "node:test";
 
 import type { ExtensionContext, SessionEntry } from "@earendil-works/pi-coding-agent";
 
-import type { MemoryExtractionInput } from "../src/application/memory-ports.js";
+import { MemoryProviderDeferredError, type MemoryExtractionInput } from "../src/application/memory-ports.js";
 import { PiMemoryProvider } from "../src/infrastructure/pi-memory-provider.js";
 import { memorySource } from "../src/interface/session-adapter.js";
 
@@ -15,6 +15,107 @@ const usage = {
 	totalTokens: 2,
 	cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
 };
+
+test("memory-only xAI Responses calls reuse the active model and session thinking level for both stages", async () => {
+	const selectedModel = {
+		id: "grok-proof",
+		name: "Grok proof",
+		api: "openai-responses",
+		provider: "xai",
+		baseUrl: "https://api.x.ai/v1",
+		reasoning: true,
+		input: ["text"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 500_000,
+		maxTokens: 500_000,
+		thinkingLevelMap: { off: null, low: "low", medium: "medium", high: "high" },
+	} as const;
+	const requests: Array<{ model: unknown; options: Record<string, unknown> }> = [];
+	const ctx = {
+		model: selectedModel,
+		thinkingLevel: "high",
+		modelRegistry: {
+			hasConfiguredAuth: () => true,
+			async complete(model: Record<string, unknown>, context: { messages: Array<{ content: Array<{ text?: string }> }> }, options: Record<string, unknown>) {
+				requests.push({ model, options });
+				const prompt = context.messages[0]?.content[0]?.text ?? "";
+				return {
+					role: "assistant",
+					content: [{ type: "text", text: prompt.includes("Stage 1") ? '{"memories":[]}' : '{"baselines":[]}' }],
+					api: "openai-responses",
+					provider: "xai",
+					model: "grok-proof",
+					usage,
+					stopReason: "stop",
+					timestamp: Date.now(),
+				};
+			},
+		},
+	} as unknown as ExtensionContext;
+	const provider = new PiMemoryProvider(() => ctx);
+	await provider.extract({
+		sourceText: "durable source",
+		allowedScopes: ["session"],
+		workItemId: "work",
+		repositoryId: "repo",
+		sessionKey: "session",
+	}, new AbortController().signal);
+	await provider.consolidate({ records: [], previousBaselines: [], allowedScopes: ["session"] }, new AbortController().signal);
+
+	assert.equal(requests.length, 2);
+	for (const request of requests) {
+		assert.equal(request.model, selectedModel);
+		assert.equal(request.options.reasoningEffort, "high");
+	}
+});
+
+test("memory-only xAI Responses calls clamp an unsupported session off level and defer connection failures", async () => {
+	const selectedModel = {
+		id: "grok-proof",
+		name: "Grok proof",
+		api: "openai-responses",
+		provider: "xai",
+		baseUrl: "https://api.x.ai/v1",
+		reasoning: true,
+		input: ["text"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 500_000,
+		maxTokens: 500_000,
+		thinkingLevelMap: { off: null, minimal: null, low: "low", medium: "medium", high: "high" },
+	} as const;
+	let requestOptions: Record<string, unknown> | undefined;
+	const ctx = {
+		model: selectedModel,
+		thinkingLevel: "off",
+		modelRegistry: {
+			hasConfiguredAuth: () => true,
+			async complete(_model: Record<string, unknown>, _context: unknown, options: Record<string, unknown>) {
+				requestOptions = options;
+				return {
+					role: "assistant",
+					content: [],
+					api: "openai-responses",
+					provider: "xai",
+					model: "grok-proof",
+					usage,
+					stopReason: "error",
+					errorMessage: "Connection error.",
+					timestamp: Date.now(),
+				};
+			},
+		},
+	} as unknown as ExtensionContext;
+	const provider = new PiMemoryProvider(() => ctx);
+	await assert.rejects(() => provider.extract({
+		sourceText: "durable source",
+		allowedScopes: ["session"],
+		workItemId: "work",
+		repositoryId: "repo",
+		sessionKey: "session",
+	}, new AbortController().signal), MemoryProviderDeferredError);
+
+	assert.equal(requestOptions?.reasoningEffort, "low");
+});
 
 test("memory-only OpenAI Responses calls suppress explicit prompt-cache mode without mutating the selected model", async () => {
 	const selectedModel = {

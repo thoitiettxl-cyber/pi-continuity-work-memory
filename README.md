@@ -271,6 +271,14 @@ The provider pipeline is:
    same atom twice. Pending records, building baselines, and cursor advancement
    commit in one transaction.
 
+Both provider stages use the selected Pi model. For APIs that expose
+`reasoningEffort`, memory requests also reuse the session's current effective
+thinking level after clamping it through the selected model's
+`thinkingLevelMap`. If the session requests `off` but the model requires
+reasoning, Pi selects the lowest supported level instead of sending an invalid
+disabled request. Recognized credential and transport unavailability defers the
+run without publishing partial records or replacing the previous baseline.
+
 Automatic extract uses a per-session cursor rather than a raw conversation
 warehouse. The first eligible settled run may extract; later automatic runs wait
 until at least three new user/assistant turns, unless `/memory run` forces an

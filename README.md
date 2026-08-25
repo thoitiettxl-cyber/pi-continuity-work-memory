@@ -114,11 +114,38 @@ After deploying or updating the managed package, start a fresh Pi process. Pi's
 `/reload` can rescan skills during development, but a fresh process is the
 deployment proof for the extension and package resources together.
 
+## Cooperative context pressure governor
+
+Interactive TUI sessions enable a cooperative context-pressure governor by
+default. Before each provider call, it evaluates `ctx.getContextUsage()` against
+the active model's configured context window. Pressure begins when remaining
+headroom reaches the smaller of 20% of the window (with a 32,768-token floor),
+98,304 tokens, or half of a small window; critical pressure begins at half that
+headroom. Severity is monotonic until a successful compaction, model change,
+tree replacement, or new session resets the in-memory epoch.
+
+At pressure, the extension appends one hidden-display custom message only to the
+current outgoing provider request. The advisory tells the agent to finish the
+current coherent step, preserve recoverable state, and settle so Pi can apply
+its native compaction policy. It is not appended to session JSONL, persisted in
+Continuity or memory, or granted mutation, reconciliation, validation,
+checkpoint, external-action, or completion authority. The governor never calls
+`ctx.abort()`, `ctx.compact()`, `pi.sendMessage()`, or `pi.sendUserMessage()`, and
+it does not guarantee that a provider will comply before the window is crossed.
+
+Use `/continuity context-governor status|on|off` for session-local TUI control.
+The footer reports pressure transitions and shows `context: /compact
+recommended` when a pressured run settles without successful native compaction.
+`off` is the immediate recovery switch and does not change Pi's personal
+compaction settings. RPC, JSON, and print modes do not transform messages or
+touch UI APIs through this path.
+
 ## Commands and tools
 
 Commands:
 
 - `/continuity status|show|workflow|workflow-mode <off|advisory|managed>`
+- `/continuity context-governor status|on|off`
 - `/continuity workflow-bind <docs/plans/active/file.md>|workflow-reset`
 - `/continuity checkpoint|recover [checkpoint-id]|operations`
 - `/continuity reconcile <operation-id> <applied|not_applied|partially_applied> <evidence-note>`

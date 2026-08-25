@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added a TUI-only cooperative context-pressure governor with deterministic headroom thresholds, monotonic per-epoch severity, ephemeral authority-limited provider advisories, lifecycle resets, session-local `/continuity context-governor` controls, and an explicit `/compact` recommendation without aborting or invoking compaction.
 - Evolved in-process learning memory to typed atoms, incremental cursor extract, and query-conditioned recall: token-ranked `memory_search`, `before_agent_start` injection of baselines plus at most 12 prompt-matched records, first-run warmup then a three-turn automatic threshold, `/memory run` force extract, exact-content dedup, and a fail-closed memory schema v3 migration. No sidecar, embeddings, or raw conversation warehouse.
 - Added six package-owned, globally discoverable Pi engineering skills for intent clarification, codebase design, bug diagnosis, TDD, code review, and domain modeling, with managed-workflow authority, Alpine compatibility, upstream provenance, isolated install proof, and safe delivery constraints.
 - Added four Pi-native repository-workflow skills for accepted invariant encoding, read-only brownfield onboarding, independent onboarding-proposal audit, and evidence-backed agent-harness improvement, with explicit invocation boundaries, dual-source MIT provenance, and ten-skill install/release proof.

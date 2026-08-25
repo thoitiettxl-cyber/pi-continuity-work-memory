@@ -8,9 +8,10 @@ being inferred from source or prior artifacts.
 ## Current RC5 candidate validation
 
 `PASS (source-local, pre-delivery)` — the RC5 worktree passed
-`npm run validate` on 2026-08-21: typecheck, build, 152/152 tests, isolated
-two-workspace Pi 0.84.1 installation, checksum-bound workflow assets, ten exact
-package skill commands, zero loader diagnostics, collision-resistant source
+`npm run validate` and `scripts/validate-premerge.sh` on 2026-08-25: typecheck,
+build, 197/197 tests, `git diff --check`, isolated two-workspace Pi 0.84.1
+installation, checksum-bound workflow assets, ten exact package skill commands,
+zero loader diagnostics, collision-resistant source
 path verification, release static validation, and the existing Continuity,
 receipt, checkpoint, reconciliation, migration, provider-sanitization,
 scheduler, and multi-process integrity coverage.
@@ -24,17 +25,19 @@ The package does not install, invoke, import, or expose Repository Harness as a
 Pi runtime resource.
 
 `scripts/validate-alpine-arm64.sh` passed for RC5 on Alpine Linux 3.24.1 ARM64
-with Node v24.18.1 and Pi 0.84.2, including the isolated two-workspace package
+with Node v24.18.1 and Pi 0.84.3, including the isolated two-workspace package
 and ten-skill source-path proof. A preliminary `npm run release` produced a
-sanitized 132-file report, passed exact staged installation and `unzip -t`, and
-the managed-installer dry-run reported `storesChanged: false`. Final premerge,
-definitive artifact identity, commit/push, and managed deployment are recorded
-only after observation in the bound execution plan and installer receipt; the
+sanitized 136-file report, passed exact staged installation and `unzip -t`, and
+the managed-installer dry-run reported `storesChanged: false`. Definitive
+artifact identity, commit/push, and managed deployment are reported only after
+observation from Git, the remote ref, and installer receipts; the
 payload does not self-assert its own deployment.
 
-The extension runtime and provider protocol were not changed by the RC5
-skill/package adaptation. Real-provider memory execution was not rerun and
-remains historical RC2 evidence rather than current RC5 authority.
+The learning-memory provider pipeline is unchanged, but the extension now adds
+one ephemeral advisory to pressured TUI provider context. Deterministic policy
+and extension integration proof is current. A real-provider governor compliance
+smoke would require a costly controlled near-window run, so it is `DEFERRED`
+rather than inferred; memory execution remains historical RC2 evidence.
 
 ## Historical RC4 release and deployment baseline
 
@@ -69,10 +72,10 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | Sealed validation receipts | `test/continuity.test.ts`, `src/domain/validation-receipt.ts` | Every authority-relevant evidence field and full executable/argv digest is receipt-bound; persisted display text cannot retain arbitrary secret-bearing arguments; evidence or checkpoint projection tamper quarantines authority. | PASS in current source-local run |
 | Consequential operation ledger | `test/continuity.test.ts`, `test/continuity-agent-loop.test.ts`, `test/tool-classifier.test.ts`, `src/domain/operation-ledger.ts` | External operations are claimed atomically across processes; tokenized ordinary shell/Git/GitHub discovery remains read-only while output-writing, executable, credential-revealing, mutating, and ambiguous forms fail closed; equivalent simple argv quoting deduplicates; blocked operations do not execute or terminate the run; results cannot cross sessions/branches; crashes become uncertain; recovery does not infer outcomes; reconciliation is human-only and digest-bound; unresolved operations block checkpoints. | PASS in current source-local run |
 | Managed repository workflow | `test/managed-workflow*.test.ts`, `test/workflow-context.test.ts`, `test/workflow-assets.test.ts`, `test/execution-plan-files.test.ts`, `src/domain/managed-workflow.ts`, `src/application/managed-workflow-service.ts` | Package assets are checksum/inventory bound; no Harness install is required; trust plus an in-repository AGENTS context gates managed behavior; read-only/bounded/ambiguous work creates no document; durable work persists intent before exclusive creation, binds one identity-bearing plan, blocks unprepared mutation, survives branch/session recovery, preserves assessed eligibility across active-run steer/follow-up input, rejects path/symlink/conflict/overwrite, recovers interrupted same-identity finalization, and requires pre/post-finalization proof without elevating checkpoint or memory to completion authority. | PASS in current source-local run |
-| Global engineering skills | `test/skills-package.test.ts`, `node scripts/validate-install.mjs`, `scripts/validate-release.mjs`, `scripts/manage-user-install.mjs` | The Pi manifest exposes exactly ten prompt-only skill directories; Pi loads each with zero diagnostics and no adjacent duplicate headings; four workflows are explicit-only; intent clarification scales one-versus-bounded frontier questions, treats generic proceed-with-uncertainty language as non-authority, and keeps process-friction fixes separately authorized; diagnosis and automatic invariant loading cannot gain mutation authority; onboarding remains read-only before exact later approval; onboarding audit is independent, per-hunk, and read-only; harness improvement requires an observed baseline and exercised fresh rerun; domain modeling preserves Continuity recovery/finalization boundaries; both pinned MIT source lineages ship; isolated workspaces load commands from package paths rather than a colliding global source; no cross-harness runtime, helper executable, concurrent/background, desktop, auto-delivery, competing-plan, memory-completion, or checkpoint-completion assumption remains. | PASS in current RC5 source-local, supported-Pi, Alpine, and preliminary package-candidate validation; final deployment is plan/receipt-owned |
+| Global engineering skills | `test/skills-package.test.ts`, `node scripts/validate-install.mjs`, `scripts/validate-release.mjs`, `scripts/manage-user-install.mjs` | The Pi manifest exposes exactly ten prompt-only skill directories; Pi loads each with zero diagnostics and no adjacent duplicate headings; four workflows are explicit-only; intent clarification scales one-versus-bounded frontier questions, treats generic proceed-with-uncertainty language as non-authority, and keeps process-friction fixes separately authorized; diagnosis and automatic invariant loading cannot gain mutation authority; onboarding remains read-only before exact later approval; onboarding audit is independent, per-hunk, and read-only; harness improvement requires an observed baseline and exercised fresh rerun; domain modeling preserves Continuity recovery/finalization boundaries; both pinned MIT source lineages ship; isolated workspaces load commands from package paths rather than a colliding global source; no cross-harness runtime, helper executable, concurrent/background, desktop, auto-delivery, competing-plan, memory-completion, or checkpoint-completion assumption remains. | PASS in current RC5 source-local, supported-Pi, Alpine, and preliminary package-candidate validation; final deployment is external-receipt-owned |
 | Ordered SQLite migrations | `test/sqlite-migrations.test.ts`, `src/infrastructure/sqlite-migrations.ts` | Literal RC2 continuity/memory stores migrate without data loss after exact schema verification and private checksum backup; gaps, future versions, history/checksum/schema drift, malformed v1, failed apply, and concurrent open fail closed or converge safely. | PASS in current source-local run |
 | Source provenance and release alignment | `SOURCE_MANIFEST.json`, `RECONSTRUCTION_NOTES.md`, `test/release-alignment.test.ts` | Original archive hashes remain historical; reconstructed OpenAI compatibility, included/excluded bash evidence, and real npm-test provider seed match the documented canonical repairs without claiming they existed in the supplied source. | PASS |
-| Global, opt-in install | `node scripts/validate-install.mjs` | User-scope `pi install`; two independent Git workspaces with AGENTS entrypoints load `/continuity` and `/memory` without `-e`/`-l`; checksum-bound workflow assets are present and Pi RPC accepts the installed workflow status command; repository keys differ; global memory crosses; stores survive remove; report actual Pi version/range. | PASS on Pi 0.84.1 and 0.84.2 |
+| Global, opt-in install | `node scripts/validate-install.mjs` | User-scope `pi install`; two independent Git workspaces with AGENTS entrypoints load `/continuity` and `/memory` without `-e`/`-l`; checksum-bound workflow assets are present and Pi RPC accepts the installed workflow status command; repository keys differ; global memory crosses; stores survive remove; report actual Pi version/range. | PASS on Pi 0.84.1 and 0.84.3 |
 | Continuity across session/tree | `test/continuity.test.ts`, `test/extension-mode.test.ts` | Full-state exit/resume, crash resume after pending mutation, active-branch reconstruction, fork/copy context and fresh child authority chain, checkpoint ancestry, no A→B marker leak, and embedded state before/after manual/automatic compaction. | PASS |
 | Safe boundary | `test/continuity.test.ts`, `test/git-fingerprint.test.ts`, `test/extension-mode.test.ts` | Pending/uncertain mutations block; executable validation and stable pre/post fingerprint required; direct `!`/`!!` mutations tracked; tracking failure fails closed; drift and corrupt/missing/cyclic chains detected; copied embedded checkpoint has no authority. | PASS |
 | Non-mutating recovery | `test/continuity.test.ts` | Recovery executes no repository command and changes only stored work state. | PASS |
@@ -83,9 +86,10 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | Project trust | `test/git-fingerprint.test.ts`, `test/extension-mode.test.ts`, `test/memory.test.ts` | Zero Git calls when untrusted; no repo/work-item injection or promotion; RPC/JSON/print load without UI access. | PASS |
 | Scheduler lifecycle | `test/scheduler.test.ts`, `test/memory.test.ts` | `agent_end` creates no worker; one settled event creates one eligible run; invalidation cancels timer/controller; stale source is superseded. | PASS |
 | Pipeline lease/crash recovery | `test/pipeline-recovery.test.ts`, `test/memory.test.ts`, `test/concurrency.test.ts` | Unique attempt owner; heartbeat covers both provider stages; lease time is sampled after transaction lock; expired owners cannot heartbeat/stage/publish; startup/reclaim removes only non-active pending/building artifacts; stale finish cannot delete replacement work; prior published head survives; failure, expiry, and supersession retry idempotently; two processes surface no uncaught `SQLITE_BUSY`. | PASS |
-| UX/non-interactive | `test/extension-mode.test.ts`, `node scripts/validate-install.mjs` | Namespaces/tools registered; exact short TUI labels; RPC/JSON/print never touch TUI APIs. | PASS |
-| Pi support matrix | `test/pi-version.test.ts`, `scripts/pi-version.mjs`, `scripts/validate-premerge.sh`, `scripts/validate-release.mjs` | Runtime range is `>=0.84.1 <0.85.0`; lower bound 0.84.1 and current 0.84.2 pass; 0.85.0 fails with actionable range diagnostic; reports show actual version. | PASS |
-| Alpine ARM64 matrix | `scripts/validate-alpine-arm64.sh` | Alpine 3.24, ARM64, Node >=22.19.0, supported Pi binary, and exact global-install proof. Wrong environment reports `DEFERRED`. | PASS on Alpine 3.24.1 aarch64, Pi 0.84.2 |
+| Cooperative context pressure | `test/context-pressure-governor.test.ts`, `test/context-pressure-extension.test.ts`, `src/application/context-pressure-governor.ts`, `src/extension.ts` | Exact inclusive headroom thresholds, invalid-input fail-open behavior, recomputed percentage, monotonic epoch severity, bounded authority-limited advisory variants, one ephemeral final custom message per pressured provider call, no input mutation or session entry, transition-only TUI status, settled `/compact` recommendation, explicit session-local controls, and reset on successful compaction/model/tree/session lifecycle. Governor paths never abort, compact, send synthetic input, persist state, or alter non-TUI messages/UI. | PASS in focused policy/extension tests and current serial source-local suite; release/deployment evidence remains external-receipt-owned |
+| UX/non-interactive | `test/extension-mode.test.ts`, `test/context-pressure-extension.test.ts`, `node scripts/validate-install.mjs` | Namespaces/tools registered; exact short Continuity and context-pressure TUI labels; RPC/JSON/print never touch TUI APIs or receive governor context transformation. | PASS |
+| Pi support matrix | `test/pi-version.test.ts`, `scripts/pi-version.mjs`, `scripts/validate-premerge.sh`, `scripts/validate-release.mjs` | Runtime range is `>=0.84.1 <0.85.0`; lower bound 0.84.1 and current 0.84.3 pass; 0.85.0 fails with actionable range diagnostic; reports show actual version. | PASS |
+| Alpine ARM64 matrix | `scripts/validate-alpine-arm64.sh` | Alpine 3.24, ARM64, Node >=22.19.0, supported Pi binary, and exact global-install proof. Wrong environment reports `DEFERRED`. | PASS on Alpine 3.24.1 aarch64, Pi 0.84.3 |
 | Release artifact | `node scripts/package-release.mjs` | Payload comes from `package.json.files`; checksum-bound workflow assets are included; exact staged payload installs; sanitized independent ZIP has exact inventory, `unzip -t`, SHA-256, and no stores/credentials/settings/.git/node_modules/target/logs. | PASS in current source-local package run |
 
 ## Authority and reliability invariants
@@ -127,9 +131,10 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 
 ## Enforcement levels
 
-- Local validation: current RC5 `npm run validate`, Pi 0.84.2 install/Alpine
-  proof, preliminary `npm run release`, and managed-installer dry-run passed;
-  final premerge and delivery evidence remains bound to the execution plan.
+- Local validation: current RC5 `npm run validate`, premerge, Pi 0.84.1 and
+  0.84.3 install proof, Alpine ARM64 proof, preliminary `npm run release`, and
+  managed-installer dry-run passed; definitive delivery evidence remains bound
+  to the execution plan and external receipts.
 - Optional hooks: none installed or required.
 - CI invocation: none present in the supplied source snapshot.
 - Branch protection: unverified; no external repository policy was changed.

@@ -7,7 +7,7 @@ which documents must change together.
 
 ## System Purpose And Boundaries
 
-The package combines one opt-in Pi extension with four cooperating runtime
+The package combines one opt-in Pi extension with five cooperating runtime
 capabilities and ten globally discoverable engineering skills:
 
 1. **Managed repository workflow** — classifies work shape, gates agent-issued
@@ -22,6 +22,9 @@ capabilities and ten globally discoverable engineering skills:
 4. **Persistent learning memory** — extracts and consolidates scoped, sanitized
    lessons without granting those records task, validation, or completion
    authority.
+5. **Cooperative context-pressure governor** — gives interactive agents bounded,
+   ephemeral pressure advisories before provider calls so they can yield at a
+   recoverable boundary without aborting, compacting, or gaining authority.
 
 The package-owned skills under `skills/` add alignment, codebase design,
 diagnosis, TDD, code review, domain modeling, accepted-invariant enforcement,
@@ -97,6 +100,7 @@ stay at the boundaries.
 | Checkpoint authority | Payload parsing, hash construction, and chain verification | `src/domain/checkpoint-chain.ts` |
 | Continuity orchestration | Branch reconstruction, tool observation, reconciliation, validation, checkpoints, and workflow projection | `src/application/continuity-service.ts` |
 | Workflow orchestration | Asset access, work preparation, plan materialization, binding, alignment, and finalization | `src/application/managed-workflow-service.ts`, `src/application/workflow-context.ts` |
+| Context-pressure policy | Pure thresholds, input validation, monotonic epochs, bounded advisories, and status projection | `src/application/context-pressure-governor.ts` |
 | Tool policy | Read/validation/mutation classification and simple-command parsing | `src/application/tool-classifier.ts` |
 | Memory orchestration | Scope selection, two-stage extraction/consolidation, leases, fencing, and publication | `src/application/memory-service.ts`, `src/application/memory-scheduler.ts`, `src/application/memory-ports.ts` |
 | Continuity persistence | Branch snapshots, operation ledger, receipts, reconciliation, and checkpoints | `src/infrastructure/continuity-store.ts` |
@@ -179,6 +183,25 @@ Pi does not emit a second `before_agent_start` for that queued input.
 `continuity_recover` restores store state only. It does not run Git, change
 files, reconcile uncertainty, replay side effects, or authorize a retry.
 
+### Cooperative Context Pressure
+
+1. The TUI-only governor reads `ctx.getContextUsage()` during each `context`
+   event and recomputes pressure from tokens and the configured model window.
+2. Within one in-memory epoch, active severity and peak percentage are
+   monotonic. Successful compaction, model selection, tree replacement, and
+   session start reset the epoch; unknown usage does not.
+3. A pressured call receives exactly one final
+   `continuity-context-pressure` custom message in the outgoing message copy.
+   It is hidden from transcript display, never appended to session state, and
+   converts through Pi's normal custom-message boundary for that provider call.
+4. Transition-only footer status and `/continuity context-governor
+   status|on|off` expose session-local TUI control. A settled pressured run may
+   recommend explicit `/compact`, but the extension never aborts, compacts,
+   sends synthetic input, persists telemetry, or resumes work automatically.
+5. Invalid usage or local policy/rendering failure fails open for that call and
+   does not compromise Continuity authority. RPC, JSON, and print modes return
+   without message transformation or UI access.
+
 ### Persistent Learning Memory
 
 1. Automatic work begins only after `agent_settled`; aborted or replaced runs
@@ -211,6 +234,7 @@ files, reconcile uncertainty, replay side effects, or authorize a retry.
 |---|---|---|
 | Continuity SQLite store | `~/.pi/continuity/state.sqlite` | Operational lineage and safety evidence |
 | Learning-memory SQLite store | `~/.pi/work-memory/memory.sqlite` | Untrusted learning context |
+| Context governor state | Extension-process memory only | Ephemeral sequencing advisory; no task or safety authority |
 | Embedded Continuity state | Pi session JSONL custom entries | Context-only recovery |
 | Active durable work | `docs/plans/active/<slug>.md`, created lazily | Repository task truth |
 | Completed durable work | `docs/plans/completed/<slug>.md` | Historical repository task record |
@@ -292,7 +316,7 @@ deferred, and skipped checks separately.
 | Managed workflow behavior | Workflow assets/manifest, domain policy, workflow service/context, file service, extension tools, README | Read-only/bounded no-write cases, authority blocks, create/bind/finalize, crash and path safety |
 | Memory scopes or provider pipeline | Session serialization, memory service/ports/scheduler, provider, memory store, README | Scope isolation, sanitization, lease/fencing, stale-worker and crash recovery |
 | SQLite schema | Ordered migrations, exact legacy schema verification, stores, fixtures, proof docs | Backup/checksum, rollback, drift/future/gap rejection, concurrent open |
-| Pi API integration | `src/extension.ts`, session adapter, mode tests, install proof, peer range | Public API behavior on supported Pi versions and non-interactive modes |
+| Pi API integration | `src/extension.ts`, session adapter, context-pressure policy, mode tests, install proof, peer range | Public API behavior on supported Pi versions, ephemeral context injection, compaction lifecycle, and non-interactive modes |
 | Package or release payload | `package.json.files`, release/install scripts, workflow manifest, README, proof docs | Exact inventory, isolated install, sanitization, `unzip -t`, checksum |
 | Package engineering skills | Skill frontmatter/references, `package.json` Pi manifest, install/release proof, README, provenance/license | Exact discovery set, command registration in two workspaces, no cross-harness/unsafe side effects, license and payload inventory |
 | Historical source provenance | `SOURCE_MANIFEST.json`, `BUILD_PROVENANCE.md`, `ORIGINAL_SOURCE_STATUS.txt`, `RECONSTRUCTION_NOTES.md` | Preserve immutable historical claims; never rewrite later work into the original snapshot |
@@ -303,7 +327,7 @@ deferred, and skipped checks separately.
 |---|---|
 | `AGENTS.md` | Compact repository instructions and contributor entrypoint |
 | `docs/ARCHITECTURE.md` | Architecture, repository workflow, validation ladder, and documentation map |
-| `docs/proposals/*.md` | Exploratory future design notes; not active plans, implementation authority, runtime contracts, or completion evidence |
+| `docs/proposals/*.md` | Exploratory or accepted design history; implementation status does not make proposals active plans, runtime contracts, validation, or completion evidence |
 | `README.md` | User-facing package behavior, installation, commands, security boundaries, and support contract |
 | `workflow/WORKFLOW.md` | Package-owned managed-workflow process defaults shipped to consumer repositories |
 | `workflow/templates/*.md` | Deterministic process scaffolding; templates do not establish product facts |

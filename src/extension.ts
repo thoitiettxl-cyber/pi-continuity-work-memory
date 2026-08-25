@@ -15,6 +15,14 @@ import type { WorkflowMode } from "./domain/managed-workflow.js";
 import type { ContinuityStatus, MemoryScope, SessionIdentity, WorkState } from "./domain/types.js";
 import { ContinuityService, type WorkStatePatch } from "./application/continuity-service.js";
 import {
+	ContextPressureGovernor,
+	CONTEXT_PRESSURE_CUSTOM_TYPE,
+	CONTEXT_PRESSURE_STATUS_KEY,
+	renderContextPressureAdvisory,
+	renderContextPressureStatus,
+	type ActiveContextPressureLevel,
+} from "./application/context-pressure-governor.js";
+import {
 	ManagedWorkflowService,
 	type PrepareManagedWorkInput,
 	type WorkflowAssetName,
@@ -168,6 +176,51 @@ export default function extension(pi: ExtensionAPI): void {
 	let generationToken = "0";
 	const manualPipelineControllers = new Set<AbortController>();
 	const manualPipelineRuns = new Set<Promise<void>>();
+	let contextPressureGovernor = new ContextPressureGovernor();
+	let sessionGovernorEnabled = false;
+	let contextGovernorStatusValue: string | undefined;
+
+	const isContextGovernorEnabled = (ctx: ExtensionContext): boolean => (
+		ctx.mode === "tui" && ctx.hasUI && sessionGovernorEnabled
+	);
+
+	const setContextGovernorStatus = (ctx: ExtensionContext, value: string | undefined): void => {
+		if (ctx.mode !== "tui" || !ctx.hasUI || contextGovernorStatusValue === value) return;
+		try {
+			ctx.ui.setStatus(CONTEXT_PRESSURE_STATUS_KEY, value);
+			contextGovernorStatusValue = value;
+		} catch {
+			contextGovernorStatusValue = undefined;
+		}
+	};
+
+	const clearContextGovernorStatus = (ctx: ExtensionContext): void => {
+		setContextGovernorStatus(ctx, undefined);
+	};
+
+	const contextGovernorStatusLabel = (level: ActiveContextPressureLevel): string | undefined => {
+		if (level === "normal") return undefined;
+		if (level === "over-limit") return "context: over configured window";
+		return `context: ${level}`;
+	};
+
+	const showContextGovernorLevel = (ctx: ExtensionContext, level: ActiveContextPressureLevel): void => {
+		if (!isContextGovernorEnabled(ctx)) return;
+		setContextGovernorStatus(ctx, contextGovernorStatusLabel(level));
+	};
+
+	const resetContextGovernor = (ctx: ExtensionContext): void => {
+		contextPressureGovernor.reset();
+		clearContextGovernorStatus(ctx);
+	};
+
+	const contextGovernorStatus = (ctx: ExtensionContext): string => renderContextPressureStatus({
+		mode: ctx.mode,
+		sessionEnabled: sessionGovernorEnabled,
+		effective: isContextGovernorEnabled(ctx),
+		state: contextPressureGovernor.currentState(),
+		snapshot: contextPressureGovernor.currentSnapshot(),
+	});
 
 	const commandRunner: CommandRunner = {
 		async run(command, args, options) {
@@ -288,6 +341,8 @@ export default function extension(pi: ExtensionAPI): void {
 
 	async function startSession(event: SessionStartEvent, ctx: ExtensionContext): Promise<void> {
 		context = ctx;
+		resetContextGovernor(ctx);
+		sessionGovernorEnabled = ctx.mode === "tui" && ctx.hasUI;
 		unavailableReason = undefined;
 		authorityCompromisedReason = undefined;
 		repositoryRoot = undefined;
@@ -367,18 +422,25 @@ export default function extension(pi: ExtensionAPI): void {
 
 	pi.on("session_compact", async (_event, ctx) => {
 		context = ctx;
+		resetContextGovernor(ctx);
 		if (continuity) continuity.reconstructBranch(branchContext(ctx));
 		appendState();
 	});
 
 	pi.on("session_tree", async (_event, ctx) => {
 		context = ctx;
+		resetContextGovernor(ctx);
 		scheduler.invalidate();
 		cancelManualPipelines("session tree replaced");
 		generationToken = `${Date.now()}:${ctx.sessionManager.getSessionId()}:${ctx.sessionManager.getLeafId() || "root"}`;
 		workflowEligibilityAssessedForRun = false;
 		if (continuity) continuity.reconstructBranch(branchContext(ctx));
 		await refreshTuiStatus(ctx);
+	});
+
+	pi.on("model_select", async (_event, ctx) => {
+		context = ctx;
+		resetContextGovernor(ctx);
 	});
 
 	pi.on("input", async (event, ctx) => {
@@ -401,6 +463,13 @@ export default function extension(pi: ExtensionAPI): void {
 
 	pi.on("agent_settled", async (_event, ctx) => {
 		context = ctx;
+		if (
+			isContextGovernorEnabled(ctx)
+			&& contextPressureGovernor.currentSnapshot().known
+			&& contextPressureGovernor.currentState().activeLevel !== "normal"
+		) {
+			setContextGovernorStatus(ctx, "context: /compact recommended");
+		}
 		scheduler.onAgentSettled((signal, currentGeneration) => runMemoryPipeline(ctx, signal, currentGeneration));
 		workflowEligibilityAssessedForRun = false;
 		if (continuity) {
@@ -409,6 +478,30 @@ export default function extension(pi: ExtensionAPI): void {
 				continuity.resetWorkflowPreparation(branchContext(ctx));
 				appendState();
 			}
+		}
+	});
+
+	pi.on("context", async (event, ctx) => {
+		context = ctx;
+		if (!isContextGovernorEnabled(ctx)) return;
+		try {
+			const snapshot = contextPressureGovernor.observe(ctx.getContextUsage());
+			if (!snapshot.known || snapshot.activeLevel === "normal") return;
+			const messages = event.messages.filter((message) => !(
+				message.role === "custom" && message.customType === CONTEXT_PRESSURE_CUSTOM_TYPE
+			));
+			const advisory = {
+				role: "custom" as const,
+				customType: CONTEXT_PRESSURE_CUSTOM_TYPE,
+				content: renderContextPressureAdvisory(snapshot),
+				display: false,
+				timestamp: Date.now(),
+			};
+			if (snapshot.transitioned) showContextGovernorLevel(ctx, snapshot.activeLevel);
+			return { messages: [...messages, advisory] };
+		} catch {
+			clearContextGovernorStatus(ctx);
+			return;
 		}
 	});
 
@@ -565,7 +658,11 @@ export default function extension(pi: ExtensionAPI): void {
 		if (text) memory.recordCitations(text);
 	});
 
-	pi.on("session_shutdown", async () => {
+	pi.on("session_shutdown", async (_event, ctx) => {
+		clearContextGovernorStatus(ctx);
+		sessionGovernorEnabled = false;
+		contextPressureGovernor = new ContextPressureGovernor();
+		contextGovernorStatusValue = undefined;
 		cancelManualPipelines("session shutdown");
 		await scheduler.shutdown();
 		await waitForManualPipelines();
@@ -855,12 +952,37 @@ export default function extension(pi: ExtensionAPI): void {
 	});
 
 	pi.registerCommand("continuity", {
-		description: "Continuity status, managed workflow, checkpoint, operations, reconciliation, or state-only recovery",
+		description: "Continuity status, context governor, managed workflow, checkpoint, operations, reconciliation, or state-only recovery",
 		async handler(args, ctx) {
 			context = ctx;
 			try {
-				const services = requireServices();
 				const [subcommand = "status", value] = args.trim().split(/\s+/, 2);
+				if (subcommand === "context-governor") {
+					const action = value || "status";
+					if (ctx.mode !== "tui" || !ctx.hasUI) {
+						if (action === "on") sessionGovernorEnabled = false;
+						return;
+					}
+					if (action === "off") {
+						sessionGovernorEnabled = false;
+						clearContextGovernorStatus(ctx);
+						safeNotify(ctx, contextGovernorStatus(ctx));
+						return;
+					}
+					if (action === "on") {
+						sessionGovernorEnabled = true;
+						showContextGovernorLevel(ctx, contextPressureGovernor.currentState().activeLevel);
+						safeNotify(ctx, contextGovernorStatus(ctx));
+						return;
+					}
+					if (action === "status") {
+						safeNotify(ctx, contextGovernorStatus(ctx));
+						return;
+					}
+					safeNotify(ctx, "Usage: /continuity context-governor status|on|off", "warning");
+					return;
+				}
+				const services = requireServices();
 				if (subcommand === "status") {
 					const status = await authoritativeStatus(ctx, ctx.signal);
 					setTuiStatus(ctx, status);
@@ -934,7 +1056,7 @@ export default function extension(pi: ExtensionAPI): void {
 					safeNotify(ctx, `Reconciled operation ${match[1]}; fresh validation is required.`);
 					return;
 				}
-				safeNotify(ctx, "Usage: /continuity status|show|workflow|workflow-mode <mode>|workflow-bind <path>|workflow-reset|checkpoint|recover [checkpoint-id]|operations|reconcile ...", "warning");
+				safeNotify(ctx, "Usage: /continuity status|show|context-governor status|on|off|workflow|workflow-mode <mode>|workflow-bind <path>|workflow-reset|checkpoint|recover [checkpoint-id]|operations|reconcile ...", "warning");
 			} catch (error) {
 				safeNotify(ctx, redactSecrets(error instanceof Error ? error.message : String(error)), "error");
 			}

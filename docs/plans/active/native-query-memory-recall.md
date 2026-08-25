@@ -10,7 +10,7 @@ Active
 
 ## Outcome
 
-Learning memory extracts incrementally from new sanitized session evidence, stores typed atoms (preference/constraint/lesson/fact) without a raw L0 warehouse, and injects published baselines plus a small query-conditioned set at before_agent_start. Existing memory tools, scopes, authority rules, and Pi ExtensionAPI usage remain compatible.
+Learning memory extracts incrementally from new sanitized session evidence, stores typed atoms (preference/constraint/lesson/fact) without a raw L0 warehouse, and injects published baselines plus a small query-conditioned set at before_agent_start. The reviewed implementation preserves matched recall under its prompt cap, deduplicates atom publication under batch/concurrent paths, advances cursors atomically, and lets ordinary read-only shell/GitHub discovery proceed without weakening mutation tracking. Existing memory tools, scopes, authority rules, and Pi ExtensionAPI usage remain compatible.
 
 ## Authority And Context
 
@@ -18,6 +18,7 @@ Learning memory extracts incrementally from new sanitized session evidence, stor
 - Default A (native evolution) was delegated: port selected algorithms only; no MemoryCore sidecar, Proxy, Hub, Wiki, CodeGraph, embeddings, or Skill-as-asset.
 - Repository authority: AGENTS.md, docs/ARCHITECTURE.md, README persistent-memory contract, proof/ACCEPTANCE.md memory rows, Pi extensions.md before_agent_start.event.prompt, and ModelRegistry.complete-only.
 - Memory remains untrusted learning context and cannot become plan, validation, checkpoint, or completion authority.
+- User requested a logic audit of draft PR #1, fixes for confirmed findings and basic operations incorrectly blocked by Continuity, followed by focused commit and push to the existing PR branch.
 
 ## Scope
 
@@ -30,14 +31,17 @@ In scope:
 - Exact-content dedup in the same scope before publish; cursor advances only after successful publish.
 - Provider JSON gains optional kind; invalid kinds become fact; pipeline never emits global-user.
 - Tests, README, ARCHITECTURE, ACCEPTANCE, and CHANGELOG updates for the new contract.
+- Review fixes for prompt-budget starvation, batch/concurrent exact-content deduplication, bounded search-candidate ordering, and atomic cursor publication.
+- Safe read-only classification for ordinary command discovery, Git remote inspection, bounded `find`/`rg`, and non-mutating GitHub CLI views; mutating or secret-bearing forms remain external operations.
+- Preserve managed-workflow eligibility when a user steer/follow-up arrives during an already assessed agent run.
 
 Out of scope:
 
 - Tencent sidecar, Proxy, Hub, team/ACL, Wiki, CodeGraph, embeddings, sqlite-vec, or scene markdown files.
 - Persisting a raw conversation L0 warehouse.
 - New memory tools or commands; existing names stay.
-- Changing Continuity, managed workflow, checkpoints, or the ten-skill inventory.
-- Commit, push, release, or deploy.
+- Changing checkpoint/ledger authority, managed-workflow document policy, or the ten-skill inventory beyond the scoped read-classification and steer lifecycle fixes.
+- Release, deploy, merge, plan finalization, or unrelated pull-request changes.
 
 ## Constraints
 
@@ -59,6 +63,8 @@ Out of scope:
 - Teach PiMemoryProvider to emit and accept kind.
 - Update README, ARCHITECTURE, ACCEPTANCE, and CHANGELOG Unreleased.
 - Run focused tests then typecheck and npm test; report passed/failed/skipped separately.
+- Add regression tests for every confirmed review finding and for read-only versus mutating GitHub/shell forms.
+- Run full repository validation and the premerge gate before the authorized commit and push.
 
 ## Risks And Recovery
 
@@ -67,12 +73,16 @@ Out of scope:
 - Recall must fail-open to baselines so a search bug cannot block the agent.
 - Compaction may remove the cursor entry id: missing cursor falls back to a full bounded resync when the full source hash changed.
 - Old tests expecting dump-40 or substring-only search must be updated to the confirmed contract, not weakened.
+- Read-only command recognition must remain token/argv based and narrowly allow-listed; GitHub mutations, credential display, executable `find`/`rg` hooks, and output-file forms stay fail-closed.
+- Cursor advancement must share the publication transaction so a cursor-write failure cannot report failure after exposing a published generation.
 
 ## Progress
 
-- [x] Implement the approved outcome.
-- [x] Run behavior-appropriate and repository-required proof.
-- [x] Record the verified result before finalization.
+- [x] Implement the initially approved memory outcome.
+- [x] Reproduce and fix confirmed PR logic findings with regression coverage.
+- [x] Fix basic read-only shell/GitHub classification and steer lifecycle gating without opening mutation bypasses.
+- [x] Run focused and full validation; review the final scoped diff and pass the premerge gate.
+- [ ] Commit and push only the authorized PR files while preserving unrelated dirty plans.
 
 ## Decisions
 
@@ -81,6 +91,11 @@ Out of scope:
 - Automatic extract uses first-run warmup, then three new user/assistant turns. `/memory run` sets `force: true`.
 - Missing cursor entries resync and extract when the remaining source hash changed.
 - `skipped` is a non-persisted pipeline result and does not write a `pipeline_runs` row.
+- Prompt rendering reserves bounded capacity for both baselines and matched atoms and always retains its closing authority delimiter.
+- Search candidate selection uses the documented latest 500 visible records before token scoring; usage remains a ranking tie-break, not a pre-filter.
+- Exact-content deduplication occurs within an extract batch and again transactionally at publish so concurrent sessions cannot expose duplicates.
+- Streaming steer/follow-up input preserves the current run's already assessed repository eligibility; idle input still requires fresh `before_agent_start` assessment.
+- Ambiguous Git option abbreviations, HTTP method-override/GraphQL API forms, and unknown future streaming modes stay fail-closed.
 
 Promote lasting product or architecture decisions into repository-owned decision documentation only after authority exists.
 
@@ -90,7 +105,9 @@ Promote lasting product or architecture decisions into repository-owned decision
 - sqlite-migrations tests prove RC2/v2 memory stores migrate to v3 without losing published records; legacy kind is fact.
 - npm run typecheck and npm test.
 - Review the final diff for unrelated edits and secret leakage.
+- `test/tool-classifier.test.ts` and `test/managed-workflow-extension.test.ts` prove ordinary read-only GitHub/shell discovery stays unblocked while mutating, executable, output-writing, and credential-revealing forms remain external.
+- `npm run validate`, `scripts/validate-premerge.sh`, staged diff review, push verification, and PR-head verification.
 
 ## Result
 
-`npm run typecheck` passed. `npm run test` passed: 165/165. Real-provider memory proof was not rerun and remains historical/deferred. User later authorized commit, push, and a draft PR of this memory change only. Finalize, release, and deploy remain unauthorized. Unrelated dirty files stay unstaged.
+The reviewed candidate passes the focused memory/classifier/extension/Continuity suite (84/84), `npm run typecheck`, the full source-local suite (178/178), `npm run validate` including isolated install and release-payload proof, `scripts/validate-premerge.sh`, and `git diff --check`. No surviving Standards or Intent/Behavior finding remained in the final scoped review. Real-provider memory proof was not rerun because provider runtime paths did not change and remains explicitly historical/deferred. The focused commit and push to draft PR #1 are the remaining delivery actions; plan finalization, release, deploy, merge, and unrelated dirty files remain out of scope.

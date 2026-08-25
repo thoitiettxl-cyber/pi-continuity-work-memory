@@ -162,6 +162,19 @@ The preparation gate applies to agent-issued repository tools. Direct user `!`/`
 
 Simple information discovery is not repository mutation. `web_search`, `x_search`, `mcp` discovery/status/tool calls, `mcpScript`, and explicitly non-interactive Eta Browser observation/navigation actions are classified as read-only for managed workflow gating, even though they may use the network or leave the shared browser on a results or document page. Continuity does not require `continuity_prepare_work` for those discovery tools and does not track them as retry-blocking external operations. Interactive browser actions such as clicking, typing, selecting, pressing keys, resetting the browser, or requesting human help, and MCP `auth-start`/`auth-complete`, remain external mutations and fail closed unless the current workflow state authorizes them.
 
+Agent shell discovery is classified from parsed argv rather than reconstructed
+shell text. Ordinary `command -v`, Git version/status/diff/log/remote inspection,
+safe `rg`/`find` queries, and non-mutating GitHub CLI auth/repository/issue/PR/run/
+workflow views plus REST GET requests remain read-only. Quoted metacharacters stay
+literal data. GitHub writes or token display, Git output files/external filters,
+`find` execution/deletion/file-output actions, `rg --pre`/archive helpers, unknown
+forms, and non-GET/ambiguous `gh api` requests remain external operations.
+
+A steering or follow-up input received during an active agent run preserves that
+run's already assessed repository eligibility; it does not create a second
+`before_agent_start` boundary. Idle input, tree/session replacement, and
+`agent_settled` still require a fresh assessment before another mutation.
+
 New WorkState defaults to `managed`; state migrated from schema v1 defaults to `advisory` so an upgrade never silently enables repository writes. Use `/continuity workflow-mode managed` once to opt an upgraded work item into enforcement. `off` keeps only Continuity/Memory behavior, while `advisory` supplies guidance without mutation gating or automatic materialization.
 
 Package removal never deletes consumer documents. Existing plans are ordinary repository files and are not rewritten when workflow templates are upgraded.
@@ -225,8 +238,10 @@ The provider pipeline is:
    (`preference`, `constraint`, `lesson`, or `fact`; missing or invalid kinds
    become `fact`).
 2. Stage 2 consolidates candidates into a published baseline.
-3. Exact-content duplicates in the same scope are not published again. Pending
-   records and building baselines become visible in one transaction.
+3. Exact-content duplicates in the same scope are removed within one extraction
+   batch and again inside publication so concurrent sessions cannot expose the
+   same atom twice. Pending records, building baselines, and cursor advancement
+   commit in one transaction.
 
 Automatic extract uses a per-session cursor rather than a raw conversation
 warehouse. The first eligible settled run may extract; later automatic runs wait
@@ -245,10 +260,12 @@ windows include one previous entry as background.
 
 Injection at `before_agent_start` keeps the learning-only preamble and published
 baselines, then adds at most 12 query-matched atoms from the current user
-prompt. With no prompt, only baselines are injected. Search ranks token overlap
-instead of requiring a contiguous substring. Recall failures omit atoms and
-keep the agent running. The complete injected block remains capped at 64,000
-characters.
+prompt. With no prompt, only baselines are injected. Search takes the latest 500
+visible records before ranking token overlap, then uses usage and recency as
+tie-breaks; it does not require a contiguous substring. Recall failures omit
+atoms and keep the agent running. The complete injected block remains capped at
+64,000 characters, reserves space for both baselines and matched atoms, and
+always retains its closing authority delimiter.
 
 Each pipeline attempt receives a unique owner token and a renewable lease. The
 default 120-second lease is heartbeated every 30 seconds across both provider

@@ -25,6 +25,98 @@ test("narrow read-only Git branch forms remain read-only", () => {
 	}
 });
 
+test("ordinary shell, Git, and GitHub discovery remains read-only", () => {
+	for (const command of [
+		"command -v gh",
+		"git --version",
+		"git remote -v",
+		"git remote get-url origin",
+		"git diff --text",
+		"gh --version",
+		"gh auth status",
+		"gh repo view --json nameWithOwner,url,defaultBranchRef",
+		"gh issue list --limit 20 --json number,title,state,url",
+		"gh issue view 1 --json number,title,state,url",
+		"gh pr list --limit 20 --json number,title,state,url",
+		"gh pr view 1 --json number,title,state,url",
+		"gh pr diff 1",
+		"gh pr checks 1",
+		"gh run list --limit 20",
+		"gh run view 123 --log-failed",
+		"gh workflow view validate.yml",
+		"gh api repos/example/project/pulls/1 --jq .title",
+		"gh api --method GET -f state=open repos/example/project/issues",
+		"find test -maxdepth 2 -type f -name '*.test.ts' -print",
+		"rg -n 'memory|classifier' src test",
+	]) {
+		assert.equal(classifyTool("bash", { command }), "read", command);
+		assert.equal(classifyMutationConsequence("bash", { command }), "none", command);
+	}
+});
+
+test("executable, output-writing, mutating, and credential-revealing command forms stay external", () => {
+	for (const command of [
+		"command gh auth status",
+		"git remote add upstream https://example.invalid/repository.git",
+		"git remote set-url origin https://example.invalid/repository.git",
+		"git diff --output=/tmp/continuity-diff",
+		"git diff --output /tmp/continuity-diff",
+		"git diff --out=/tmp/continuity-diff",
+		"git diff --ext-dif",
+		"git show --textco HEAD",
+		"git diff --ext-diff",
+		"git show --textconv HEAD",
+		"gh auth token",
+		"gh auth status --show-token",
+		"gh repo clone example/project",
+		"gh pr checkout 1",
+		"gh pr create --title change --body body",
+		"gh pr merge 1",
+		"gh run rerun 123",
+		"gh api repos/example/project/issues -f title=change",
+		"gh api --method POST repos/example/project/issues",
+		"gh api -XPOST repos/example/project/issues",
+		"gh api --method GET -H 'X-HTTP-Method-Override: POST' repos/example/project/issues",
+		"gh api --method GET -H='X-Method-Override: PATCH' repos/example/project/issues",
+		"gh api --method GET /graphql -f query=mutation",
+		"gh api graphql -f query=query",
+		"find . -delete",
+		"find . -exec touch marker +",
+		"find . -fprint /tmp/continuity-find",
+		"rg --pre ./helper pattern .",
+		"rg --pre=./helper pattern .",
+		"rg --search-zip pattern .",
+		"rg -z pattern .",
+	]) {
+		assert.equal(classifyTool("bash", { command }), "mutation", command);
+		assert.equal(classifyMutationConsequence("bash", { command }), "external", command);
+	}
+});
+
+test("literal metacharacters in parsed argv do not lose read or validation authority", () => {
+	assert.equal(classifyTool("bash", { command: "rg -n 'alpha|beta' src" }), "read");
+	assert.equal(isExecutableValidationCommand("npm test -- --test-name-pattern='memory|classifier'"), true);
+});
+
+test("git diff validation accepts explicit filter opt-outs", () => {
+	assert.equal(isExecutableValidationCommand("git diff --check --no-ext-diff --no-textconv --text"), true);
+});
+
+test("git diff validation rejects output and executable-filter hazards", () => {
+	for (const command of [
+		"git diff --check --output=/tmp/continuity-diff",
+		"git diff --check --output /tmp/continuity-diff",
+		"git diff --check --out=/tmp/continuity-diff",
+		"git diff --check --ext-dif",
+		"git diff --check --textco",
+		"git diff --check --ext-diff",
+		"git diff --check --textconv",
+	]) {
+		assert.equal(isExecutableValidationCommand(command), false, command);
+		assert.equal(classifyTool("bash", { command }), "mutation", command);
+	}
+});
+
 test("validation commands reject credential-bearing option arguments", () => {
 	for (const command of [
 		"npm test -- --api_key=sk-secret-value",

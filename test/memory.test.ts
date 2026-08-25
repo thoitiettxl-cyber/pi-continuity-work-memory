@@ -239,6 +239,36 @@ test("memory search ranks token overlap and does not require a contiguous substr
 	store.close();
 });
 
+test("memory search scores the latest 500 records before applying usage tie-breaks", () => {
+	const root = temporaryDirectory("memory-search-candidates");
+	const store = new MemoryStore(join(root, "memory.sqlite"));
+	const session = identity();
+	const service = new MemoryService(session, () => emptyWorkState(), store);
+	for (let index = 0; index < 500; index += 1) {
+		store.addPublished({
+			id: `old-popular-${index}`,
+			scope: "repository",
+			scopeKey: session.repositoryId,
+			content: `old unrelated record ${index}`,
+			citation: "historical evidence",
+			sourceSessionKey: session.sessionKey,
+			sourceHash: `old-source-${index}`,
+		}, index + 1);
+	}
+	store.db.prepare("UPDATE memory_records SET usage_count = 1 WHERE id LIKE 'old-popular-%'").run();
+	store.addPublished({
+		id: "recent-query-match",
+		scope: "repository",
+		scopeKey: session.repositoryId,
+		content: "needle from the newest unused record",
+		citation: "recent evidence",
+		sourceSessionKey: session.sessionKey,
+		sourceHash: "recent-source",
+	}, 10_000);
+	assert.equal(service.search("needle", 10)[0]?.id, "recent-query-match");
+	store.close();
+});
+
 test("context prompt injects query-matched atoms instead of dumping visible records", () => {
 	const root = temporaryDirectory("memory-query-prompt");
 	const store = new MemoryStore(join(root, "memory.sqlite"));
@@ -259,6 +289,31 @@ test("context prompt without a query injects baselines only and omits the record
 	service.add("manual session note that must not dump", "session", "agent-tool");
 	assert.equal(service.contextPrompt(), "");
 	assert.equal(service.contextPrompt("   "), "");
+	store.close();
+});
+
+test("context prompt reserves space for matched atoms and its closing authority delimiter", () => {
+	const root = temporaryDirectory("memory-prompt-budget");
+	const store = new MemoryStore(join(root, "memory.sqlite"));
+	const session = identity();
+	const state = emptyWorkState();
+	state.workItemId = "work-a";
+	const service = new MemoryService(session, () => state, store);
+	const lease = store.claimPipeline(session.sessionKey, "prompt-budget-source", "prompt-budget-generation", "prompt-budget-owner");
+	assert.ok(lease);
+	assert.equal(store.publish(lease, [
+		{ id: "baseline-global", scope: "global-user", scopeKey: "global", content: `global-${"g".repeat(16_000)}` },
+		{ id: "baseline-repository", scope: "repository", scopeKey: session.repositoryId, content: `repository-${"r".repeat(16_000)}` },
+		{ id: "baseline-work-item", scope: "work-item", scopeKey: `${session.repositoryId}:work-a`, content: `work-item-${"w".repeat(16_000)}` },
+		{ id: "baseline-session", scope: "session", scopeKey: session.sessionKey, content: `session-${"s".repeat(16_000)}` },
+	], usage), true);
+	service.add(`matched recall ${"context ".repeat(1_980)}`, "repository", "agent-tool", `${"source ".repeat(2_270)}needle tail`);
+	const prompt = service.contextPrompt("needle");
+	assert.ok(prompt.length <= 64_000);
+	assert.match(prompt, /Baseline \(/);
+	assert.match(prompt, /matched recall/);
+	assert.match(prompt, /needle tail/);
+	assert.ok(prompt.endsWith("</persistent-memory>"));
 	store.close();
 });
 
@@ -344,6 +399,112 @@ test("pipeline does not publish a second exact-content atom in the same scope", 
 	}, new AbortController().signal);
 	assert.equal(result.status, "published");
 	assert.equal(service.list().filter((record) => record.content === "repository A durable marker").length, 1);
+	store.close();
+});
+
+test("pipeline publishes one exact-content atom when Stage 1 repeats it in one batch", async () => {
+	const root = temporaryDirectory("memory-batch-dedup");
+	const store = new MemoryStore(join(root, "memory.sqlite"));
+	const service = new MemoryService(identity(), () => emptyWorkState(), store);
+	let consolidatedRecords = 0;
+	const provider: MemoryProvider = {
+		async extract() {
+			return {
+				value: [
+					{ scope: "repository", kind: "fact", content: "one exact batch atom", citation: "first evidence" },
+					{ scope: "repository", kind: "lesson", content: "one exact batch atom", citation: "second evidence" },
+				],
+				usage,
+			};
+		},
+		async consolidate(input) {
+			consolidatedRecords = input.records.length;
+			return { value: [{ scope: "repository", content: "deduplicated baseline" }], usage };
+		},
+	};
+	const source = { text: "batch duplicate source", hash: "batch-duplicate-source", citation: "session" };
+	const result = await service.runPipeline(source, "generation-batch-dedup", provider, {
+		isCurrentGeneration: () => true,
+		currentSourceHash: () => source.hash,
+	}, new AbortController().signal);
+	assert.equal(result.status, "published");
+	assert.equal(result.stage1Records, 1);
+	assert.equal(consolidatedRecords, 1);
+	const records = service.list().filter((record) => record.content === "one exact batch atom");
+	assert.equal(records.length, 1);
+	assert.equal(records[0]?.kind, "fact", "the first occurrence wins deterministically");
+	store.close();
+});
+
+test("publish removes an exact-content atom staged concurrently by another session", () => {
+	const root = temporaryDirectory("memory-concurrent-dedup");
+	const store = new MemoryStore(join(root, "memory.sqlite"));
+	const repositoryId = identity().repositoryId;
+	const first = store.claimPipeline("dedup-session-a", "dedup-source-a", "dedup-generation-a", "dedup-owner-a");
+	const second = store.claimPipeline("dedup-session-b", "dedup-source-b", "dedup-generation-b", "dedup-owner-b");
+	assert.ok(first);
+	assert.ok(second);
+	assert.equal(store.stage1(first, [{
+		id: "concurrent-atom-a",
+		scope: "repository",
+		scopeKey: repositoryId,
+		kind: "fact",
+		content: "one concurrent exact atom",
+		citation: "session a",
+	}], usage), true);
+	assert.equal(store.stage1(second, [{
+		id: "concurrent-atom-b",
+		scope: "repository",
+		scopeKey: repositoryId,
+		kind: "lesson",
+		content: "one concurrent exact atom",
+		citation: "session b",
+	}], usage), true);
+	assert.equal(store.publish(first, [{ id: "concurrent-baseline-a", scope: "repository", scopeKey: repositoryId, content: "baseline a" }], usage), true);
+	assert.equal(store.publish(second, [{ id: "concurrent-baseline-b", scope: "repository", scopeKey: repositoryId, content: "baseline b" }], usage), true);
+	const records = store.list([{ scope: "repository", scopeKey: repositoryId }], 10)
+		.filter((record) => record.content === "one concurrent exact atom");
+	assert.equal(records.length, 1);
+	assert.equal(records[0]?.id, "concurrent-atom-a", "the first committed publication wins");
+	assert.equal(store.latestRun("dedup-session-a")?.status, "published");
+	assert.equal(store.latestRun("dedup-session-b")?.status, "published");
+	store.close();
+});
+
+test("cursor write failure rolls back publication and leaves the pipeline retryable", async () => {
+	const root = temporaryDirectory("memory-cursor-atomic");
+	const store = new MemoryStore(join(root, "memory.sqlite"));
+	const service = new MemoryService(identity(), () => emptyWorkState(), store);
+	const provider = new FakeProvider();
+	store.db.exec(`CREATE TRIGGER fail_cursor_write BEFORE INSERT ON memory_cursors
+BEGIN
+  SELECT RAISE(ABORT, 'simulated cursor write failure');
+END`);
+	const source = {
+		text: "cursor atomic source",
+		hash: "cursor-atomic-source",
+		citation: "session",
+		lastEntryId: "cursor-leaf",
+		newTurnCount: 1,
+	};
+	const result = await service.runPipeline(source, "generation-cursor-atomic", provider, {
+		isCurrentGeneration: () => true,
+		currentSourceHash: () => source.hash,
+	}, new AbortController().signal);
+	assert.equal(result.status, "failed");
+	assert.match(result.reason, /cursor write failure/);
+	assert.equal(service.list().length, 0);
+	assert.equal(store.publishedBaselines(service.selectors()).length, 0);
+	assert.equal(service.latestRun()?.status, "failed");
+	assert.equal(service.cursor(), undefined);
+	store.db.exec("DROP TRIGGER fail_cursor_write");
+	const retry = await service.runPipeline(source, "generation-cursor-atomic-retry", provider, {
+		isCurrentGeneration: () => true,
+		currentSourceHash: () => source.hash,
+	}, new AbortController().signal);
+	assert.equal(retry.status, "published");
+	assert.ok(service.list().length > 0);
+	assert.equal(service.cursor()?.lastEntryId, "cursor-leaf");
 	store.close();
 });
 

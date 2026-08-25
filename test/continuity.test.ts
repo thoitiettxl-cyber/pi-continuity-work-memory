@@ -506,6 +506,26 @@ test("validation commands persist only redacted text plus a digest", async () =>
 	store.close();
 });
 
+test("validation rejects output-writing or executable git diff forms before command execution", async () => {
+	const { service, runner, store } = fixture("validation-git-diff-hazards");
+	const active = branch(["root", "node"]);
+	service.initialize(active);
+	for (const command of [
+		"git diff --check --output=/tmp/continuity-diff",
+		"git diff --check --output /tmp/continuity-diff",
+		"git diff --check --out=/tmp/continuity-diff",
+		"git diff --check --ext-dif",
+		"git diff --check --textco",
+		"git diff --check --ext-diff",
+		"git diff --check --textconv",
+	]) {
+		const commandCount = runner.commands.length;
+		await assert.rejects(service.validate(command, active), /executable allow-list/);
+		assert.equal(runner.commands.length, commandCount, command);
+	}
+	store.close();
+});
+
 test("checkpoint creation aborts atomically when mutation state changes during fingerprint collection", async () => {
 	const { service, runner, store } = fixture("checkpoint-race");
 	const active = branch(["root", "node"]);

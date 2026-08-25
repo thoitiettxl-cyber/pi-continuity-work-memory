@@ -164,6 +164,27 @@ test("adapted skills retain authority and avoid cross-harness or unsafe delivery
 	]) assert.ok(!repositoryHarnessText.includes(forbidden), `Repository Harness protocol leaked into Pi skill: ${forbidden}`);
 });
 
+test("grill-with-docs scales the decision frontier without weakening mutation authority", () => {
+	const grill = skillText("grill-with-docs");
+	for (const expected of [
+		"problem being addressed",
+		"audience or operator",
+		"current behavior",
+		"target behavior",
+		"decision chain",
+		"process friction",
+	]) assert.ok(grill.toLowerCase().includes(expected), `grill-with-docs omits ${expected}`);
+	assert.match(grill, /ask \*\*one question at a time\*\*/i);
+	assert.match(grill, /ask \*\*two to five independent frontier questions per round\*\*/i);
+	assert.match(grill, /delegates the recommended default[\s\S]*resolved/i);
+	assert.match(grill, /unresolved material[\s\S]*authority-blocked/i);
+	assert.match(grill, /generic request to proceed[\s\S]*does not resolve/i);
+	assert.match(grill, /separately\s+authorizes that exact change/i);
+	assert.match(grill, /bounded mutation creates no lifecycle execution plan/i);
+	assert.doesNotMatch(grill, /continue despite unresolved uncertainty/i);
+	assert.doesNotMatch(grill, /fix it within scope if trivial/i);
+});
+
 test("repository workflow skills preserve their distinct authority and proof boundaries", () => {
 	const invariant = skillText("encode-invariant");
 	assert.match(invariant, /Automatic skill loading.*does not authorize/is);

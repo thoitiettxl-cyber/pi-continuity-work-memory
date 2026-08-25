@@ -164,6 +164,28 @@ test("provider source remains valid bounded JSON and retains the newest evidence
 	assert.ok(!source.text.includes("marker-0-"));
 });
 
+test("memorySource after a cursor counts only new turns and keeps a small background window", () => {
+	const now = new Date().toISOString();
+	const entries = [
+		{ type: "message", id: "u1", parentId: null, timestamp: now, message: { role: "user", content: [{ type: "text", text: "first user" }] } },
+		{ type: "message", id: "a1", parentId: "u1", timestamp: now, message: { role: "assistant", content: [{ type: "text", text: "first assistant" }] } },
+		{ type: "message", id: "u2", parentId: "a1", timestamp: now, message: { role: "user", content: [{ type: "text", text: "second user" }] } },
+	] as SessionEntry[];
+	const full = memorySource(contextFor(entries));
+	assert.equal(full.newTurnCount, 3);
+	assert.equal(full.lastEntryId, "u2");
+	assert.equal(full.resync, false);
+	const incremental = memorySource(contextFor(entries), "a1");
+	assert.equal(incremental.newTurnCount, 1);
+	assert.equal(incremental.lastEntryId, "u2");
+	assert.match(incremental.text, /second user/);
+	assert.match(incremental.text, /first assistant/);
+	assert.doesNotMatch(incremental.text, /first user/);
+	const missing = memorySource(contextFor(entries), "gone");
+	assert.equal(missing.resync, true);
+	assert.equal(missing.newTurnCount, 3);
+});
+
 test("MemoryService sanitizes Stage 1 metadata and every Stage 2 field even when callers or legacy rows bypass session serialization", async () => {
 	const root = temporaryDirectory("provider-boundary");
 	const store = new MemoryStore(join(root, "memory.sqlite"));
@@ -184,10 +206,10 @@ VALUES ('session', ?, 'legacy-baseline', ?)`)
 	let extractionInput: MemoryExtractionInput | undefined;
 	let consolidationInput: MemoryConsolidationInput | undefined;
 	const provider: MemoryProvider = {
-		async extract(input: MemoryExtractionInput): Promise<ProviderResult<Array<{ scope: "session"; content: string; citation: string }>>> {
+		async extract(input: MemoryExtractionInput): Promise<ProviderResult<Array<{ scope: "session"; kind: "fact"; content: string; citation: string }>>> {
 			extractionInput = input;
 			return {
-				value: [{ scope: "session", content: `candidate ${opaquePayload} ${sessionPath}`, citation: `citation ${apiKey}` }],
+				value: [{ scope: "session", kind: "fact", content: `candidate ${opaquePayload} ${sessionPath}`, citation: `citation ${apiKey}` }],
 				usage,
 			};
 		},

@@ -95,8 +95,9 @@ test("literal RC2 memory schema migrates without losing published records or hea
 	legacy.close();
 
 	const store = new MemoryStore(path);
-	assert.equal(String((store.db.prepare("SELECT value FROM memory_meta WHERE key = 'schema_version'").get() as Record<string, unknown>).value), "2");
+	assert.equal(String((store.db.prepare("SELECT value FROM memory_meta WHERE key = 'schema_version'").get() as Record<string, unknown>).value), "3");
 	assert.equal(store.list([{ scope: "repository", scopeKey: "repo:a" }], 10)[0]?.content, "legacy memory marker");
+	assert.equal(store.list([{ scope: "repository", scopeKey: "repo:a" }], 10)[0]?.kind, "fact");
 	assert.equal(store.publishedBaselines([{ scope: "repository", scopeKey: "repo:a" }])[0]?.content, "legacy baseline marker");
 	store.close();
 	assertBackup(root);

@@ -179,15 +179,21 @@ files, reconcile uncertainty, replay side effects, or authorize a retry.
    are canceled or superseded.
 2. The session adapter serializes bounded ordinary evidence while removing or
    redacting images, hidden thinking, secrets, private session paths, excluded
-   bash content, and opaque payloads.
-3. Stage 1 extracts scoped candidates. Stage 2 consolidates candidates into a
-   new baseline generation.
+   bash content, and opaque payloads. After the first extract, later windows
+   start from a per-session cursor plus one background entry.
+3. Stage 1 extracts scoped typed atoms (`preference`, `constraint`, `lesson`,
+   `fact`). Stage 2 consolidates candidates into a new baseline generation.
+   Exact-content duplicates in the same scope are dropped before publish.
 4. Unique owner tokens, renewable leases, generation/source checks, and atomic
    publication prevent stale or crashed workers from publishing over current
-   state.
+   state. After warmup, automatic extract waits for three new user/assistant
+   turns unless `/memory run` forces it.
 5. Visible scopes are isolated as `global-user`, `repository`, explicit/bound
    `work-item`, and `session`. There is no implicit repository-wide `default`
    work-item bucket.
+6. `before_agent_start` injects published baselines plus at most 12
+   query-matched atoms from `event.prompt`. Search ranks token overlap.
+   Memory remains untrusted learning context.
 
 ## Persistence And Generated Data
 
@@ -287,6 +293,7 @@ deferred, and skipped checks separately.
 |---|---|
 | `AGENTS.md` | Compact repository instructions and contributor entrypoint |
 | `docs/ARCHITECTURE.md` | Architecture, repository workflow, validation ladder, and documentation map |
+| `docs/proposals/*.md` | Exploratory future design notes; not active plans, implementation authority, runtime contracts, or completion evidence |
 | `README.md` | User-facing package behavior, installation, commands, security boundaries, and support contract |
 | `workflow/WORKFLOW.md` | Package-owned managed-workflow process defaults shipped to consumer repositories |
 | `workflow/templates/*.md` | Deterministic process scaffolding; templates do not establish product facts |

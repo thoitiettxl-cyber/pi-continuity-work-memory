@@ -4,7 +4,7 @@ import type { Usage } from "@earendil-works/pi-ai";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 import { redactSecrets } from "../domain/canonical.js";
-import type { MemoryScope, PipelineUsage } from "../domain/types.js";
+import { isMemoryKind, type MemoryScope, type PipelineUsage } from "../domain/types.js";
 import {
 	MemoryProviderDeferredError,
 	type ConsolidatedBaseline,
@@ -74,8 +74,9 @@ Allowed scopes: ${input.allowedScopes.join(", ")}.
 - repository: reusable only in repository ${input.repositoryId}.
 - Never emit global-user; only an explicit user command may create it.
 
+Classify each memory as preference, constraint, lesson, or fact. Never emit work-task progress or validation claims.
 Return strict JSON only:
-{"memories":[{"scope":"session|work-item|repository","content":"concise durable fact","citation":"short source description"}]}
+{"memories":[{"scope":"session|work-item|repository","kind":"preference|constraint|lesson|fact","content":"concise durable fact","citation":"short source description"}]}
 Return {"memories":[]} when there is no high-signal learning.
 
 <session-source>
@@ -102,6 +103,7 @@ ${input.sourceText}
 				if (!isScope(row.scope, input.allowedScopes) || typeof row.content !== "string") continue;
 				memories.push({
 					scope: row.scope,
+					kind: isMemoryKind(row.kind) ? row.kind : "fact",
 					content: redactSecrets(row.content),
 					citation: typeof row.citation === "string" ? redactSecrets(row.citation) : `session:${input.sessionKey}`,
 				});

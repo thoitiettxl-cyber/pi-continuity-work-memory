@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 
-import { MEMORY_DATABASE_SCHEMA_VERSION } from "../domain/types.js";
+import { MEMORY_DATABASE_SCHEMA_VERSION, isMemoryKind } from "../domain/types.js";
 import type {
+	MemoryKind,
 	MemoryRecord,
 	MemoryScope,
 	PipelineRunResult,
@@ -43,6 +44,7 @@ export interface PendingMemoryInput {
 	id: string;
 	scope: MemoryScope;
 	scopeKey: string;
+	kind: MemoryKind;
 	content: string;
 	citation: string;
 }
@@ -52,6 +54,23 @@ export interface BaselineInput {
 	scope: MemoryScope;
 	scopeKey: string;
 	content: string;
+}
+
+export interface MemoryExtractCursor {
+	lastEntryId: string | null;
+	lastSourceHash: string;
+	processedTurnCount: number;
+	warmupStep: number;
+}
+
+function uniqueTokens(value: string): string[] {
+	return [...new Set(value.toLowerCase().match(/[\p{L}\p{N}_]+/gu) ?? [])];
+}
+
+function tokenOverlapScore(tokens: readonly string[], haystack: string): number {
+	if (tokens.length === 0) return 0;
+	const present = new Set(uniqueTokens(haystack));
+	return tokens.reduce((score, token) => score + (present.has(token) ? 1 : 0), 0);
 }
 
 function scopeClause(selectors: readonly ScopeSelector[], alias = ""): { sql: string; params: string[] } {
@@ -68,6 +87,7 @@ function rowToMemory(row: Record<string, unknown>): MemoryRecord {
 		id: String(row.id),
 		scope: String(row.scope) as MemoryScope,
 		scopeKey: String(row.scope_key),
+		kind: isMemoryKind(row.kind) ? row.kind : "fact",
 		content: String(row.content),
 		citation: String(row.citation),
 		sourceSessionKey: String(row.source_session_key),
@@ -166,6 +186,18 @@ CREATE TABLE IF NOT EXISTS citation_usage (
 
 const MEMORY_V2_SQL = "SELECT 1;";
 
+const MEMORY_V3_SQL = `
+ALTER TABLE memory_records ADD COLUMN kind TEXT NOT NULL DEFAULT 'fact';
+CREATE TABLE IF NOT EXISTS memory_cursors (
+  session_key TEXT PRIMARY KEY,
+  last_entry_id TEXT,
+  last_source_hash TEXT NOT NULL,
+  processed_turn_count INTEGER NOT NULL DEFAULT 0,
+  warmup_step INTEGER NOT NULL DEFAULT 0,
+  updated_at INTEGER NOT NULL
+);
+`;
+
 function verifyMemoryV1(db: DurableSqlite): void {
 	requiredSchemaMatchesSql(db, MEMORY_V1_SQL, ["schema_migrations"]);
 	requiredOnlySchemaObjects(db, [
@@ -178,6 +210,27 @@ function verifyMemoryV1(db: DurableSqlite): void {
 	requiredExactColumns(db, "memory_baselines", ["id", "scope", "scope_key", "content", "source_generation", "run_id", "status", "created_at"]);
 	requiredExactColumns(db, "baseline_heads", ["scope", "scope_key", "baseline_id", "updated_at"]);
 	requiredExactColumns(db, "citation_usage", ["id", "memory_id", "session_key", "created_at"]);
+	requiredIndexColumns(db, "idx_memory_run_lease", ["status", "lease_until"]);
+	requiredIndexColumns(db, "idx_memory_scope", ["scope", "scope_key", "status", "updated_at"]);
+	requiredIndexColumns(db, "idx_baseline_scope", ["scope", "scope_key", "status", "created_at"]);
+	requiredForeignKeys(db, "memory_records", [{ from: "run_id", table: "pipeline_runs", to: "id" }]);
+	requiredForeignKeys(db, "memory_baselines", [{ from: "run_id", table: "pipeline_runs", to: "id" }]);
+	requiredForeignKeys(db, "baseline_heads", [{ from: "baseline_id", table: "memory_baselines", to: "id" }]);
+	requiredForeignKeys(db, "citation_usage", [{ from: "memory_id", table: "memory_records", to: "id" }]);
+}
+
+function verifyMemoryV3(db: DurableSqlite): void {
+	requiredOnlySchemaObjects(db, [
+		"baseline_heads", "citation_usage", "idx_baseline_scope", "idx_memory_run_lease", "idx_memory_scope",
+		"memory_baselines", "memory_cursors", "memory_meta", "memory_records", "pipeline_runs", "schema_migrations",
+	]);
+	requiredExactColumns(db, "memory_meta", ["key", "value"]);
+	requiredExactColumns(db, "pipeline_runs", ["id", "session_key", "source_hash", "generation", "status", "owner", "lease_until", "reason", "stage1_records", "stage2_baselines", "usage_json", "created_at", "updated_at"]);
+	requiredExactColumns(db, "memory_records", ["id", "scope", "scope_key", "content", "citation", "source_session_key", "source_hash", "run_id", "status", "usage_count", "last_used_at", "created_at", "updated_at", "kind"]);
+	requiredExactColumns(db, "memory_baselines", ["id", "scope", "scope_key", "content", "source_generation", "run_id", "status", "created_at"]);
+	requiredExactColumns(db, "baseline_heads", ["scope", "scope_key", "baseline_id", "updated_at"]);
+	requiredExactColumns(db, "citation_usage", ["id", "memory_id", "session_key", "created_at"]);
+	requiredExactColumns(db, "memory_cursors", ["session_key", "last_entry_id", "last_source_hash", "processed_turn_count", "warmup_step", "updated_at"]);
 	requiredIndexColumns(db, "idx_memory_run_lease", ["status", "lease_until"]);
 	requiredIndexColumns(db, "idx_memory_scope", ["scope", "scope_key", "status", "updated_at"]);
 	requiredIndexColumns(db, "idx_baseline_scope", ["scope", "scope_key", "status", "created_at"]);
@@ -201,6 +254,13 @@ const MEMORY_MIGRATIONS: readonly SqliteMigration[] = [
 		checksumMaterial: MEMORY_V2_SQL,
 		apply: (db) => db.exec(MEMORY_V2_SQL),
 		verify: verifyMemoryV1,
+	},
+	{
+		version: 3,
+		name: "typed-atoms-and-extract-cursor",
+		checksumMaterial: MEMORY_V3_SQL,
+		apply: (db) => db.exec(MEMORY_V3_SQL),
+		verify: verifyMemoryV3,
 	},
 ];
 
@@ -302,12 +362,12 @@ WHERE id = ? AND owner = ? AND status = 'running' AND lease_until >= ?`)
 				|| String(run.source_hash) !== lease.sourceHash || String(run.generation) !== lease.generation
 				|| run.lease_until === null || asNumber(run.lease_until) < effectiveNow) return false;
 			const insert = this.db.prepare(`INSERT INTO memory_records(
-  id, scope, scope_key, content, citation, source_session_key, source_hash, run_id, status,
+  id, scope, scope_key, kind, content, citation, source_session_key, source_hash, run_id, status,
   created_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
 ON CONFLICT(id) DO NOTHING`);
 			for (const input of inputs) {
-				insert.run(input.id, input.scope, input.scopeKey, input.content, input.citation, lease.sessionKey, lease.sourceHash, lease.runId, effectiveNow, effectiveNow);
+				insert.run(input.id, input.scope, input.scopeKey, input.kind, input.content, input.citation, lease.sessionKey, lease.sourceHash, lease.runId, effectiveNow, effectiveNow);
 			}
 			this.db.prepare(`UPDATE pipeline_runs SET stage1_records = ?, usage_json = ?, updated_at = ?
 WHERE id = ? AND owner = ? AND status = 'running'`).run(inputs.length, JSON.stringify(usage), effectiveNow, lease.runId, lease.owner);
@@ -359,15 +419,17 @@ WHERE id = ? AND owner = ? AND status = 'running'`).run(status, reason.slice(0, 
 		});
 	}
 
-	addPublished(input: Omit<MemoryRecord, "usageCount" | "createdAt" | "updatedAt">, now = Date.now()): MemoryRecord {
+	addPublished(input: Omit<MemoryRecord, "usageCount" | "createdAt" | "updatedAt" | "kind"> & { kind?: MemoryKind }, now = Date.now()): MemoryRecord {
+		const kind = isMemoryKind(input.kind) ? input.kind : "fact";
 		this.db.transaction(() => {
 			this.db.prepare(`INSERT INTO memory_records(
-  id, scope, scope_key, content, citation, source_session_key, source_hash, status, created_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, 'published', ?, ?)
+  id, scope, scope_key, kind, content, citation, source_session_key, source_hash, status, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'published', ?, ?)
 ON CONFLICT(id) DO NOTHING`).run(
 				input.id,
 				input.scope,
 				input.scopeKey,
+				kind,
 				input.content,
 				input.citation,
 				input.sourceSessionKey,
@@ -376,7 +438,7 @@ ON CONFLICT(id) DO NOTHING`).run(
 				now,
 			);
 		});
-		return { ...input, usageCount: 0, createdAt: now, updatedAt: now };
+		return { ...input, kind, usageCount: 0, createdAt: now, updatedAt: now };
 	}
 
 	list(selectors: readonly ScopeSelector[], limit = 100): MemoryRecord[] {
@@ -396,11 +458,17 @@ ORDER BY usage_count DESC, updated_at DESC, id ASC LIMIT ?`).all(...clause.param
 	}
 
 	search(query: string, selectors: readonly ScopeSelector[], limit = 50): MemoryRecord[] {
-		const normalized = query.trim().toLowerCase();
-		if (!normalized) return [];
+		const tokens = uniqueTokens(query);
+		if (tokens.length === 0) return [];
 		return this.list(selectors, 500)
-			.filter((record) => `${record.content}\n${record.citation}`.toLowerCase().includes(normalized))
-			.slice(0, Math.max(1, Math.min(limit, 100)));
+			.map((record) => ({ record, score: tokenOverlapScore(tokens, `${record.content}\n${record.citation}`) }))
+			.filter((item) => item.score > 0)
+			.sort((left, right) => right.score - left.score
+				|| right.record.usageCount - left.record.usageCount
+				|| right.record.updatedAt - left.record.updatedAt
+				|| left.record.id.localeCompare(right.record.id))
+			.slice(0, Math.max(1, Math.min(limit, 100)))
+			.map((item) => item.record);
 	}
 
 	publishedBaselines(selectors: readonly ScopeSelector[]): PublishedBaseline[] {
@@ -449,6 +517,41 @@ ORDER BY b.scope, b.scope_key`).all(...clause.params) as Array<Record<string, un
 		};
 	}
 
+	publishedContentExists(scope: MemoryScope, scopeKey: string, content: string): boolean {
+		return Boolean(this.db.prepare(`SELECT 1 FROM memory_records
+WHERE status = 'published' AND scope = ? AND scope_key = ? AND content = ?`).get(scope, scopeKey, content));
+	}
+
+	getCursor(sessionKey: string): MemoryExtractCursor | undefined {
+		const row = this.db.prepare("SELECT * FROM memory_cursors WHERE session_key = ?").get(sessionKey) as Record<string, unknown> | undefined;
+		if (!row) return undefined;
+		return {
+			lastEntryId: row.last_entry_id === null ? null : String(row.last_entry_id),
+			lastSourceHash: String(row.last_source_hash),
+			processedTurnCount: asNumber(row.processed_turn_count),
+			warmupStep: asNumber(row.warmup_step),
+		};
+	}
+
+	putCursor(sessionKey: string, cursor: MemoryExtractCursor, now = Date.now()): void {
+		this.db.prepare(`INSERT INTO memory_cursors(
+  session_key, last_entry_id, last_source_hash, processed_turn_count, warmup_step, updated_at
+) VALUES (?, ?, ?, ?, ?, ?)
+ON CONFLICT(session_key) DO UPDATE SET
+  last_entry_id = excluded.last_entry_id,
+  last_source_hash = excluded.last_source_hash,
+  processed_turn_count = excluded.processed_turn_count,
+  warmup_step = excluded.warmup_step,
+  updated_at = excluded.updated_at`).run(
+			sessionKey,
+			cursor.lastEntryId,
+			cursor.lastSourceHash,
+			cursor.processedTurnCount,
+			cursor.warmupStep,
+			now,
+		);
+	}
+
 	reset(): void {
 		this.db.transaction(() => {
 			this.db.exec("DELETE FROM citation_usage");
@@ -456,6 +559,7 @@ ORDER BY b.scope, b.scope_key`).all(...clause.params) as Array<Record<string, un
 			this.db.exec("DELETE FROM memory_baselines");
 			this.db.exec("DELETE FROM memory_records");
 			this.db.exec("DELETE FROM pipeline_runs");
+			this.db.exec("DELETE FROM memory_cursors");
 		});
 	}
 

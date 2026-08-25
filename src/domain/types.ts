@@ -2,7 +2,7 @@ import { emptyWorkflowProjection, type WorkflowProjection } from "./managed-work
 
 export const CONTINUITY_STATE_SCHEMA_VERSION = 2;
 export const CONTINUITY_DATABASE_SCHEMA_VERSION = 2;
-export const MEMORY_DATABASE_SCHEMA_VERSION = 2;
+export const MEMORY_DATABASE_SCHEMA_VERSION = 3;
 export const CONTINUITY_SCHEMA_VERSION = CONTINUITY_STATE_SCHEMA_VERSION;
 export const MEMORY_SCHEMA_VERSION = 1;
 
@@ -10,6 +10,12 @@ export type CheckpointAuthority = "none" | "verified" | "embedded" | "legacy" | 
 export type ContinuityHealth = "safe" | "drifted" | "degraded" | "unavailable";
 export type MutationStatus = "none" | "pending" | "determined" | "uncertain";
 export type MemoryScope = "global-user" | "repository" | "work-item" | "session";
+export type MemoryKind = "preference" | "constraint" | "lesson" | "fact";
+export const MEMORY_KINDS = ["preference", "constraint", "lesson", "fact"] as const;
+
+export function isMemoryKind(value: unknown): value is MemoryKind {
+	return typeof value === "string" && (MEMORY_KINDS as readonly string[]).includes(value);
+}
 export type MutationConsequence = "none" | "local" | "external";
 export type ReconciliationOutcome = "applied" | "not_applied" | "partially_applied";
 
@@ -182,6 +188,7 @@ export interface MemoryRecord {
 	id: string;
 	scope: MemoryScope;
 	scopeKey: string;
+	kind: MemoryKind;
 	content: string;
 	citation: string;
 	sourceSessionKey: string;
@@ -210,7 +217,7 @@ export interface PipelineUsage {
 
 export interface PipelineRunResult {
 	runId: string;
-	status: "published" | "deferred" | "superseded" | "failed";
+	status: "published" | "deferred" | "superseded" | "failed" | "skipped";
 	stage1Records: number;
 	stage2Baselines: number;
 	usage: PipelineUsage;

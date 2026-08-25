@@ -1,7 +1,8 @@
-import type { MemoryScope, PipelineUsage } from "../domain/types.js";
+import type { MemoryKind, MemoryScope, PipelineUsage } from "../domain/types.js";
 
 export interface ExtractedMemory {
 	scope: MemoryScope;
+	kind: MemoryKind;
 	content: string;
 	citation: string;
 }

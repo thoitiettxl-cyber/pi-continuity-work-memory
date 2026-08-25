@@ -66,6 +66,8 @@ const SIMPLE_READ_PROGRAMS = new Set([
 	"type",
 	"uname",
 	"printenv",
+	"cat",
+	"ldd",
 ]);
 
 const GIT_READ_SUBCOMMANDS = new Set(["status", "diff", "show", "log", "rev-parse", "ls-files"]);
@@ -76,6 +78,7 @@ const GIT_BENIGN_HAZARD_PREFIX_COLLISIONS = new Set(["--text"]);
 const GH_READ_ACTIONS = new Map<string, ReadonlySet<string>>([
 	["repo", new Set(["list", "view"])],
 	["issue", new Set(["list", "status", "view"])],
+	["label", new Set(["list"])],
 	["pr", new Set(["checks", "diff", "list", "status", "view"])],
 	["run", new Set(["list", "view", "watch"])],
 	["workflow", new Set(["list", "view"])],
@@ -391,6 +394,7 @@ function isReadOnlyShellCommand(parsed: ReturnType<typeof splitSimpleCommand>): 
 		case "find": return isReadOnlyFind(parsed.args);
 		case "npm": return isReadOnlyNpm(parsed.args);
 		case "node": return parsed.args.length === 1 && (parsed.args[0] === "--version" || parsed.args[0] === "-v");
+		case "pi": return parsed.args.length === 1 && (parsed.args[0] === "--version" || parsed.args[0] === "-v");
 		default: return false;
 	}
 }

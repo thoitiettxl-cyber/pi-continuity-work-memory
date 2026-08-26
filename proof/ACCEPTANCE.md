@@ -16,8 +16,10 @@ update that cleans stale output and rebuilds `dist/extension.js` on Pi 0.84.1.
 Fresh `npm run release` packaging after commit `8d1be43` also passed with a
 sanitized 136-file independent-install ZIP, successful `unzip -t`, and SHA-256
 `f90da03faac718c64019d3f33fe94e20c4b9e2e750e4e5240e9144f918707fdd`.
-Public Git-ref delivery remains separate evidence; the command is not claimed
-available until that commit is pushed.
+`git push origin dev-next` then delivered the implementation and release-proof
+commits; GitHub `refs/heads/dev-next` resolved to full commit
+`d6640c8a2773397aa68d63b2e5cdc7a4179ba7bc`. The documented unpinned Git command
+is therefore available from the repository's default branch.
 
 ## Current RC5 candidate validation
 

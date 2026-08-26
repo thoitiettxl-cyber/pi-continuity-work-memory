@@ -82,7 +82,8 @@ Promote lasting product or architecture decisions into repository-owned decision
 - `continuity_checkpoint` — DEFERRED: five failed or timed-out proof attempts remain `uncertain` in the operation ledger even though later distinct proofs passed; only direct user reconciliation can clear those records.
 - `continuity_finalize_work` — DEFERRED for the same unresolved operation ledger; the plan is evidence-ready but remains under `docs/plans/active/` until user reconciliation permits the managed move.
 - `git diff --check` and final task-scoped diff/status review — PASS; unrelated pre-existing worktree changes remain untouched.
+- `git push origin dev-next` — PASS: GitHub `refs/heads/dev-next` resolved to `d6640c8a2773397aa68d63b2e5cdc7a4179ba7bc` immediately after delivery.
 
 ## Result
 
-Implemented and committed first-class Pi Git installation and update support without committing generated output. Real loopback Git integration, source/premerge gates, and fresh release-artifact proof all pass. The documented command becomes available from GitHub when commit `8d1be43` is pushed under the user's follow-up authorization.
+Implemented, committed, and pushed first-class Pi Git installation and update support without committing generated output. Real loopback Git integration, source/premerge gates, fresh release-artifact proof, and GitHub delivery all pass. The documented command is available from the default `dev-next` branch at remote commit `d6640c8`; managed document finalization remains deferred only by the unresolved Continuity operation ledger recorded above.

@@ -5,6 +5,20 @@ complete only when every mandatory row has an observed `PASS`. Missing authority
 credentials, target hardware, or external proof remains `DEFERRED` rather than
 being inferred from source or prior artifacts.
 
+## Current Git-install refinement
+
+`PASS (source-local, pre-delivery)` — `npm run validate` and
+`scripts/validate-premerge.sh` passed with 200/200 tests. Both gates include a
+clean temporary loopback Git source with no generated `dist/`, Pi's real Git
+install command and default `npm install --omit=dev` lifecycle, the pinned
+TypeScript install-time emitter, managed-checkout command discovery, and a Git
+update that cleans stale output and rebuilds `dist/extension.js` on Pi 0.84.1.
+Fresh archive packaging
+was not observed for this refinement because Continuity rejected both release
+entrypoints as already-determined operations, so no new archive result is
+claimed. Public Git-ref delivery also remains separate evidence; the command is
+not claimed available with these changes until they are committed and pushed.
+
 ## Current RC5 candidate validation
 
 `PASS (source-local, pre-delivery)` — the RC5 worktree passed
@@ -75,7 +89,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | Global engineering skills | `test/skills-package.test.ts`, `node scripts/validate-install.mjs`, `scripts/validate-release.mjs`, `scripts/manage-user-install.mjs` | The Pi manifest exposes exactly ten prompt-only skill directories; Pi loads each with zero diagnostics and no adjacent duplicate headings; four workflows are explicit-only; intent clarification scales one-versus-bounded frontier questions, treats generic proceed-with-uncertainty language as non-authority, and keeps process-friction fixes separately authorized; diagnosis and automatic invariant loading cannot gain mutation authority; onboarding remains read-only before exact later approval; onboarding audit is independent, per-hunk, and read-only; harness improvement requires an observed baseline and exercised fresh rerun; domain modeling preserves Continuity recovery/finalization boundaries; both pinned MIT source lineages ship; isolated workspaces load commands from package paths rather than a colliding global source; no cross-harness runtime, helper executable, concurrent/background, desktop, auto-delivery, competing-plan, memory-completion, or checkpoint-completion assumption remains. | PASS in current RC5 source-local, supported-Pi, Alpine, and preliminary package-candidate validation; final deployment is external-receipt-owned |
 | Ordered SQLite migrations | `test/sqlite-migrations.test.ts`, `src/infrastructure/sqlite-migrations.ts` | Literal RC2 continuity/memory stores migrate without data loss after exact schema verification and private checksum backup; gaps, future versions, history/checksum/schema drift, malformed v1, failed apply, and concurrent open fail closed or converge safely. | PASS in current source-local run |
 | Source provenance and release alignment | `SOURCE_MANIFEST.json`, `RECONSTRUCTION_NOTES.md`, `test/release-alignment.test.ts` | Original archive hashes remain historical; reconstructed OpenAI compatibility, included/excluded bash evidence, and real npm-test provider seed match the documented canonical repairs without claiming they existed in the supplied source. | PASS |
-| Global, opt-in install | `node scripts/validate-install.mjs` | User-scope `pi install`; two independent Git workspaces with AGENTS entrypoints load `/continuity` and `/memory` without `-e`/`-l`; checksum-bound workflow assets are present and Pi RPC accepts the installed workflow status command; repository keys differ; global memory crosses; stores survive remove; report actual Pi version/range. | PASS on Pi 0.84.1 and 0.84.3 |
+| Global, opt-in install | `node scripts/validate-git-install.mjs`, `node scripts/validate-install.mjs` | A clean loopback Git source starts without generated `dist/`; Pi's real Git install and default omit-dev npm lifecycle create a managed checkout and emit the entrypoint from pinned build-only tooling; commands load from that checkout; a new remote commit plus `pi update --extensions` cleans stale output, advances the checkout, regenerates the entrypoint, and reloads commands. Existing two-workspace payload proof still verifies checksum-bound workflow assets, repository/global memory isolation, store retention, and actual Pi version/range. | PASS for real Git install/update plus managed-checkout Pi 0.84.1 load; existing archive/source payload proof also passed on Pi 0.84.3 |
 | Continuity across session/tree | `test/continuity.test.ts`, `test/extension-mode.test.ts` | Full-state exit/resume, crash resume after pending mutation, active-branch reconstruction, fork/copy context and fresh child authority chain, checkpoint ancestry, no A→B marker leak, and embedded state before/after manual/automatic compaction. | PASS |
 | Safe boundary | `test/continuity.test.ts`, `test/git-fingerprint.test.ts`, `test/extension-mode.test.ts` | Pending/uncertain mutations block; executable validation and stable pre/post fingerprint required; direct `!`/`!!` mutations tracked; tracking failure fails closed; drift and corrupt/missing/cyclic chains detected; copied embedded checkpoint has no authority. | PASS |
 | Non-mutating recovery | `test/continuity.test.ts` | Recovery executes no repository command and changes only stored work state. | PASS |
@@ -90,7 +104,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | UX/non-interactive | `test/extension-mode.test.ts`, `test/context-pressure-extension.test.ts`, `node scripts/validate-install.mjs` | Namespaces/tools registered; exact short Continuity and context-pressure TUI labels; RPC/JSON/print never touch TUI APIs or receive governor context transformation. | PASS |
 | Pi support matrix | `test/pi-version.test.ts`, `scripts/pi-version.mjs`, `scripts/validate-premerge.sh`, `scripts/validate-release.mjs` | Runtime range is `>=0.84.1 <0.85.0`; lower bound 0.84.1 and current 0.84.3 pass; 0.85.0 fails with actionable range diagnostic; reports show actual version. | PASS |
 | Alpine ARM64 matrix | `scripts/validate-alpine-arm64.sh` | Alpine 3.24, ARM64, Node >=22.19.0, supported Pi binary, and exact global-install proof. Wrong environment reports `DEFERRED`. | PASS on Alpine 3.24.1 aarch64, Pi 0.84.3 |
-| Release artifact | `node scripts/package-release.mjs` | Payload comes from `package.json.files`; checksum-bound workflow assets are included; exact staged payload installs; sanitized independent ZIP has exact inventory, `unzip -t`, SHA-256, and no stores/credentials/settings/.git/node_modules/target/logs. | PASS in current source-local package run |
+| Release artifact | `node scripts/package-release.mjs` | Payload comes from `package.json.files`; checksum-bound workflow assets are included; exact staged payload installs; sanitized independent ZIP has exact inventory, `unzip -t`, SHA-256, and no stores/credentials/settings/.git/node_modules/target/logs. | DEFERRED for the current Git-install refinement because both release entrypoints were rejected as already-determined operations before execution; the earlier RC5 package run is historical only |
 
 ## Authority and reliability invariants
 

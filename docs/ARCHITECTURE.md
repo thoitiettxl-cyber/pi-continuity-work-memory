@@ -45,7 +45,8 @@ Different artifacts answer different questions:
   user authority define what work is allowed and in scope.
 - Repository documents, code, tests, observed runtime behavior, and Git history
   are the system of record for product and task truth.
-- `package.json` and `README.md` own the supported package/runtime contract.
+- `package.json` and `README.md` own the supported package/runtime and
+  Git-install contract.
 - `workflow/WORKFLOW.md` and its templates provide package process defaults;
   they cannot invent product policy or validation evidence.
 - A bound plan under `docs/plans/` owns durable task progress, decisions,
@@ -277,8 +278,9 @@ opening the repository or starting/ending an agent run creates no document.
 - Keep pure integrity/state rules in `src/domain/` and side effects at the
   infrastructure/runtime boundaries.
 - Preserve strict ESM TypeScript style and the existing support contract:
-  Node.js `>=22.19.0`, Pi `>=0.84.1 <0.85.0`, and no production runtime
-  dependencies.
+  Node.js `>=22.19.0`, Pi `>=0.84.1 <0.85.0`, no production runtime
+  dependencies, and only the pinned TypeScript install-time emitter required to
+  generate ignored `dist/` output in Pi's default omit-dev Git clone.
 - Add focused tests whenever behavior, authority, recovery, migration,
   concurrency, trust, or non-interactive handling changes.
 
@@ -293,7 +295,7 @@ checklists, prose, memory, and checkpoints are not behavior proof by themselves.
 | Pure domain/application behavior | Targeted tests plus `npm run typecheck` | `npm test` |
 | Runtime, persistence, trust, recovery, or provider boundary | Relevant integration tests | `npm run validate` |
 | Premerge candidate | Focused proof already green | `scripts/validate-premerge.sh` |
-| Release payload/install contract | Full validation | `npm run release` and artifact/install inspection |
+| Git or release payload/install contract | Clean Git-install proof plus full validation | `npm run validate:git-install`, `npm run release`, and artifact/install inspection |
 | Provider or platform claim | Repository script using the real authorized environment | Report unavailable prerequisites as `DEFERRED`, never `PASS` |
 
 Always review the final diff and relevant untracked files. Report passed, failed,
@@ -317,7 +319,7 @@ deferred, and skipped checks separately.
 | Memory scopes or provider pipeline | Session serialization, memory service/ports/scheduler, provider, memory store, README | Scope isolation, sanitization, lease/fencing, stale-worker and crash recovery |
 | SQLite schema | Ordered migrations, exact legacy schema verification, stores, fixtures, proof docs | Backup/checksum, rollback, drift/future/gap rejection, concurrent open |
 | Pi API integration | `src/extension.ts`, session adapter, context-pressure policy, mode tests, install proof, peer range | Public API behavior on supported Pi versions, ephemeral context injection, compaction lifecycle, and non-interactive modes |
-| Package or release payload | `package.json.files`, release/install scripts, workflow manifest, README, proof docs | Exact inventory, isolated install, sanitization, `unzip -t`, checksum |
+| Package, Git install, or release payload | Package lifecycle/dependencies, `package.json.files`, Git/release/install scripts, workflow manifest, README, proof docs | Real Pi Git install/update through a clean loopback source, default omit-dev build/load, exact archive inventory, isolated install, sanitization, `unzip -t`, checksum |
 | Package engineering skills | Skill frontmatter/references, `package.json` Pi manifest, install/release proof, README, provenance/license | Exact discovery set, command registration in two workspaces, no cross-harness/unsafe side effects, license and payload inventory |
 | Historical source provenance | `SOURCE_MANIFEST.json`, `BUILD_PROVENANCE.md`, `ORIGINAL_SOURCE_STATUS.txt`, `RECONSTRUCTION_NOTES.md` | Preserve immutable historical claims; never rewrite later work into the original snapshot |
 
@@ -343,7 +345,7 @@ deferred, and skipped checks separately.
 | `SOURCE_MANIFEST.json` | Immutable original-source inventory and hashes |
 | `BUILD_PROVENANCE.md` | Original build/source provenance |
 | `ORIGINAL_SOURCE_STATUS.txt` | Original source-availability statement |
-| `package.json` | Package identity, support range, Pi entrypoint, payload inventory, and scripts |
+| `package.json` | Package identity, support range, Pi entrypoint, Git-install lifecycle, payload inventory, and scripts |
 | `test/*.test.ts` | Executable behavioral and invariant documentation |
 | `scripts/` | Repository-owned validation, install, deployment, version, provider, platform, and release entrypoints |
 

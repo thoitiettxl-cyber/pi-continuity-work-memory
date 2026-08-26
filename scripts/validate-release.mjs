@@ -36,7 +36,11 @@ function walk(path) {
 if (manifest.engines?.node !== ">=22.19.0") failures.push("Node engine must be >=22.19.0");
 if (manifest.peerDependencies?.["@earendil-works/pi-coding-agent"] !== SUPPORTED_PI_RANGE) failures.push(`Pi coding-agent peer range must be ${SUPPORTED_PI_RANGE}`);
 if (manifest.peerDependencies?.["@earendil-works/pi-ai"] !== SUPPORTED_PI_RANGE) failures.push(`Pi AI peer range must be ${SUPPORTED_PI_RANGE}`);
-if (manifest.dependencies && Object.keys(manifest.dependencies).length) failures.push("Runtime dependencies must remain empty");
+const expectedBuildDependencies = { typescript: "5.9.3" };
+if (JSON.stringify(manifest.dependencies) !== JSON.stringify(expectedBuildDependencies)) {
+	failures.push("Git install build dependencies must remain exact and build-only");
+}
+if (manifest.scripts?.prepare !== "npm run build:git-install") failures.push("Git installs must emit the extension during npm prepare");
 const requiredPayload = [
 	"dist",
 	"skills",

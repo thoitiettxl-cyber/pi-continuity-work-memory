@@ -10,14 +10,40 @@ The implementation combines clean architecture and transactional recovery, Pi co
 - Pi `>=0.84.1 <0.85.0`
 - Built-in `node:sqlite`; no native SQLite npm addon
 - Git for verified safe checkpoints
+- Network access to the reviewed Git source and npm registry/cache for Git installation
 - A loaded in-repository `AGENTS.md` or `AGENTS.override.md` plus project trust for managed auto-document behavior
 - `unzip`/`zipinfo` when deploying a release ZIP; `zip` only when building one from source
 
-## Install globally, opt in explicitly
+## Install from GitHub
 
-For a managed user installation, keep the development checkout separate and
-deploy the verified release payload to the stable package path under Pi's agent
-directory:
+Review the source, then install the package globally for the current Pi user:
+
+```sh
+pi install git:github.com/thoitiettxl-cyber/pi-continuity-work-memory
+```
+
+Pi clones the repository under its user package directory and runs the package
+install lifecycle. The package pins TypeScript only as an install-time emitter;
+the npm `prepare` lifecycle generates the ignored `dist/` entrypoint from source
+without requiring development dependencies. Start a fresh Pi process after
+installation so the extension and all packaged skills are discovered together.
+
+The unpinned command follows the repository's default branch. Use
+`pi update --extensions` to update it, or pin a reviewed tag/commit by appending
+`@<ref>` to the Git source. Remove it with:
+
+```sh
+pi remove git:github.com/thoitiettxl-cyber/pi-continuity-work-memory
+```
+
+Git packages execute code with the same system access as Pi. Install only from
+a source and ref you trust.
+
+## Deploy a verified release archive (advanced)
+
+For atomic activation, rollback backups, and exact archive inventory checks,
+keep the development checkout separate and deploy a verified release payload to
+the stable package path under Pi's agent directory:
 
 ```sh
 node scripts/manage-user-install.mjs deploy \
@@ -58,10 +84,11 @@ Continuity or learning-memory stores.
 
 Direct source-tree registration with `pi install /path/to/development/checkout`
 is intended only for development: Pi records a local path reference and does
-not copy the package. Do not keep a source-tree registration active at the same
-time as the managed package, because both copies register the same commands and
-tools. The manager changes only global user settings; remove any project-local
-registration from that project's `.pi/settings.json` separately.
+not copy the package. Do not keep Git, source-tree, and managed-archive
+registrations active at the same time, because the copies register the same
+commands and tools. The archive manager changes only global user settings;
+remove any project-local registration from that project's `.pi/settings.json`
+separately.
 
 Default stores:
 
@@ -343,6 +370,13 @@ npm run validate
 scripts/validate-premerge.sh
 git diff --check
 ```
+
+`npm run validate:git-install` additionally serves a clean temporary Git source
+over loopback, runs Pi's real `install git:...` command with its default
+`npm install --omit=dev` lifecycle, verifies the managed checkout and commands,
+then advances the source and proves `pi update --extensions` cleans and rebuilds
+`dist/extension.js`. A configured Pi `npmCommand` uses that command's plain
+`install` form instead of the default npm omit-dev arguments.
 
 Additional executable proofs:
 

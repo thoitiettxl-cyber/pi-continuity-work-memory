@@ -6,7 +6,7 @@ Date: 2026-08-26
 
 ## Status
 
-Active
+Ready for completion
 
 ## Outcome
 
@@ -60,7 +60,7 @@ Out of scope:
 
 - [x] Added the Git-install lifecycle, pinned build-only emitter, dedicated no-check emit config, real Pi Git install/update proof, and user-facing installation contract.
 - [x] Ran focused proof, full validation, and the repository premerge gate.
-- [ ] Run the mandatory fresh release-artifact gate after the operation identity can advance, then record the final result; public commit/push remains separately out of scope.
+- [x] Ran the mandatory fresh release-artifact gate after committing the implementation; public push remains separately authorized by the user's follow-up.
 
 ## Decisions
 
@@ -78,10 +78,11 @@ Promote lasting product or architecture decisions into repository-owned decision
 - `node --test .test-build/test/git-install-package.test.js` — PASS (1/1 focused package-contract test).
 - `npm --silent run validate` — PASS: strict typecheck, build, 200/200 tests, isolated two-workspace install, real Git install/update proof, and release static validation.
 - `sh scripts/validate-premerge.sh` — PASS with the same 200/200 baseline plus repository premerge checks.
-- `npm run release` and `node scripts/package-release.mjs` — DEFERRED: Continuity rejected both as already-determined equivalent operations before execution, so no fresh archive result is claimed for this refinement.
+- `npm run release` — PASS after commit `8d1be43`: produced a sanitized 136-file independent-install ZIP, passed `unzip -t`, and emitted SHA-256 `f90da03faac718c64019d3f33fe94e20c4b9e2e750e4e5240e9144f918707fdd`.
 - `continuity_checkpoint` — DEFERRED: five failed or timed-out proof attempts remain `uncertain` in the operation ledger even though later distinct proofs passed; only direct user reconciliation can clear those records.
+- `continuity_finalize_work` — DEFERRED for the same unresolved operation ledger; the plan is evidence-ready but remains under `docs/plans/active/` until user reconciliation permits the managed move.
 - `git diff --check` and final task-scoped diff/status review — PASS; unrelated pre-existing worktree changes remain untouched.
 
 ## Result
 
-Implemented first-class Pi Git installation and update support without committing generated output. The documented command is backed by real loopback Git integration proof and all source/premerge gates, but this plan remains active because the mandatory fresh release-artifact command was blocked before execution by an existing determined Continuity operation. The command also will not become available from GitHub until these changes are separately committed and pushed, which was explicitly out of scope.
+Implemented and committed first-class Pi Git installation and update support without committing generated output. Real loopback Git integration, source/premerge gates, and fresh release-artifact proof all pass. The documented command becomes available from GitHub when commit `8d1be43` is pushed under the user's follow-up authorization.

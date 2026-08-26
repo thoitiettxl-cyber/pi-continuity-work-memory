@@ -13,11 +13,11 @@ clean temporary loopback Git source with no generated `dist/`, Pi's real Git
 install command and default `npm install --omit=dev` lifecycle, the pinned
 TypeScript install-time emitter, managed-checkout command discovery, and a Git
 update that cleans stale output and rebuilds `dist/extension.js` on Pi 0.84.1.
-Fresh archive packaging
-was not observed for this refinement because Continuity rejected both release
-entrypoints as already-determined operations, so no new archive result is
-claimed. Public Git-ref delivery also remains separate evidence; the command is
-not claimed available with these changes until they are committed and pushed.
+Fresh `npm run release` packaging after commit `8d1be43` also passed with a
+sanitized 136-file independent-install ZIP, successful `unzip -t`, and SHA-256
+`f90da03faac718c64019d3f33fe94e20c4b9e2e750e4e5240e9144f918707fdd`.
+Public Git-ref delivery remains separate evidence; the command is not claimed
+available until that commit is pushed.
 
 ## Current RC5 candidate validation
 
@@ -104,7 +104,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | UX/non-interactive | `test/extension-mode.test.ts`, `test/context-pressure-extension.test.ts`, `node scripts/validate-install.mjs` | Namespaces/tools registered; exact short Continuity and context-pressure TUI labels; RPC/JSON/print never touch TUI APIs or receive governor context transformation. | PASS |
 | Pi support matrix | `test/pi-version.test.ts`, `scripts/pi-version.mjs`, `scripts/validate-premerge.sh`, `scripts/validate-release.mjs` | Runtime range is `>=0.84.1 <0.85.0`; lower bound 0.84.1 and current 0.84.3 pass; 0.85.0 fails with actionable range diagnostic; reports show actual version. | PASS |
 | Alpine ARM64 matrix | `scripts/validate-alpine-arm64.sh` | Alpine 3.24, ARM64, Node >=22.19.0, supported Pi binary, and exact global-install proof. Wrong environment reports `DEFERRED`. | PASS on Alpine 3.24.1 aarch64, Pi 0.84.3 |
-| Release artifact | `node scripts/package-release.mjs` | Payload comes from `package.json.files`; checksum-bound workflow assets are included; exact staged payload installs; sanitized independent ZIP has exact inventory, `unzip -t`, SHA-256, and no stores/credentials/settings/.git/node_modules/target/logs. | DEFERRED for the current Git-install refinement because both release entrypoints were rejected as already-determined operations before execution; the earlier RC5 package run is historical only |
+| Release artifact | `node scripts/package-release.mjs` | Payload comes from `package.json.files`; checksum-bound workflow assets are included; exact staged payload installs; sanitized independent ZIP has exact inventory, `unzip -t`, SHA-256, and no stores/credentials/settings/.git/node_modules/target/logs. | PASS after Git-install commit `8d1be43`: 136 files, `unzip -t` PASS, sanitized independent-install payload, SHA-256 recorded above |
 
 ## Authority and reliability invariants
 

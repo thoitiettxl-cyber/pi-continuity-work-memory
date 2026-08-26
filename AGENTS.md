@@ -23,7 +23,7 @@ architecture, workflow, validation ladder, and documentation map.
 ## Implementation
 
 - Use Node.js `>=22.19.0`; run `npm ci` for a reproducible install. The supported Pi range is `>=0.84.1 <0.85.0`.
-- Keep runtime dependencies empty unless a reviewed requirement proves otherwise; use Node built-ins such as `node:sqlite`.
+- Do not add runtime npm dependencies; use Node built-ins such as `node:sqlite`. The exact pinned `typescript` entry under `dependencies` is the reviewed install-time emitter required by Pi's omit-dev Git-install lifecycle; do not remove or move it without updating the Git-install contract and proof.
 - Preserve the responsibilities described in `docs/ARCHITECTURE.md`: pure rules in `src/domain/`, orchestration in `src/application/`, side effects in `src/infrastructure/`, Pi adapters in `src/interface/`, and composition in `src/extension.ts`.
 - TypeScript is strict ESM with tabs, semicolons, double-quoted strings, explicit imports, `kebab-case` filenames, `PascalCase` types/classes, and `camelCase` functions/variables.
 - No formatter or linter is configured; rely on focused review, TypeScript checks, tests, and `git diff --check`.
@@ -31,6 +31,8 @@ architecture, workflow, validation ladder, and documentation map.
 - Do not commit generated `dist/`, `.test-build/`, or `release/` output.
 
 ## Verification
+
+Repository gates are mutating even when used only as proof: `clean` and `validate` remove and regenerate ignored `dist/` and `.test-build/`; release proof rewrites files under `release/`; install proofs create isolated temporary repositories, stores, sessions, caches, and a loopback Git server. Inspect relevant pre-existing generated state before selecting a gate, and do not run these commands during read-only work.
 
 Choose proof proportional to the change, then run every repository gate required by its scope:
 

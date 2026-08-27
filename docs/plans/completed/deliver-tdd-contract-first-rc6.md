@@ -6,7 +6,7 @@ Date: 2026-08-27
 
 ## Status
 
-Active
+Ready for completion
 
 ## Outcome
 
@@ -70,13 +70,15 @@ Out of scope:
 
 ## Progress
 
-- [ ] Implement the approved outcome.
-- [ ] Run behavior-appropriate and repository-required proof.
-- [ ] Record the verified result before finalization.
+- [x] Implement the approved outcome.
+- [x] Run behavior-appropriate and repository-required proof.
+- [x] Record the verified result before finalization.
 
 ## Decisions
 
-- No task-local decision recorded yet.
+- Publish means GitHub prerelease `v1.0.0-rc.6` targeting the implementation commit with exactly the verified ZIP and checksum assets; npm publication remains out of scope.
+- The definitive delivery artifact is built from an isolated clean clone of commit `1140be1f474ac88d4d0ff3bc7592f56fa790649c`; its SHA-256 `8e85b9fce05be8dec0508630dc7ceac63d63f6ab6362f645e5b0b2c7ac3f399f` supersedes the earlier dirty-worktree local candidate for publication and deployment authority.
+- Migration from the existing Git package used Pi's documented `pi remove` command before the package-owned archive manager established one stable managed registration; recovery remains reinstalling the Git source, restoring the installer backup, or redeploying preserved RC5.
 
 Promote lasting product or architecture decisions into repository-owned decision documentation only after authority exists.
 
@@ -92,4 +94,8 @@ Promote lasting product or architecture decisions into repository-owned decision
 
 ## Result
 
-Pending implementation and executable proof.
+Ready for completion. Implementation commit `1140be1f474ac88d4d0ff3bc7592f56fa790649c` contains only the authorized RC6 skill, package, proof, and plan paths and was fast-forward pushed to `origin/dev-next` together with the already-authorized ancestor `601a0a8`. Primary-worktree and isolated-clean-clone premerge gates passed with 202/202 tests, strict typecheck/build, Pi 0.84.1 install and Git-install/update proof, and exactly eleven skills.
+
+The clean commit produced the definitive 138-file sanitized archive with SHA-256 `8e85b9fce05be8dec0508630dc7ceac63d63f6ab6362f645e5b0b2c7ac3f399f`. GitHub prerelease `v1.0.0-rc.6` targets the exact implementation commit and exposes only the ZIP and checksum at `https://github.com/thoitiettxl-cyber/pi-continuity-work-memory/releases/tag/v1.0.0-rc.6`; GitHub reports the ZIP digest equal to the local trusted digest.
+
+The managed installer deployed that archive to `/root/.pi/agent/packages/pi-continuity-work-memory`, reported `storesChanged: false` and `restartRequired: true`, created rollback backup `/root/.pi/agent/backups/pi-continuity-work-memory/2026-08-27T04-28-38-172Z-8788-75c5f0c7`, and established exactly one `packages/pi-continuity-work-memory` registration. Installed-package validation on Pi 0.84.3 loaded all eleven packaged skill sources with verified workflow assets. Historical RC5 remains unchanged; unrelated worktree changes remain unstaged. No npm publication, force push, pull request, provider run, persistent-service restart, or store mutation was performed.

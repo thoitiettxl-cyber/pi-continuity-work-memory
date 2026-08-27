@@ -21,25 +21,39 @@ commits; GitHub `refs/heads/dev-next` resolved to full commit
 `d6640c8a2773397aa68d63b2e5cdc7a4179ba7bc`. The documented unpinned Git command
 is therefore available from the repository's default branch.
 
-## Current RC6 candidate validation
+## Current RC6 release and deployment
 
-`PASS (source-local and local archive; delivery deferred)` — the RC6 worktree
-passes the repository validation and premerge gates with 202/202 serial tests,
-strict typecheck/build, `git diff --check`, isolated Pi 0.84.1 install and Git
-install/update proof, exactly eleven loadable skill paths, and release static
-validation. `npm run release` produces a sanitized 138-file independent-install
-ZIP with exact inventory, staged install, and `unzip -t` verification while
-leaving the historical RC5 archive untouched.
+`PASS (committed, published, and deployed)` — implementation commit
+`1140be1f474ac88d4d0ff3bc7592f56fa790649c` passed the repository premerge
+gate both in the primary worktree and in an isolated clean clone: 202/202 serial
+tests, strict typecheck/build, isolated Pi 0.84.1 install and Git install/update
+proof, exactly eleven loadable skill paths, and release static validation. The
+commit was fast-forward pushed to `origin/dev-next` without force.
 
-Focused prompt-contract proof covers the new independently evolving
-consumer/provider trigger and same-change escape hatch, one authoritative
-artifact, compatibility and untrusted-input boundaries, actual serialization,
-reproducible regression-first behavior, and materially distinct execution-path
-parity without coverage quotas. Matt Pocock, Repository Harness, and ECC retain
-separate pinned MIT attribution. No ECC runtime, hook, command, agent, generator,
-MCP configuration, dependency, publication, or deployment is added. Actual
-model retrieval/adherence and external delivery remain `DEFERRED` rather than
-being inferred from package discovery or local archive proof.
+The clean committed source produced the definitive sanitized 138-file RC6 ZIP
+with SHA-256 `8e85b9fce05be8dec0508630dc7ceac63d63f6ab6362f645e5b0b2c7ac3f399f`,
+exact inventory, staged install, `unzip -t`, and isolated managed-installer
+dry-run proof. GitHub prerelease `v1.0.0-rc.6` targets that exact commit and
+publishes only the ZIP and checksum assets at
+`https://github.com/thoitiettxl-cyber/pi-continuity-work-memory/releases/tag/v1.0.0-rc.6`.
+
+The checksum-pinned archive was deployed through the package-owned manager to
+`/root/.pi/agent/packages/pi-continuity-work-memory`. The receipt reports
+`storesChanged: false`, `restartRequired: true`, one stable
+`packages/pi-continuity-work-memory` registration, and rollback backup
+`/root/.pi/agent/backups/pi-continuity-work-memory/2026-08-27T04-28-38-172Z-8788-75c5f0c7`.
+Installed-package validation on fresh Pi 0.84.3 loaded all eleven skill sources
+and verified the workflow payload.
+
+Focused prompt-contract proof covers the independent consumer/provider trigger,
+same-change escape hatch, one authoritative artifact, compatibility and
+untrusted-input boundaries, actual serialization, reproducible regression-first
+behavior, and materially distinct execution-path parity without coverage
+quotas. Matt Pocock, Repository Harness, and ECC retain separate pinned MIT
+attribution; no ECC runtime, hook, command, agent, generator, MCP configuration,
+or dependency was added. Actual model retrieval/adherence and real-provider
+memory execution remain `DEFERRED` rather than inferred from package discovery
+or deployment. Historical RC5 artifacts remain unchanged.
 
 ## Historical RC5 candidate validation
 
@@ -108,7 +122,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | Sealed validation receipts | `test/continuity.test.ts`, `src/domain/validation-receipt.ts` | Every authority-relevant evidence field and full executable/argv digest is receipt-bound; persisted display text cannot retain arbitrary secret-bearing arguments; evidence or checkpoint projection tamper quarantines authority. | PASS in current source-local run |
 | Consequential operation ledger | `test/continuity.test.ts`, `test/continuity-agent-loop.test.ts`, `test/tool-classifier.test.ts`, `src/domain/operation-ledger.ts` | External operations are claimed atomically across processes; tokenized ordinary shell/Git/GitHub discovery remains read-only while output-writing, executable, credential-revealing, mutating, and ambiguous forms fail closed; equivalent simple argv quoting deduplicates; blocked operations do not execute or terminate the run; results cannot cross sessions/branches; crashes become uncertain; recovery does not infer outcomes; reconciliation is human-only and digest-bound; unresolved operations block checkpoints. | PASS in current source-local run |
 | Managed repository workflow | `test/managed-workflow*.test.ts`, `test/workflow-context.test.ts`, `test/workflow-assets.test.ts`, `test/execution-plan-files.test.ts`, `src/domain/managed-workflow.ts`, `src/application/managed-workflow-service.ts` | Package assets are checksum/inventory bound; no Harness install is required; trust plus an in-repository AGENTS context gates managed behavior; read-only/bounded/ambiguous work creates no document; durable work persists intent before exclusive creation, binds one identity-bearing plan, blocks unprepared mutation, survives branch/session recovery, preserves assessed eligibility across active-run steer/follow-up input, rejects path/symlink/conflict/overwrite, recovers interrupted same-identity finalization, and requires pre/post-finalization proof without elevating checkpoint or memory to completion authority. | PASS in current source-local run |
-| Global engineering skills | `test/skills-package.test.ts`, `node scripts/validate-install.mjs`, `scripts/validate-release.mjs`, `scripts/manage-user-install.mjs` | The Pi manifest exposes exactly eleven prompt-only skill directories; Pi loads each with zero diagnostics and no adjacent duplicate headings; four workflows are explicit-only; contract-first activates only for independently evolving consumers/providers, uses one authoritative artifact, validates actual serialized behavior, avoids same-change ceremony, and cannot gain mutation/dependency/network authority; TDD requires reproducible regression-first proof without fabricated RED states or coverage quotas and checks materially distinct execution paths; intent clarification, diagnosis, invariant encoding, onboarding/audit, harness improvement, domain modeling, three pinned MIT source lineages, isolated source paths, and cross-harness/unsafe-side-effect exclusions retain their established boundaries. | PASS in current RC6 focused, full source-local, isolated-install, premerge, and local archive proof; actual model retrieval/adherence and external delivery remain DEFERRED |
+| Global engineering skills | `test/skills-package.test.ts`, `node scripts/validate-install.mjs`, `scripts/validate-release.mjs`, `scripts/manage-user-install.mjs` | The Pi manifest exposes exactly eleven prompt-only skill directories; Pi loads each with zero diagnostics and no adjacent duplicate headings; four workflows are explicit-only; contract-first activates only for independently evolving consumers/providers, uses one authoritative artifact, validates actual serialized behavior, avoids same-change ceremony, and cannot gain mutation/dependency/network authority; TDD requires reproducible regression-first proof without fabricated RED states or coverage quotas and checks materially distinct execution paths; intent clarification, diagnosis, invariant encoding, onboarding/audit, harness improvement, domain modeling, three pinned MIT source lineages, isolated source paths, and cross-harness/unsafe-side-effect exclusions retain their established boundaries. | PASS in current RC6 focused, exact-commit premerge, GitHub prerelease, managed deployment, installed-package, and fresh Pi 0.84.3 proof; actual model retrieval/adherence remains DEFERRED |
 | Ordered SQLite migrations | `test/sqlite-migrations.test.ts`, `src/infrastructure/sqlite-migrations.ts` | Literal RC2 continuity/memory stores migrate without data loss after exact schema verification and private checksum backup; gaps, future versions, history/checksum/schema drift, malformed v1, failed apply, and concurrent open fail closed or converge safely. | PASS in current source-local run |
 | Source provenance and release alignment | `SOURCE_MANIFEST.json`, `RECONSTRUCTION_NOTES.md`, `test/release-alignment.test.ts` | Original archive hashes remain historical; reconstructed OpenAI compatibility, included/excluded bash evidence, and real npm-test provider seed match the documented canonical repairs without claiming they existed in the supplied source. | PASS |
 | Global, opt-in install | `node scripts/validate-git-install.mjs`, `node scripts/validate-install.mjs` | A clean loopback Git source starts without generated `dist/`; Pi's real Git install and default omit-dev npm lifecycle create a managed checkout and emit the entrypoint from pinned build-only tooling; commands load from that checkout; a new remote commit plus `pi update --extensions` cleans stale output, advances the checkout, regenerates the entrypoint, and reloads commands. Existing two-workspace payload proof still verifies checksum-bound workflow assets, repository/global memory isolation, store retention, and actual Pi version/range. | PASS for real Git install/update plus managed-checkout Pi 0.84.1 load; existing archive/source payload proof also passed on Pi 0.84.3 |
@@ -126,7 +140,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | UX/non-interactive | `test/extension-mode.test.ts`, `test/context-pressure-extension.test.ts`, `node scripts/validate-install.mjs` | Namespaces/tools registered; exact short Continuity and context-pressure TUI labels; RPC/JSON/print never touch TUI APIs or receive governor context transformation. | PASS |
 | Pi support matrix | `test/pi-version.test.ts`, `scripts/pi-version.mjs`, `scripts/validate-premerge.sh`, `scripts/validate-release.mjs` | Runtime range is `>=0.84.1 <0.85.0`; lower bound 0.84.1 and current 0.84.3 pass; 0.85.0 fails with actionable range diagnostic; reports show actual version. | PASS |
 | Alpine ARM64 matrix | `scripts/validate-alpine-arm64.sh` | Alpine 3.24, ARM64, Node >=22.19.0, supported Pi binary, and exact global-install proof. Wrong environment reports `DEFERRED`. | PASS on Alpine 3.24.1 aarch64, Pi 0.84.3 |
-| Release artifact | `node scripts/package-release.mjs` | Payload comes from `package.json.files`; checksum-bound workflow assets are included; exact staged payload installs; sanitized independent ZIP has exact inventory, `unzip -t`, SHA-256, and no stores/credentials/settings/.git/node_modules/target/logs. | PASS for the current local RC6 candidate: 138 files, exact staged install, `unzip -t` PASS, and sanitized independent-install payload; external release/deployment remains DEFERRED |
+| Release artifact | `node scripts/package-release.mjs` | Payload comes from `package.json.files`; checksum-bound workflow assets are included; exact staged payload installs; sanitized independent ZIP has exact inventory, `unzip -t`, SHA-256, and no stores/credentials/settings/.git/node_modules/target/logs. | PASS for the definitive clean-commit RC6 archive: 138 files, exact staged install, `unzip -t` PASS, SHA-256 `8e85b9fce05be8dec0508630dc7ceac63d63f6ab6362f645e5b0b2c7ac3f399f`, GitHub prerelease publication, and checksum-pinned managed deployment |
 
 ## Authority and reliability invariants
 

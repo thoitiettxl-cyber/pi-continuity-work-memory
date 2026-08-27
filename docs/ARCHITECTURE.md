@@ -8,7 +8,7 @@ which documents must change together.
 ## System Purpose And Boundaries
 
 The package combines one opt-in Pi extension with five cooperating runtime
-capabilities and ten globally discoverable engineering skills:
+capabilities and eleven globally discoverable engineering skills:
 
 1. **Managed repository workflow** — classifies work shape, gates agent-issued
    mutations, and safely creates or binds only the repository documents required
@@ -27,9 +27,10 @@ capabilities and ten globally discoverable engineering skills:
    recoverable boundary without aborting, compacting, or gaining authority.
 
 The package-owned skills under `skills/` add alignment, codebase design,
-diagnosis, TDD, code review, domain modeling, accepted-invariant enforcement,
-read-only repository onboarding and proposal audit, and measured agent-workflow
-improvement. They are prompt resources, not extension code or authority. They
+contract-first boundary coordination, regression-aware TDD, diagnosis, code
+review, domain modeling, accepted-invariant enforcement, read-only repository
+onboarding and proposal audit, and measured agent-workflow improvement. They are
+prompt resources, not extension code or authority. They
 use the same repository, managed-workflow, validation, delivery, and Alpine
 constraints as the extension.
 

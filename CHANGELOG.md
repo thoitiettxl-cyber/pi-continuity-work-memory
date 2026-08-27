@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added an eleventh prompt-only global engineering skill, `contract-first`, for one authoritative consumer/provider boundary artifact with compatibility, untrusted-input, runtime-serialization, and managed-authority safeguards; strengthened `tdd` with reproducible regression-first proof and parity checks across materially distinct execution paths.
+
 - Added first-class GitHub installation through `pi install git:github.com/thoitiettxl-cyber/pi-continuity-work-memory`, with a pinned install-time TypeScript emitter, clean omit-dev Git-clone proof, and isolated Pi load verification while keeping generated `dist/` out of Git.
 - Added a TUI-only cooperative context-pressure governor with deterministic headroom thresholds, monotonic per-epoch severity, ephemeral authority-limited provider advisories, lifecycle resets, session-local `/continuity context-governor` controls, and an explicit `/compact` recommendation without aborting or invoking compaction.
 - Evolved in-process learning memory to typed atoms, incremental cursor extract, and query-conditioned recall: token-ranked `memory_search`, `before_agent_start` injection of baselines plus at most 12 prompt-matched records, first-run warmup then a three-turn automatic threshold, `/memory run` force extract, exact-content dedup, and a fail-closed memory schema v3 migration. No sidecar, embeddings, or raw conversation warehouse.
@@ -11,6 +13,10 @@
 - Added four Pi-native repository-workflow skills for accepted invariant encoding, read-only brownfield onboarding, independent onboarding-proposal audit, and evidence-backed agent-harness improvement, with explicit invocation boundaries, dual-source MIT provenance, and ten-skill install/release proof.
 - Added a package-owned managed repository workflow with checksum-verified guidance/templates, trust-and-`AGENTS.md` eligibility, structured work-shape preparation, document-free read-only/bounded work, intent-first exclusive execution-plan creation, recoverable binding/finalization, branch-correct recovery metadata, and explicit separation between repository completion and safe checkpoints.
 - Added explicit work-document identities for work-item memory so unbound tasks no longer share an implicit repository-wide `default` work-item bucket.
+
+### Changed
+
+- Advanced the package prerelease identity to `1.0.0-rc.6` for the eleven-skill payload, preserving the historical RC5 archive identity.
 
 ### Fixed
 

@@ -19,11 +19,22 @@ const memoryRoot = join(proofRoot, "memory-store");
 const packageRoot = suppliedPackage ? resolve(suppliedPackage) : join(proofRoot, "extracted-package", "pi-continuity-work-memory");
 const piCandidate = resolve(projectRoot, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
 const pi = process.env.PI_VALIDATION_PI || (existsSync(piCandidate) ? piCandidate : "pi");
-const expectedSkills = ["audit-onboarding-proposal", "code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "encode-invariant", "grill-with-docs", "improve-harness", "onboard-repository", "tdd"];
+const expectedSkills = ["audit-onboarding-proposal", "code-review", "codebase-design", "contract-first", "diagnosing-bugs", "domain-modeling", "encode-invariant", "grill-with-docs", "improve-harness", "onboard-repository", "tdd"];
 const expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);
+const mattPocockSkills = new Set(["code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-with-docs", "tdd"]);
 const repositoryHarnessSkills = new Set(["audit-onboarding-proposal", "encode-invariant", "improve-harness", "onboard-repository"]);
+const eccSkills = new Set(["contract-first", "tdd"]);
 const mattPocockCommit = "5b15a47f2d7150f545fbcacbfe381787fc0230dc";
 const repositoryHarnessCommit = "e765792b635b4d5e3e5fc0578f82f9ca5dea2681";
+const eccCommit = "d8409a4b0813771235555e32e3d8046a73988bfa";
+
+function sourceCommitsFor(name) {
+	const commits = [];
+	if (mattPocockSkills.has(name)) commits.push(mattPocockCommit);
+	if (repositoryHarnessSkills.has(name)) commits.push(repositoryHarnessCommit);
+	if (eccSkills.has(name)) commits.push(eccCommit);
+	return commits;
+}
 
 function fail(message) {
 	throw new Error(message);
@@ -101,7 +112,7 @@ function verifyWorkflowPayload() {
 
 function verifySkillsPayload() {
 	const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
-	if (JSON.stringify(manifest.pi?.skills) !== JSON.stringify(expectedSkillEntries)) fail("Installed package does not load exactly the ten package skill directories");
+	if (JSON.stringify(manifest.pi?.skills) !== JSON.stringify(expectedSkillEntries)) fail("Installed package does not load exactly the eleven package skill directories");
 	const skillsRoot = join(packageRoot, "skills");
 	if (!existsSync(skillsRoot)) fail("Installed package skill root is missing");
 	const actual = readdirSync(skillsRoot, { withFileTypes: true })
@@ -114,8 +125,10 @@ function verifySkillsPayload() {
 		if (!text.startsWith("---\n") || !text.includes(`\nname: ${name}\n`) || !/\ndescription:\s*"[^\n]+"\n/.test(text)) {
 			fail(`Installed Pi skill frontmatter is invalid: ${name}`);
 		}
-		const sourceCommit = repositoryHarnessSkills.has(name) ? repositoryHarnessCommit : mattPocockCommit;
-		if (!text.includes(sourceCommit)) fail(`Installed Pi skill provenance is invalid: ${name}`);
+		const sourceCommits = sourceCommitsFor(name);
+		if (sourceCommits.length === 0 || sourceCommits.some((commit) => !text.includes(commit))) {
+			fail(`Installed Pi skill provenance is invalid: ${name}`);
+		}
 	}
 	if (workflowFiles(skillsRoot).some((path) => !/\.(?:md|txt)$/.test(path))) fail("Installed package skills must remain prompt/reference-only resources");
 	if (!readFileSync(join(skillsRoot, "UPSTREAM_LICENSE.txt"), "utf8").includes("Copyright (c) 2026 Matt Pocock")) {
@@ -123,6 +136,9 @@ function verifySkillsPayload() {
 	}
 	if (!readFileSync(join(skillsRoot, "REPOSITORY_HARNESS_LICENSE.txt"), "utf8").includes("Copyright (c) 2025 Hoang Nguyen")) {
 		fail("Installed Repository Harness skill license notice is missing");
+	}
+	if (!readFileSync(join(skillsRoot, "ECC_LICENSE.txt"), "utf8").includes("Copyright (c) 2026 Affaan Mustafa")) {
+		fail("Installed ECC skill license notice is missing");
 	}
 }
 

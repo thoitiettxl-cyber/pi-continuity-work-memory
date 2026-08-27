@@ -1,6 +1,6 @@
 # Pi Engineering Skills
 
-This directory ships ten Pi-native engineering skills with
+This directory ships eleven Pi-native engineering skills with
 `pi-continuity-work-memory`. A global package install makes them available in
 all repositories while applicable runtime instructions, repository `AGENTS.md`
 files, explicit user authority, repository documents, code, tests, and observed
@@ -12,6 +12,8 @@ behavior remain authoritative.
   authority-aware documentation only after material ambiguity is resolved.
 - `codebase-design` — deep-module, interface, seam, adapter, locality, and
   leverage design vocabulary.
+- `contract-first` — coordinate independently evolving consumers and providers
+  through one authoritative, machine-checkable boundary artifact.
 - `diagnosing-bugs` — feedback-loop-first diagnosis for difficult bugs and
   regressions.
 - `tdd` — behavior-first red/green development at repository-approved seams.
@@ -28,7 +30,7 @@ behavior remain authoritative.
   from an observed baseline through a materially equivalent fresh rerun.
 
 `grill-with-docs`, `onboard-repository`, `audit-onboarding-proposal`, and
-`improve-harness` are explicit-only through `/skill:<name>`. The other six may
+`improve-harness` are explicit-only through `/skill:<name>`. The other seven may
 be loaded by Pi when their descriptions match and can also be invoked directly.
 
 ## Shared Authority Contract

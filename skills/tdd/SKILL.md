@@ -1,11 +1,13 @@
 ---
 name: tdd
 description: "Implement a feature or bug fix test-first through public behavior using focused red/green vertical slices. Use when the user requests TDD, red-green development, regression coverage, or an implementation whose behavior should be established by automated tests."
-license: "MIT; adapted from mattpocock/skills — see ../UPSTREAM.md"
+license: "MIT; adapted from mattpocock/skills and affaan-m/ECC — see ../UPSTREAM.md"
 compatibility: "Pi >=0.84.1 <0.85.0; repository-native test runners; Alpine-compatible commands"
 metadata:
   source: "https://github.com/mattpocock/skills"
   source-commit: "5b15a47f2d7150f545fbcacbfe381787fc0230dc"
+  additional-source: "https://github.com/affaan-m/ECC"
+  additional-source-commit: "d8409a4b0813771235555e32e3d8046a73988bfa"
   adapted-for: "pi-continuity-work-memory"
 ---
 
@@ -52,6 +54,33 @@ For each smallest coherent behavior:
 A vertical slice may cross storage, application, interface, and tests when that
 is the smallest independently observable behavior. Avoid writing all tests
 first and all implementation later.
+
+## Regression-First Bug Fixes
+
+For a reproducible bug, add the smallest focused regression test through the
+public seam before changing production behavior. Confirm it fails because it
+exposes the reported behavior, not because of setup noise or an unrelated
+failure. Then make that same test green with the smallest coherent fix.
+
+Do not fabricate a RED state when the bug cannot be reproduced. Preserve the
+observed report, investigate with the repository's diagnosis workflow, and
+state the evidence gap instead of writing a test that already passes or encodes
+an assumed cause.
+
+Map the affected behavior across materially distinct execution paths before
+declaring the regression closed. Depending on the repository, these may include:
+
+- production and sandbox behavior;
+- a real adapter and a test adapter;
+- each affected feature flag state;
+- the success path and documented error path; or
+- versioned, cached, retry, or fallback behavior that can diverge.
+
+Exercise only paths with a plausible independent drift mechanism. Do not
+enumerate unaffected combinations or turn one regression into a coverage quota.
+Derive the expected result from the report, accepted contract, invariant, or
+known example. Review by the same agent that wrote the fix is not independent
+proof; executable behavior evidence must be able to falsify the fix.
 
 ## Test Quality
 

@@ -1,7 +1,7 @@
 # Engineering Skills Sources And Adaptation
 
-The packaged skills are reviewed adaptations, not symlinks. Neither source
-checkout is part of the release payload or required at runtime.
+The packaged skills are reviewed adaptations, not symlinks. No source checkout
+is part of the release payload or required at runtime.
 
 ## Sources
 
@@ -24,6 +24,17 @@ Repository Harness remains an independent product. This package does not install
 invoke, import, or depend on it; only the reviewed skill methods listed below
 were adapted.
 
+### Everything Claude Code (ECC)
+
+- Repository: `https://github.com/affaan-m/ECC`
+- Local reviewed snapshot: `/root/code/ECC`
+- Pinned commit: `d8409a4b0813771235555e32e3d8046a73988bfa`
+- License: MIT, reproduced in `ECC_LICENSE.txt`
+
+Only the reviewed contract-first and regression-testing methods are adapted.
+This package does not install or depend on ECC, its hooks, agents, commands,
+scripts, MCP configuration, or runtime.
+
 ## Source Map
 
 | Shipped skill | Reviewed source material |
@@ -31,7 +42,8 @@ were adapted.
 | `grill-with-docs` | Matt Pocock `skills/engineering/grill-with-docs/SKILL.md`, `skills/productivity/grilling/SKILL.md`, and domain-modeling material below |
 | `codebase-design` | Matt Pocock `skills/engineering/codebase-design/SKILL.md`, `DEEPENING.md`, `DESIGN-IT-TWICE.md` |
 | `diagnosing-bugs` | Matt Pocock `skills/engineering/diagnosing-bugs/SKILL.md` and `scripts/hitl-loop.template.sh` |
-| `tdd` | Matt Pocock `skills/engineering/tdd/SKILL.md`, `tests.md`, `mocking.md` |
+| `tdd` | Matt Pocock `skills/engineering/tdd/SKILL.md`, `tests.md`, `mocking.md`; ECC `skills/ai-regression-testing/SKILL.md` regression-first and materially distinct path methods |
+| `contract-first` | ECC `skills/contract-first/SKILL.md` |
 | `code-review` | Matt Pocock `skills/engineering/code-review/SKILL.md` |
 | `domain-modeling` | Matt Pocock `skills/engineering/domain-modeling/SKILL.md`, `CONTEXT-FORMAT.md`, `ADR-FORMAT.md` |
 | `encode-invariant` | Repository Harness `.agents/skills/encode-invariant/SKILL.md` and `docs/patterns/encoding-invariants.md` |
@@ -61,6 +73,9 @@ package's runtime and authority model:
   external effects require explicit target-specific authority.
 - Shell guidance follows restrictive Alpine environments and never relies on a
   desktop opener, service manager, hidden command wrapper, or detached process.
+- ECC adaptations remain prompt-only and omit Claude hooks, commands, agents,
+  Context7, automatic dependency installation, fixed coverage quotas, and
+  self-evaluation as evidence.
 
 ## Repository Harness Adaptation Boundary
 
@@ -79,7 +94,7 @@ stops at a read-only proposal until exact documentation wording is later
 approved; its companion audit is independently read-only; workflow improvement
 requires an observed baseline and a materially equivalent fresh rerun.
 
-## Updating From Either Source
+## Updating From Any Source
 
 1. Record the candidate source repository, commit, and license.
 2. Diff only the mapped source material against the relevant adapted copy.

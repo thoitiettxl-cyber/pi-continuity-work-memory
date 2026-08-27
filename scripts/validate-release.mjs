@@ -10,11 +10,22 @@ const manifest = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"))
 const failures = [];
 const piCandidate = resolve(root, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
 const pi = process.env.PI_VALIDATION_PI || (existsSync(piCandidate) ? piCandidate : "pi");
-const expectedSkills = ["audit-onboarding-proposal", "code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "encode-invariant", "grill-with-docs", "improve-harness", "onboard-repository", "tdd"];
+const expectedSkills = ["audit-onboarding-proposal", "code-review", "codebase-design", "contract-first", "diagnosing-bugs", "domain-modeling", "encode-invariant", "grill-with-docs", "improve-harness", "onboard-repository", "tdd"];
 const expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);
+const mattPocockSkills = new Set(["code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-with-docs", "tdd"]);
 const repositoryHarnessSkills = new Set(["audit-onboarding-proposal", "encode-invariant", "improve-harness", "onboard-repository"]);
+const eccSkills = new Set(["contract-first", "tdd"]);
 const mattPocockCommit = "5b15a47f2d7150f545fbcacbfe381787fc0230dc";
 const repositoryHarnessCommit = "e765792b635b4d5e3e5fc0578f82f9ca5dea2681";
+const eccCommit = "d8409a4b0813771235555e32e3d8046a73988bfa";
+
+function sourceCommitsFor(name) {
+	const commits = [];
+	if (mattPocockSkills.has(name)) commits.push(mattPocockCommit);
+	if (repositoryHarnessSkills.has(name)) commits.push(repositoryHarnessCommit);
+	if (eccSkills.has(name)) commits.push(eccCommit);
+	return commits;
+}
 const piResult = spawnSync(pi, ["--version"], { encoding: "utf8", timeout: 30_000 });
 let piVersion = "unavailable";
 if (piResult.status !== 0) failures.push(`Pi version check failed: ${piResult.stderr || piResult.stdout}`);
@@ -59,7 +70,7 @@ if (!Array.isArray(manifest.files)) failures.push("package.json files must defin
 else for (const path of requiredPayload) if (!manifest.files.includes(path)) failures.push(`Release payload is missing ${path}`);
 const piEntries = [...(manifest.pi?.extensions ?? []), ...(manifest.pi?.skills ?? [])];
 if (piEntries.some((entry) => typeof entry === "string" && entry.includes("repository-harness"))) failures.push("Repository Harness appears as a Pi runtime resource");
-if (JSON.stringify(manifest.pi?.skills) !== JSON.stringify(expectedSkillEntries)) failures.push("Pi manifest must load exactly the ten package skill directories");
+if (JSON.stringify(manifest.pi?.skills) !== JSON.stringify(expectedSkillEntries)) failures.push("Pi manifest must load exactly the eleven package skill directories");
 const skillsRoot = resolve(root, "skills");
 let skillCount = 0;
 if (!existsSync(skillsRoot)) failures.push("Package skill root is missing");
@@ -75,8 +86,10 @@ else {
 		if (!text.startsWith("---\n") || !text.includes(`\nname: ${name}\n`) || !/\ndescription:\s*"[^\n]+"\n/.test(text)) {
 			failures.push(`Pi skill frontmatter is invalid: ${name}`);
 		}
-		const sourceCommit = repositoryHarnessSkills.has(name) ? repositoryHarnessCommit : mattPocockCommit;
-		if (!text.includes(sourceCommit)) failures.push(`Pinned source provenance is missing: ${name}`);
+		const sourceCommits = sourceCommitsFor(name);
+		if (sourceCommits.length === 0 || sourceCommits.some((commit) => !text.includes(commit))) {
+			failures.push(`Pinned source provenance is missing: ${name}`);
+		}
 	}
 	const skillText = walk(skillsRoot).filter((path) => /\.(?:md|txt)$/.test(path)).map((path) => readFileSync(path, "utf8")).join("\n");
 	if (walk(skillsRoot).some((path) => !/\.(?:md|txt)$/.test(path))) failures.push("Package skills must remain prompt/reference-only resources");
@@ -85,6 +98,7 @@ else {
 	}
 	if (!skillText.includes("Copyright (c) 2026 Matt Pocock")) failures.push("Matt Pocock skill license notice is missing");
 	if (!skillText.includes("Copyright (c) 2025 Hoang Nguyen")) failures.push("Repository Harness skill license notice is missing");
+	if (!skillText.includes("Copyright (c) 2026 Affaan Mustafa")) failures.push("ECC skill license notice is missing");
 }
 const workflowRoot = resolve(root, "workflow");
 const workflowManifestPath = resolve(workflowRoot, "manifest.json");

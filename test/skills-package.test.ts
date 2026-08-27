@@ -11,6 +11,7 @@ const expectedSkills = [
 	"audit-onboarding-proposal",
 	"code-review",
 	"codebase-design",
+	"contract-first",
 	"diagnosing-bugs",
 	"domain-modeling",
 	"encode-invariant",
@@ -33,6 +34,10 @@ const repositoryHarnessSkills = [
 	"improve-harness",
 	"onboard-repository",
 ] as const;
+const eccSkills = [
+	"contract-first",
+	"tdd",
+] as const;
 const explicitOnlySkills = new Set([
 	"audit-onboarding-proposal",
 	"grill-with-docs",
@@ -42,6 +47,15 @@ const explicitOnlySkills = new Set([
 const expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);
 const mattPocockCommit = "5b15a47f2d7150f545fbcacbfe381787fc0230dc";
 const repositoryHarnessCommit = "e765792b635b4d5e3e5fc0578f82f9ca5dea2681";
+const eccCommit = "d8409a4b0813771235555e32e3d8046a73988bfa";
+
+function sourceCommitsFor(name: typeof expectedSkills[number]): string[] {
+	const commits: string[] = [];
+	if (mattPocockSkills.includes(name as typeof mattPocockSkills[number])) commits.push(mattPocockCommit);
+	if (repositoryHarnessSkills.includes(name as typeof repositoryHarnessSkills[number])) commits.push(repositoryHarnessCommit);
+	if (eccSkills.includes(name as typeof eccSkills[number])) commits.push(eccCommit);
+	return commits;
+}
 
 function filesBelow(path: string): string[] {
 	return readdirSync(path, { withFileTypes: true }).flatMap((entry) => {
@@ -75,7 +89,7 @@ function skillText(name: string): string {
 	return readFileSync(join(skillsRoot, name, "SKILL.md"), "utf8");
 }
 
-test("package declares exactly the ten shipped Pi skill directories", () => {
+test("package declares exactly the eleven shipped Pi skill directories", () => {
 	const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as {
 		files?: string[];
 		pi?: { extensions?: string[]; skills?: string[] };
@@ -105,10 +119,11 @@ test("skill inventory and frontmatter are Pi-compatible", () => {
 		assert.equal(typeof metadata.description, "string");
 		assert.ok(String(metadata.description).length > 20 && String(metadata.description).length <= 1_024);
 		assert.match(String(metadata.compatibility), /Pi >=0\.84\.1 <0\.85\.0/);
-		const sourceCommit = repositoryHarnessSkills.includes(name as typeof repositoryHarnessSkills[number])
-			? repositoryHarnessCommit
-			: mattPocockCommit;
-		assert.ok(text.includes(sourceCommit), `${name} omits its pinned source commit`);
+		const sourceCommits = sourceCommitsFor(name);
+		assert.ok(sourceCommits.length > 0, `${name} has no reviewed source commit`);
+		for (const sourceCommit of sourceCommits) {
+			assert.ok(text.includes(sourceCommit), `${name} omits pinned source commit ${sourceCommit}`);
+		}
 		assert.ok(statSync(path).size < 16_000);
 		const headings = text.match(/^#{1,6} .+$/gm) ?? [];
 		for (let index = 1; index < headings.length; index += 1) {
@@ -185,6 +200,34 @@ test("grill-with-docs scales the decision frontier without weakening mutation au
 	assert.doesNotMatch(grill, /fix it within scope if trivial/i);
 });
 
+test("contract-first coordinates independent boundaries without creating ceremony or authority", () => {
+	const contract = skillText("contract-first");
+	assert.match(contract, /independently evolving consumers and providers/i);
+	assert.match(contract, /same atomic change[\s\S]*shared type/i);
+	assert.match(contract, /one authoritative[\s\S]*artifact/i);
+	assert.match(contract, /consumer jobs/i);
+	assert.match(contract, /nullability[\s\S]*enums[\s\S]*errors/i);
+	assert.match(contract, /actual serialized/i);
+	assert.match(contract, /materially distinct paths/i);
+	assert.match(contract, /untrusted data/i);
+	assert.match(contract, /do not install/i);
+	assert.match(contract, /automatic skill loading[\s\S]*does not authorize/i);
+	assert.match(contract, /continuity_prepare_work/);
+	assert.match(contract, /Do not commit, push/i);
+});
+
+test("tdd turns reproducible bugs into regression guards across material paths", () => {
+	const tdd = skillText("tdd");
+	assert.match(tdd, /reproducible bug[\s\S]*regression test/i);
+	assert.match(tdd, /confirm it fails[\s\S]*reported behavior/i);
+	assert.match(tdd, /Do not fabricate a RED state/i);
+	assert.match(tdd, /materially distinct execution paths/i);
+	for (const path of ["production", "sandbox", "test adapter", "feature flag", "error path"]) assert.ok(tdd.includes(path));
+	assert.match(tdd, /same agent[\s\S]*not independent\s+proof/i);
+	assert.doesNotMatch(tdd, /80% coverage/i);
+	assert.doesNotMatch(tdd, /test every path/i);
+});
+
 test("repository workflow skills preserve their distinct authority and proof boundaries", () => {
 	const invariant = skillText("encode-invariant");
 	assert.match(invariant, /Automatic skill loading.*does not authorize/is);
@@ -250,16 +293,21 @@ test("domain-modeling uses Continuity without creating parallel authority", () =
 	assert.match(domain, /checkpoint.*never.*completion/is);
 });
 
-test("source provenance and both MIT notices are shipped", () => {
+test("source provenance and all three MIT notices are shipped", () => {
 	const provenance = readFileSync(join(skillsRoot, "UPSTREAM.md"), "utf8");
 	const mattLicense = readFileSync(join(skillsRoot, "UPSTREAM_LICENSE.txt"), "utf8");
 	const repositoryHarnessLicense = readFileSync(join(skillsRoot, "REPOSITORY_HARNESS_LICENSE.txt"), "utf8");
+	const eccLicense = readFileSync(join(skillsRoot, "ECC_LICENSE.txt"), "utf8");
 	assert.ok(provenance.includes(mattPocockCommit));
 	assert.ok(provenance.includes(repositoryHarnessCommit));
+	assert.ok(provenance.includes(eccCommit));
 	for (const name of mattPocockSkills) assert.ok(provenance.includes(`\`${name}\``));
 	for (const name of repositoryHarnessSkills) assert.ok(provenance.includes(`\`${name}\``));
+	for (const name of eccSkills) assert.ok(provenance.includes(`\`${name}\``));
 	assert.match(mattLicense, /Copyright \(c\) 2026 Matt Pocock/);
 	assert.match(mattLicense, /Permission is hereby granted/);
 	assert.match(repositoryHarnessLicense, /Copyright \(c\) 2025 Hoang Nguyen/);
 	assert.match(repositoryHarnessLicense, /Permission is hereby granted/);
+	assert.match(eccLicense, /Copyright \(c\) 2026 Affaan Mustafa/);
+	assert.match(eccLicense, /Permission is hereby granted/);
 });

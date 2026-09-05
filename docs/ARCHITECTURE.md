@@ -94,6 +94,8 @@ stay at the boundaries.
 |---|---|---|
 | Composition root | Registers Pi events, tools, commands, trust behavior, and wires services/stores | `src/extension.ts` |
 | Pi/session adapter | Builds branch context, embeds/restores Continuity state, and serializes bounded provider input | `src/interface/session-adapter.ts` |
+| Plan browser display | Read-only catalog/detail projections and Work/Refine editor-draft text | `src/domain/plan-browser.ts` |
+| Plan browser TUI | Trusted idle search/filter, Markdown detail, and reviewable editor drafts | `src/interface/plan-browser.ts` |
 | Core state | WorkState, evidence, operation, checkpoint, memory, and schema types | `src/domain/types.ts` |
 | Canonical integrity | Stable JSON/hashes, redaction, provider-bound sanitization, and bounded strings | `src/domain/canonical.ts` |
 | Managed-workflow policy | Work-shape derivation, workflow projection, document identity/path rules, and deterministic plan rendering | `src/domain/managed-workflow.ts` |
@@ -109,7 +111,7 @@ stay at the boundaries.
 | Memory persistence | Records, baseline generations, pipeline runs, leases, and citation usage | `src/infrastructure/memory-store.ts` |
 | SQLite integrity | Durable connection behavior, ordered migrations, backups, checksums, and schema verification | `src/infrastructure/sqlite.ts`, `src/infrastructure/sqlite-migrations.ts` |
 | Repository evidence | Canonical repository identity and complete stable Git fingerprinting | `src/infrastructure/git-fingerprint.ts` |
-| Managed files | Root-confined plan create/bind/finalize and crash-state recovery | `src/infrastructure/execution-plan-files.ts` |
+| Managed files | Root-confined plan create/bind/finalize, crash-state recovery, and bounded read-only catalog/detail | `src/infrastructure/execution-plan-files.ts` |
 | Package assets | Manifest-verified workflow asset loading | `src/infrastructure/workflow-assets.ts`, `workflow/` |
 | Engineering skills | Pi-discovered alignment/design/diagnosis/TDD/review/domain guidance with source provenance | `skills/`, `test/skills-package.test.ts` |
 | Provider boundary | Pi-backed Stage 1/Stage 2 memory provider | `src/infrastructure/pi-memory-provider.ts` |
@@ -158,6 +160,21 @@ stay at the boundaries.
 Direct user `!`/`!!` commands remain explicit human actions. They are recorded
 and invalidate stale evidence, but the agent preparation gate does not
 reinterpret them as workflow decisions.
+
+### Execution Plan Browser
+
+1. `/continuity plans [query]` runs only in a trusted idle TUI session with a
+   canonical Git repository root. RPC, JSON, print, untrusted, and
+   non-repository sessions return without UI or discovery.
+2. Catalog and detail reads reuse execution-plan path, symlink, identity, and
+   regular-file rules. Missing directories are not created. Each directory scan
+   stops at 500 entries and each file is capped at 256 KiB.
+3. Titles and recorded statuses are display data. They do not prove completion
+   or grant permission. Work is disabled for completed/history plans.
+4. Work and Refine only append a reviewable editor draft. The command never
+   binds, edits, finalizes, or submits. Session, tree, trust, or file identity
+   changes discard an in-flight overlay instead of writing a replacement
+   editor.
 
 Read-only shell discovery is recognized from parsed argv, including narrow Git
 and GitHub CLI views; output-writing, executable, credential-revealing,

@@ -60,6 +60,7 @@ import {
 	sessionFileKey,
 	sessionKey,
 } from "./interface/session-adapter.js";
+import { showPlanBrowser } from "./interface/plan-browser.js";
 
 const PlanStepSchema = Type.Object({
 	id: Type.String({ maxLength: 200 }),
@@ -174,6 +175,7 @@ export default function extension(pi: ExtensionAPI): void {
 	let unavailableReason: string | undefined;
 	let authorityCompromisedReason: string | undefined;
 	let generationToken = "0";
+	let planBrowserRequest = 0;
 	const manualPipelineControllers = new Set<AbortController>();
 	const manualPipelineRuns = new Set<Promise<void>>();
 	let contextPressureGovernor = new ContextPressureGovernor();
@@ -340,6 +342,7 @@ export default function extension(pi: ExtensionAPI): void {
 	};
 
 	async function startSession(event: SessionStartEvent, ctx: ExtensionContext): Promise<void> {
+		planBrowserRequest++;
 		context = ctx;
 		resetContextGovernor(ctx);
 		sessionGovernorEnabled = ctx.mode === "tui" && ctx.hasUI;
@@ -428,6 +431,7 @@ export default function extension(pi: ExtensionAPI): void {
 	});
 
 	pi.on("session_tree", async (_event, ctx) => {
+		planBrowserRequest++;
 		context = ctx;
 		resetContextGovernor(ctx);
 		scheduler.invalidate();
@@ -659,6 +663,7 @@ export default function extension(pi: ExtensionAPI): void {
 	});
 
 	pi.on("session_shutdown", async (_event, ctx) => {
+		planBrowserRequest++;
 		clearContextGovernorStatus(ctx);
 		sessionGovernorEnabled = false;
 		contextPressureGovernor = new ContextPressureGovernor();
@@ -952,11 +957,31 @@ export default function extension(pi: ExtensionAPI): void {
 	});
 
 	pi.registerCommand("continuity", {
-		description: "Continuity status, context governor, managed workflow, checkpoint, operations, reconciliation, or state-only recovery",
+		description: "Continuity status, plan browser, context governor, managed workflow, checkpoint, operations, reconciliation, or state-only recovery",
 		async handler(args, ctx) {
 			context = ctx;
 			try {
 				const [subcommand = "status", value] = args.trim().split(/\s+/, 2);
+				if (subcommand === "plans") {
+					// Do not discover files or access UI outside a trusted idle TUI repository.
+					if (ctx.mode !== "tui" || !ctx.hasUI) return;
+					if (!ctx.isProjectTrusted() || !repositoryRoot) {
+						safeNotify(ctx, "Plan browser requires a trusted Git repository.", "warning");
+						return;
+					}
+					if (!ctx.isIdle()) {
+						safeNotify(ctx, "Wait for the agent to become idle before browsing plans.", "warning");
+						return;
+					}
+					const root = repositoryRoot;
+					const generation = generationToken;
+					const request = ++planBrowserRequest;
+					const isCurrent = () => context === ctx && repositoryRoot === root && generationToken === generation
+						&& request === planBrowserRequest && ctx.mode === "tui" && ctx.hasUI && ctx.isProjectTrusted() && ctx.isIdle();
+					const files = await ExecutionPlanFileService.open(root);
+					await showPlanBrowser(ctx, files, isCurrent, args.trim().slice("plans".length).trim());
+					return;
+				}
 				if (subcommand === "context-governor") {
 					const action = value || "status";
 					if (ctx.mode !== "tui" || !ctx.hasUI) {
@@ -1056,7 +1081,7 @@ export default function extension(pi: ExtensionAPI): void {
 					safeNotify(ctx, `Reconciled operation ${match[1]}; fresh validation is required.`);
 					return;
 				}
-				safeNotify(ctx, "Usage: /continuity status|show|context-governor status|on|off|workflow|workflow-mode <mode>|workflow-bind <path>|workflow-reset|checkpoint|recover [checkpoint-id]|operations|reconcile ...", "warning");
+				safeNotify(ctx, "Usage: /continuity status|show|plans [query]|context-governor status|on|off|workflow|workflow-mode <mode>|workflow-bind <path>|workflow-reset|checkpoint|recover [checkpoint-id]|operations|reconcile ...", "warning");
 			} catch (error) {
 				safeNotify(ctx, redactSecrets(error instanceof Error ? error.message : String(error)), "error");
 			}

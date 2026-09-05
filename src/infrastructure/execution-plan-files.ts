@@ -1,17 +1,22 @@
 import { constants } from "node:fs";
-import { link, lstat, mkdir, open, readFile, realpath, unlink } from "node:fs/promises";
+import { link, lstat, mkdir, open, opendir, readFile, realpath, unlink } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { withFileMutationQueue } from "@earendil-works/pi-coding-agent";
 
 import { sha256 } from "../domain/canonical.js";
 import type { WorkflowDocumentBinding, WorkflowDocumentStatus } from "../domain/managed-workflow.js";
+import type { PlanCatalog, PlanDetail } from "../domain/plan-browser.js";
 
 export class ExecutionPlanPathError extends Error {}
+class ExecutionPlanDirectoryMissingError extends ExecutionPlanPathError {}
 export class ExecutionPlanConflictError extends Error {}
 export class ExecutionPlanDigestMismatchError extends Error {}
 export class ExecutionPlanFinalizeError extends Error {}
 export class ExecutionPlanNotReadyError extends Error {}
+
+const BROWSER_MAX_FILE_BYTES = 256 * 1024;
+const BROWSER_MAX_DIRECTORY_ENTRIES = 500;
 
 export interface ExecutionPlanFileBinding extends WorkflowDocumentBinding {
 	kind: "execution-plan";
@@ -129,7 +134,7 @@ export class ExecutionPlanFileService {
 				metadata = await lstat(current);
 			} catch (error) {
 				if (errorCode(error) === "ENOENT") {
-					throw new ExecutionPlanPathError(`Execution plan directory does not exist: ${relative(this.root, current)}`);
+					throw new ExecutionPlanDirectoryMissingError(`Execution plan directory does not exist: ${relative(this.root, current)}`);
 				}
 				throw error;
 			}
@@ -172,6 +177,86 @@ export class ExecutionPlanFileService {
 			digest: sha256(content),
 			size: content.byteLength,
 		};
+	}
+
+	/** Bounded, read-only display. Does not bind a plan or create missing directories. */
+	async listExecutionPlans(): Promise<PlanCatalog> {
+		const catalog: PlanCatalog = { plans: [], issues: [], truncated: false };
+		for (const status of ["active", "completed"] as const) {
+			const prefix = `docs/plans/${status}`;
+			try {
+				const directory = await this.prepareDirectory(status, false);
+				let scanned = 0;
+				const names: string[] = [];
+				for await (const entry of await opendir(directory)) {
+					if (++scanned > BROWSER_MAX_DIRECTORY_ENTRIES) {
+						catalog.truncated = true;
+						break;
+					}
+					if (entry.name.endsWith(".md")) names.push(entry.name);
+				}
+				for (const name of names.sort()) {
+					try {
+						const { content: _content, ...summary } = await this.readExecutionPlan(`${prefix}/${name}`);
+						catalog.plans.push(summary);
+					} catch {
+						// Never echo an unvalidated filename, file contents or arbitrary OS errors.
+						catalog.issues.push(`${prefix}: skipped an unsafe, unreadable, oversized, changed or invalid plan`);
+					}
+				}
+			} catch (error) {
+				if (!(error instanceof ExecutionPlanDirectoryMissingError)) catalog.issues.push(`${prefix}: directory unavailable or unsafe`);
+			}
+		}
+		return catalog;
+	}
+
+	/** Fresh bounded detail, with optional optimistic digest check for a UI selection. */
+	async readExecutionPlan(relativePath: string, expectedDigest?: string): Promise<PlanDetail> {
+		const status = relativePath.startsWith("docs/plans/completed/") ? "completed" : "active";
+		const safePath = validateRelativePlanPath(relativePath, status);
+		if (/[\x00-\x1f\x7f-\x9f\u2028-\u202e\u2066-\u2069]/.test(safePath)) throw new ExecutionPlanPathError("Execution plan path contains control characters");
+		await this.prepareDirectory(status, false);
+		const absolutePath = this.absolute(safePath);
+		const metadata = await lstat(absolutePath);
+		if (!metadata.isFile() || metadata.isSymbolicLink()) throw new ExecutionPlanPathError("Execution plan must be a regular file");
+		// NOFOLLOW protects the leaf; NONBLOCK avoids hanging if a concurrent writer replaces it with a FIFO.
+		const handle = await open(absolutePath, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
+		try {
+			const before = await handle.stat();
+			if (!before.isFile() || before.dev !== metadata.dev || before.ino !== metadata.ino || before.size > BROWSER_MAX_FILE_BYTES) {
+				throw new ExecutionPlanPathError("Execution plan is unsafe, changed or exceeds the 256 KiB browser limit");
+			}
+			const buffer = Buffer.alloc(BROWSER_MAX_FILE_BYTES + 1);
+			let size = 0;
+			while (size < buffer.length) {
+				const { bytesRead } = await handle.read(buffer, size, buffer.length - size, size);
+				if (bytesRead === 0) break;
+				size += bytesRead;
+			}
+			const after = await handle.stat();
+			await this.prepareDirectory(status, false);
+			const current = await lstat(absolutePath);
+			if (size > BROWSER_MAX_FILE_BYTES || size !== before.size || after.size !== before.size
+				|| after.mtimeMs !== before.mtimeMs || after.ctimeMs !== before.ctimeMs
+				|| !current.isFile() || current.dev !== before.dev || current.ino !== before.ino
+				|| current.mtimeMs !== before.mtimeMs || current.ctimeMs !== before.ctimeMs
+				|| await realpath(absolutePath) !== absolutePath) {
+				throw new ExecutionPlanDigestMismatchError("Execution plan changed while reading; reopen the browser");
+			}
+			const bytes = buffer.subarray(0, size);
+			const digest = sha256(bytes);
+			if (expectedDigest !== undefined && expectedDigest !== digest) {
+				throw new ExecutionPlanDigestMismatchError("Execution plan changed since selection; reopen the browser");
+			}
+			const document = documentMetadata(bytes, safePath);
+			const content = bytes.toString("utf8");
+			const title = /^# +(?:Execution Plan: *)?([^\r\n]+)/m.exec(content)?.[1]?.trim() || safePath.split("/").at(-1)!;
+			const declaredStatus = /^## Status[ \t]*\r?\n\s*([^\r\n]+)/m.exec(content)?.[1]?.trim() || "Not recorded";
+			return { kind: "execution-plan", status, relativePath: safePath, ...document, digest, title: title.slice(0, 500), declaredStatus: declaredStatus.slice(0, 200), content };
+		} finally {
+			await handle.close();
+		}
 	}
 
 	async createExecutionPlan(relativePath: string, content: string): Promise<ExecutionPlanFileBinding> {

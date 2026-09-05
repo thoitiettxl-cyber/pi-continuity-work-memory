@@ -174,6 +174,7 @@ touch UI APIs through this path.
 Commands:
 
 - `/continuity status|show|workflow|workflow-mode <off|advisory|managed>`
+- `/continuity plans [query]`
 - `/continuity context-governor status|on|off`
 - `/continuity workflow-bind <docs/plans/active/file.md>|workflow-reset`
 - `/continuity checkpoint|recover [checkpoint-id]|operations`
@@ -198,6 +199,8 @@ Structured tools:
 - `memory_add`
 
 `/memory reset` resets only the memory store. It cannot delete Continuity state.
+
+`/continuity plans [query]` is trusted TUI-only. In an idle trusted Git repository it fuzzy-searches existing Markdown under `docs/plans/active/` and `docs/plans/completed/`, shows read-only detail, and can append a Work or Refine draft to the editor. It does not create directories, bind or edit a plan, change recorded status, or submit the draft; completed/history plans cannot be resumed with Work. Recorded plan status is display data, not completion proof. RPC, JSON, print, untrusted, and non-repository sessions do not open this UI. The host Pi process supplies `pi-tui` when loading the extension; this package pins that API only as a dev-only type and test dependency.
 
 ## Managed repository workflow
 

@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added `/continuity plans [query]`, a trusted TUI-only browser for existing execution plans that fuzzy-searches active/completed Markdown, shows read-only detail, and appends Work/Refine editor drafts without submitting, binding, or changing plan status.
+
 - Added an eleventh prompt-only global engineering skill, `contract-first`, for one authoritative consumer/provider boundary artifact with compatibility, untrusted-input, runtime-serialization, and managed-authority safeguards; strengthened `tdd` with reproducible regression-first proof and parity checks across materially distinct execution paths.
 
 - Added first-class GitHub installation through `pi install git:github.com/thoitiettxl-cyber/pi-continuity-work-memory`, with a pinned install-time TypeScript emitter, clean omit-dev Git-clone proof, and isolated Pi load verification while keeping generated `dist/` out of Git.

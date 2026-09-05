@@ -19,9 +19,12 @@ case "$(uname -m)" in
 esac
 
 node -e 'const [major,minor]=process.versions.node.split(".").map(Number); if (major<22 || (major===22 && minor<19)) process.exit(1)'
-validation_pi=${PI_VALIDATION_PI:-pi}
-pi_version=$("$validation_pi" --version)
+if [ -z "${PI_VALIDATION_PI:-}" ]; then
+  PI_VALIDATION_PI=$(node "$project_root/scripts/pi-version.mjs" --resolve)
+fi
+export PI_VALIDATION_PI
+pi_version=$("$PI_VALIDATION_PI" --version)
 node "$project_root/scripts/pi-version.mjs" "$pi_version" >/dev/null
 
-PI_VALIDATION_PI="$validation_pi" node "$project_root/scripts/validate-install.mjs" --package "$project_root"
-printf '{"status":"PASS","platform":"Alpine Linux 3.24 ARM64","node":">=22.19.0","pi":"%s","piRange":">=0.84.1 <0.85.0"}\n' "$pi_version"
+node "$project_root/scripts/validate-install.mjs" --package "$project_root"
+printf '{"status":"PASS","platform":"Alpine Linux 3.24 ARM64","node":">=22.19.0","pi":"%s","piRange":">=0.84.1 <0.86.0"}\n' "$pi_version"

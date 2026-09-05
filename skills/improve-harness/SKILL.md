@@ -2,7 +2,7 @@
 name: improve-harness
 description: "Improve one bounded agent-facing guidance, tool, runbook, or validation behavior from an observed baseline and verify it with a materially equivalent fresh Pi rerun. Use only through /skill:improve-harness when the user explicitly authorizes that experiment. Do not use for ordinary product work, speculative cleanup, one unexplained agent mistake, or automatic post-task reflection."
 license: "MIT; adapted from repository-harness — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; managed-workflow aware; fresh-session rerun required for an improvement claim"
+compatibility: "Pi >=0.84.1 <0.86.0; managed-workflow aware; fresh-session rerun required for an improvement claim"
 metadata:
   source: "https://github.com/hoangnb24/repository-harness"
   source-commit: "e765792b635b4d5e3e5fc0578f82f9ca5dea2681"

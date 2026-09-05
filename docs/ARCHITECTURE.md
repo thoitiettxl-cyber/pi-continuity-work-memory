@@ -296,7 +296,7 @@ opening the repository or starting/ending an agent run creates no document.
 - Keep pure integrity/state rules in `src/domain/` and side effects at the
   infrastructure/runtime boundaries.
 - Preserve strict ESM TypeScript style and the existing support contract:
-  Node.js `>=22.19.0`, Pi `>=0.84.1 <0.85.0`, no production runtime
+  Node.js `>=22.19.0`, Pi `>=0.84.1 <0.86.0`, no production runtime
   dependencies, and only the pinned TypeScript install-time emitter required to
   generate ignored `dist/` output in Pi's default omit-dev Git clone.
 - Add focused tests whenever behavior, authority, recovery, migration,

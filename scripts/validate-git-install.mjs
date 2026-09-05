@@ -4,7 +4,7 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 
-import { SUPPORTED_PI_RANGE, assertSupportedPiVersion } from "./pi-version.mjs";
+import { SUPPORTED_PI_RANGE, assertSupportedPiVersion, resolvePiExecutable } from "./pi-version.mjs";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(resolve(projectRoot, "package.json"), "utf8"));
@@ -16,8 +16,7 @@ const agentDir = join(proofRoot, "agent");
 const workspace = join(proofRoot, "workspace");
 const sessionDir = join(proofRoot, "sessions");
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-const piCandidate = resolve(projectRoot, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
-const pi = process.env.PI_VALIDATION_PI || (existsSync(piCandidate) ? piCandidate : "pi");
+const pi = resolvePiExecutable();
 let gitServer;
 
 function fail(message) {

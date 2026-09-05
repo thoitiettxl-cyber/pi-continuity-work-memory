@@ -17,6 +17,7 @@ Provide /continuity plans [query] in trusted TUI repositories to fuzzy-search ex
 - User supplied /storage/emulated/0/Download/todos.ts and explicitly selected the recommended execution-plan UX adaptation rather than an independent todo subsystem.
 - AGENTS.md; docs/ARCHITECTURE.md; README.md; proof/ACCEPTANCE.md.
 - Installed Pi extension/TUI documentation and locked Pi 0.84.1 public declarations; reference file is behavioral inspiration, not code copied into the package.
+- Follow-on 2026-09-05: user rejected peer range `>=0.84.1 <0.85.0`, required proofs to check the live system Pi, and required the extension to be compatible with that host. Observed PATH `pi --version` 0.85.1 and installed `@earendil-works/pi-coding-agent` 0.85.1.
 
 ## Scope
 
@@ -27,12 +28,14 @@ In scope:
 - Tests for file safety, stale/deleted plans, editor preservation, mode/trust/session boundaries, UI rendering, and existing authority remaining unchanged.
 - README, architecture/acceptance mapping, focused proof and required runtime/premerge validation.
 - Pin the existing host-provided pi-tui API as a dev-only dependency if needed for strict typecheck and native ESM tests; no runtime dependency additions.
+- Follow-on: widen runtime support to `>=0.84.1 <0.86.0`, accept live 0.85.x, and make install/premerge/provider proofs use PATH/`PI_VALIDATION_PI` instead of nested `node_modules/.bin/pi`.
 
 Out of scope:
 
 - Independent todo storage, tags/assignments/locks, automatic GC, plan editing/deletion/finalization, automatic binding, or synthetic user submission.
 - Memory/SQLite/receipt/checkpoint authority changes, provider calls, host changes, installation/deployment, commits or publishing.
 - Unrelated pre-existing changes and historical release archives.
+- Follow-on still excludes package version bump, GitHub release, commit/push/deploy unless separately requested, 0.85-only APIs, and rewriting historical PASS rows.
 
 ## Constraints
 
@@ -91,4 +94,15 @@ Observed 2026-09-05 on this worktree, Pi 0.84.1, Node v22.23.2:
 - `npm run validate`: PASS, including `validate:install`, omit-dev `validate:git-install`, and `validate:release`
 - `scripts/validate-premerge.sh`: PASS, including a second validate plus `git diff --check -- .`
 
-Not claimed: live-terminal overlay recording, user-package deploy, commit, publish, or provider proof. This Result write is later than those gates; finalization still needs fresh receipt-bound validation.
+Not claimed at that write: live-terminal overlay recording, user-package deploy, commit, publish, or provider proof.
+
+Follow-on 2026-09-05: host Pi compatibility. Observed PATH `pi --version` 0.85.1; npm-prepended `node_modules/.bin/pi` remains 0.84.1. Runtime range is now `>=0.84.1 <0.86.0`. Proofs skip nested `node_modules/.bin` and report the live host.
+
+Observed 2026-09-05 on this worktree, live Pi 0.85.1, Node v22.23.2:
+
+- `npm run typecheck`: PASS
+- `npm test`: 227/227 PASS
+- `npm run validate`: PASS; `validate:install`, `validate:git-install`, and `validate:release` each reported `"pi":"0.85.1","piRange":">=0.84.1 <0.86.0"`
+- `git diff --check`: PASS
+
+Not claimed: `scripts/validate-premerge.sh` rerun after the follow-on (equivalent validate + `git diff --check` already passed), live TUI overlay, commit, push, deploy of this follow-on, or provider proof. Finalization still needs fresh receipt-bound validation.

@@ -2,7 +2,7 @@
 name: tdd
 description: "Implement a feature or bug fix test-first through public behavior using focused red/green vertical slices. Use when the user requests TDD, red-green development, regression coverage, or an implementation whose behavior should be established by automated tests."
 license: "MIT; adapted from mattpocock/skills and affaan-m/ECC — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; repository-native test runners; Alpine-compatible commands"
+compatibility: "Pi >=0.84.1 <0.86.0; repository-native test runners; Alpine-compatible commands"
 metadata:
   source: "https://github.com/mattpocock/skills"
   source-commit: "5b15a47f2d7150f545fbcacbfe381787fc0230dc"

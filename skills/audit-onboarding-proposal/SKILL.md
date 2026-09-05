@@ -2,7 +2,7 @@
 name: audit-onboarding-proposal
 description: "Independently audit exact proposed onboarding documentation hunks against a pinned repository revision. Use only through /skill:audit-onboarding-proposal with explicit hunk IDs and destinations. This workflow is read-only, returns hunk-level evidence dispositions, and never applies the proposal."
 license: "MIT; adapted from repository-harness — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; independent read-only repository and Git inspection; Alpine-compatible"
+compatibility: "Pi >=0.84.1 <0.86.0; independent read-only repository and Git inspection; Alpine-compatible"
 metadata:
   source: "https://github.com/hoangnb24/repository-harness"
   source-commit: "e765792b635b4d5e3e5fc0578f82f9ca5dea2681"

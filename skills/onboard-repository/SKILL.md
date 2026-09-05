@@ -2,7 +2,7 @@
 name: onboard-repository
 description: "Inspect an unfamiliar or brownfield repository and propose evidence-backed agent-facing guidance. Use only through /skill:onboard-repository when the user explicitly asks to onboard, map, assess, or backfill repository guidance. The first pass is always read-only; exact approved documentation hunks may be applied only in a later authorized pass."
 license: "MIT; adapted from repository-harness — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; first pass uses read-only repository and Git tools; Alpine-compatible"
+compatibility: "Pi >=0.84.1 <0.86.0; first pass uses read-only repository and Git tools; Alpine-compatible"
 metadata:
   source: "https://github.com/hoangnb24/repository-harness"
   source-commit: "e765792b635b4d5e3e5fc0578f82f9ca5dea2681"

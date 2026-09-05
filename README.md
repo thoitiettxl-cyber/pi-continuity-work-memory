@@ -1,13 +1,13 @@
 # Pi Continuity + Work Memory
 
-One opt-in Pi package for versions `>=0.84.1 <0.85.0`, providing a Pi extension for branch-correct work continuity, a package-owned managed repository workflow, evidence-backed safe checkpoints, and scoped persistent learning memory, plus eleven global engineering skills adapted for the same authority and runtime contract.
+One opt-in Pi package for versions `>=0.84.1 <0.86.0`, providing a Pi extension for branch-correct work continuity, a package-owned managed repository workflow, evidence-backed safe checkpoints, and scoped persistent learning memory, plus eleven global engineering skills adapted for the same authority and runtime contract.
 
 The implementation combines clean architecture and transactional recovery, Pi compaction/session lifecycle handling, a package-owned workflow and template bundle, and a two-stage provider-backed memory pipeline. Consumer repositories do not need `repository-harness` installed, and the extension never invokes or installs it.
 
 ## Requirements
 
 - Node.js 22.19.0 or newer
-- Pi `>=0.84.1 <0.85.0`
+- Pi `>=0.84.1 <0.86.0`
 - Built-in `node:sqlite`; no native SQLite npm addon
 - Git for verified safe checkpoints
 - Network access to the reviewed Git source and npm registry/cache for Git installation
@@ -389,7 +389,7 @@ Additional executable proofs:
 # Validate an explicit supported Pi binary and report its actual version
 PI_VALIDATION_PI=/absolute/path/to/pi node scripts/validate-install.mjs
 
-# Requires Alpine Linux 3.24 ARM64, Node >=22.19.0, and Pi >=0.84.1 <0.85.0
+# Requires Alpine Linux 3.24 ARM64, Node >=22.19.0, and Pi >=0.84.1 <0.86.0
 PI_VALIDATION_PI=/absolute/path/to/pi scripts/validate-alpine-arm64.sh
 
 # Requires a credential-configured Pi directory and the actual target model
@@ -398,10 +398,11 @@ PI_PROVIDER_PROOF_MODEL=provider/model \
 node scripts/validate-provider.mjs
 ```
 
-The lockfile pins Pi 0.84.1 as the lower-bound development dependency. Set
-`PI_VALIDATION_PI` (or `PI_PROVIDER_PROOF_PI` for provider proof) to exercise a
-different installed binary within the peer range. Proofs that reach a Pi binary
-report both its actual version and the supported range; environment checks that
-cannot reach Pi report `DEFERRED` with their missing prerequisite.
+The lockfile pins Pi 0.84.1 as the lower-bound development dependency. Host
+proofs use PATH `pi` unless `PI_VALIDATION_PI` (or `PI_PROVIDER_PROOF_PI` for
+provider proof) names another binary in the peer range. Nested
+`node_modules/.bin/pi` is not treated as the live system. Proofs that reach a Pi
+binary report both its actual version and the supported range; environment
+checks that cannot reach Pi report `DEFERRED` with their missing prerequisite.
 
 Missing platform or provider credentials produce `DEFERRED`, never `PASS`. See `proof/ACCEPTANCE.md` for the evidence map.

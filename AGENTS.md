@@ -22,7 +22,7 @@ architecture, workflow, validation ladder, and documentation map.
 
 ## Implementation
 
-- Use Node.js `>=22.19.0`; run `npm ci` for a reproducible install. The supported Pi range is `>=0.84.1 <0.85.0`.
+- Use Node.js `>=22.19.0`; run `npm ci` for a reproducible install. The supported Pi range is `>=0.84.1 <0.86.0`. Proofs must check the live system `pi` (PATH or `PI_VALIDATION_PI`), not a nested `node_modules` pin.
 - Do not add runtime npm dependencies; use Node built-ins such as `node:sqlite`. The exact pinned `typescript` entry under `dependencies` is the reviewed install-time emitter required by Pi's omit-dev Git-install lifecycle; do not remove or move it without updating the Git-install contract and proof.
 - Preserve the responsibilities described in `docs/ARCHITECTURE.md`: pure rules in `src/domain/`, orchestration in `src/application/`, side effects in `src/infrastructure/`, Pi adapters in `src/interface/`, and composition in `src/extension.ts`.
 - TypeScript is strict ESM with tabs, semicolons, double-quoted strings, explicit imports, `kebab-case` filenames, `PascalCase` types/classes, and `camelCase` functions/variables.

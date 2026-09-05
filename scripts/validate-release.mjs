@@ -3,13 +3,12 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { isAbsolute, resolve, relative, sep } from "node:path";
 
-import { SUPPORTED_PI_RANGE, assertSupportedPiVersion } from "./pi-version.mjs";
+import { SUPPORTED_PI_RANGE, assertSupportedPiVersion, resolvePiExecutable } from "./pi-version.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
 const failures = [];
-const piCandidate = resolve(root, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
-const pi = process.env.PI_VALIDATION_PI || (existsSync(piCandidate) ? piCandidate : "pi");
+const pi = resolvePiExecutable();
 const expectedSkills = ["audit-onboarding-proposal", "code-review", "codebase-design", "contract-first", "diagnosing-bugs", "domain-modeling", "encode-invariant", "grill-with-docs", "improve-harness", "onboard-repository", "tdd"];
 const expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);
 const mattPocockSkills = new Set(["code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-with-docs", "tdd"]);

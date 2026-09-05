@@ -2,7 +2,7 @@
 name: codebase-design
 description: "Design or improve module interfaces and seams for depth, locality, leverage, testability, and AI navigability. Use when shaping an interface, locating a seam, evaluating adapters, reviewing architectural coupling, or comparing module designs."
 license: "MIT; adapted from mattpocock/skills — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; no runtime dependencies or desktop assumptions"
+compatibility: "Pi >=0.84.1 <0.86.0; no runtime dependencies or desktop assumptions"
 metadata:
   source: "https://github.com/mattpocock/skills"
   source-commit: "5b15a47f2d7150f545fbcacbfe381787fc0230dc"

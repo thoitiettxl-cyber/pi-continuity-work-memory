@@ -2,7 +2,7 @@
 name: encode-invariant
 description: "Convert an accepted repository architecture, reliability, security, or quality rule into the smallest repository-native mechanical guard, with allowed and forbidden proof and precise enforcement reporting. Use when asked to enforce a documented invariant, prevent an accepted violation from recurring, add a structural policy check, or turn an accepted rule into validation. Do not use to infer policy from code, tests, defaults, or convention."
 license: "MIT; adapted from repository-harness — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; repository-native validation; Alpine-compatible tools"
+compatibility: "Pi >=0.84.1 <0.86.0; repository-native validation; Alpine-compatible tools"
 metadata:
   source: "https://github.com/hoangnb24/repository-harness"
   source-commit: "e765792b635b4d5e3e5fc0578f82f9ca5dea2681"

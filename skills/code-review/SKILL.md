@@ -2,7 +2,7 @@
 name: code-review
 description: "Review a branch, pull request, or worktree diff from a fixed Git point along separate Standards and Intent/Behavior axes. Use for code review, PR review, review since a commit or branch, or final pre-commit assessment."
 license: "MIT; adapted from mattpocock/skills — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; read-only Git and repository tools; optional serialized subagents"
+compatibility: "Pi >=0.84.1 <0.86.0; read-only Git and repository tools; optional serialized subagents"
 metadata:
   source: "https://github.com/mattpocock/skills"
   source-commit: "5b15a47f2d7150f545fbcacbfe381787fc0230dc"

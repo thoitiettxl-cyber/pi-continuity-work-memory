@@ -2,7 +2,7 @@
 name: domain-modeling
 description: "Build or sharpen repository domain language, resolve overloaded terms against code and scenarios, and document accepted reusable definitions or lasting trade-offs. Use when actively changing a glossary/context model or deciding whether an accepted trade-off warrants a repository-native decision record."
 license: "MIT; adapted from mattpocock/skills — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; repository-native documentation; managed-workflow aware"
+compatibility: "Pi >=0.84.1 <0.86.0; repository-native documentation; managed-workflow aware"
 metadata:
   source: "https://github.com/mattpocock/skills"
   source-commit: "5b15a47f2d7150f545fbcacbfe381787fc0230dc"

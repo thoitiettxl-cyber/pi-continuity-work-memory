@@ -2,7 +2,7 @@
 name: grill-with-docs
 description: "Clarify an uncertain engineering request through a focused, evidence-backed interview and preserve the resulting shared understanding in repository-authoritative documents when authorized. Invoke explicitly before implementation when intent, scope, constraints, terminology, recovery, or acceptance evidence is unclear."
 license: "MIT; adapted from mattpocock/skills — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; designed for pi-continuity-work-memory managed workflow and Alpine-compatible tools"
+compatibility: "Pi >=0.84.1 <0.86.0; designed for pi-continuity-work-memory managed workflow and Alpine-compatible tools"
 metadata:
   source: "https://github.com/mattpocock/skills"
   source-commit: "5b15a47f2d7150f545fbcacbfe381787fc0230dc"

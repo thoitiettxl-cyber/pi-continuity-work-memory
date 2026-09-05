@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-import { SUPPORTED_PI_RANGE, assertSupportedPiVersion } from "./pi-version.mjs";
+import { SUPPORTED_PI_RANGE, assertSupportedPiVersion, resolvePiExecutable } from "./pi-version.mjs";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const packageManifest = JSON.parse(readFileSync(resolve(projectRoot, "package.json"), "utf8"));
@@ -17,8 +17,7 @@ const sessionDir = join(proofRoot, "sessions");
 const continuityRoot = join(proofRoot, "continuity-store");
 const memoryRoot = join(proofRoot, "memory-store");
 const packageRoot = suppliedPackage ? resolve(suppliedPackage) : join(proofRoot, "extracted-package", "pi-continuity-work-memory");
-const piCandidate = resolve(projectRoot, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
-const pi = process.env.PI_VALIDATION_PI || (existsSync(piCandidate) ? piCandidate : "pi");
+const pi = resolvePiExecutable();
 const expectedSkills = ["audit-onboarding-proposal", "code-review", "codebase-design", "contract-first", "diagnosing-bugs", "domain-modeling", "encode-invariant", "grill-with-docs", "improve-harness", "onboard-repository", "tdd"];
 const expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);
 const mattPocockSkills = new Set(["code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-with-docs", "tdd"]);

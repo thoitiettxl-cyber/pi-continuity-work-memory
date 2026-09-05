@@ -2,7 +2,7 @@
 name: contract-first
 description: "Coordinate independently evolving consumers and providers through one authoritative, machine-checkable API, event, or payload contract. Use when parallel implementations risk field, nullability, enum, error, mock, or compatibility drift; do not use for one atomic same-module change with no independent consumer."
 license: "MIT; adapted from affaan-m/ECC — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; repository-native contract formats and validation; no generator or network dependency"
+compatibility: "Pi >=0.84.1 <0.86.0; repository-native contract formats and validation; no generator or network dependency"
 metadata:
   source: "https://github.com/affaan-m/ECC"
   source-commit: "d8409a4b0813771235555e32e3d8046a73988bfa"

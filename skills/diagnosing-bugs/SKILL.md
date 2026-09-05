@@ -2,7 +2,7 @@
 name: diagnosing-bugs
 description: "Diagnose difficult bugs, intermittent failures, and performance regressions with a red-capable feedback loop, minimization, falsifiable hypotheses, targeted instrumentation, and regression proof. Use when a failure is not already localized or the user explicitly asks to diagnose or debug it."
 license: "MIT; adapted from mattpocock/skills — see ../UPSTREAM.md"
-compatibility: "Pi >=0.84.1 <0.85.0; Alpine-compatible; uses repository-native tools and optional Eta Browser handoff"
+compatibility: "Pi >=0.84.1 <0.86.0; Alpine-compatible; uses repository-native tools and optional Eta Browser handoff"
 metadata:
   source: "https://github.com/mattpocock/skills"
   source-commit: "5b15a47f2d7150f545fbcacbfe381787fc0230dc"

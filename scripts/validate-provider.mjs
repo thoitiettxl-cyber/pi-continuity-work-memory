@@ -5,13 +5,12 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-import { SUPPORTED_PI_RANGE, assertSupportedPiVersion } from "./pi-version.mjs";
+import { SUPPORTED_PI_RANGE, assertSupportedPiVersion, resolvePiExecutable } from "./pi-version.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const model = process.env.PI_PROVIDER_PROOF_MODEL;
 const agentDir = process.env.PI_PROVIDER_PROOF_AGENT_DIR || process.env.PI_CODING_AGENT_DIR;
-const localPi = resolve(root, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
-const pi = process.env.PI_PROVIDER_PROOF_PI || (existsSync(localPi) ? localPi : "pi");
+const pi = resolvePiExecutable();
 
 let piVersion;
 
@@ -149,7 +148,7 @@ try {
 					if (value.type !== "response") continue;
 					if (value.id === "seed") {
 						if (!value.success) {
-							finish(new Error(`npm test seed failed: ${String(value.error || "RPC command rejected")}`));
+							finish(new Error(`provider-proof source seed failed: ${String(value.error || "RPC command rejected")}`));
 						} else if (!sentPipeline) {
 							sentPipeline = true;
 							child.stdin.write(`${JSON.stringify({ id: "pipeline", type: "prompt", message: "/memory run" })}\n`);
@@ -162,7 +161,7 @@ try {
 			child.stdin.write(`${JSON.stringify({
 				id: "seed",
 				type: "bash",
-				command: "npm test",
+				command: "cat package.json",
 			})}\n`);
 		});
 	}

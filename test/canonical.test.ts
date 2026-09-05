@@ -1,7 +1,20 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { redactSecrets, sanitizeProviderBoundText } from "../src/domain/canonical.js";
+import { escapeXmlText, redactSecrets, sanitizeProviderBoundText } from "../src/domain/canonical.js";
+
+test("escapeXmlText encodes ampersand, less-than, and greater-than independently and in combination", () => {
+	assert.equal(escapeXmlText("&"), "&amp;");
+	assert.equal(escapeXmlText("<"), "&lt;");
+	assert.equal(escapeXmlText(">"), "&gt;");
+	assert.equal(escapeXmlText("a&b<c>d"), "a&amp;b&lt;c&gt;d");
+});
+
+test("escapeXmlText encodes ampersand first so existing entity text is not mistaken for markup", () => {
+	assert.equal(escapeXmlText("&lt;"), "&amp;lt;");
+	assert.equal(escapeXmlText(""), "");
+	assert.equal(escapeXmlText(`"'`), `"'`);
+});
 
 test("memory-bound text redacts common API, OAuth, cookie, private-key, and session-token forms", () => {
 	const secrets = [

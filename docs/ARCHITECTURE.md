@@ -97,7 +97,7 @@ stay at the boundaries.
 | Plan browser display | Read-only catalog/detail projections and Work/Refine editor-draft text | `src/domain/plan-browser.ts` |
 | Plan browser TUI | Trusted idle search/filter, Markdown detail, and reviewable editor drafts | `src/interface/plan-browser.ts` |
 | Core state | WorkState, evidence, operation, checkpoint, memory, and schema types | `src/domain/types.ts` |
-| Canonical integrity | Stable JSON/hashes, redaction, provider-bound sanitization, and bounded strings | `src/domain/canonical.ts` |
+| Canonical integrity | Stable JSON/hashes, XML text-node escaping, redaction, provider-bound sanitization, and bounded strings | `src/domain/canonical.ts` |
 | Managed-workflow policy | Work-shape derivation, workflow projection, document identity/path rules, and deterministic plan rendering | `src/domain/managed-workflow.ts` |
 | Operation authority | Consequential-operation identity and ledger integrity | `src/domain/operation-ledger.ts` |
 | Validation authority | Receipt creation and verification | `src/domain/validation-receipt.ts` |
@@ -134,6 +134,23 @@ stay at the boundaries.
    enabled only for a trusted canonical Git repository.
 6. Session state is embedded back into Pi as context-only recovery material;
    embedded text never grants checkpoint authority.
+
+### Continuity Prompt Injection
+
+1. `before_agent_start` appends `ContinuityService.contextSummary()` to
+   `systemPrompt`. That string is the only injection caller for work-state
+   fields.
+2. Dynamic interpolations are untrusted escaped text-node data. A goal that is
+   non-empty after trim is wrapped once as `untrusted-objective`. Empty-after-trim
+   goal stays `Goal: (unset)`.
+3. When goal is non-empty after trim or a Bound plan exists (`managed` and a
+   binding), exactly one prompt-only `session-objective-policy` kind is
+   appended. The policy grants no mutation, reconciliation, validation,
+   checkpoint, or completion authority. `WorkState.goal` is operational
+   reminder only and is never a success owner.
+4. A context-pressure yield outranks continuing work on a first-time technical
+   blocker for that turn. Ending the run is not completion. The governor path
+   remains a separate `context` event and still must not send synthetic input.
 
 ### Managed Repository Workflow
 

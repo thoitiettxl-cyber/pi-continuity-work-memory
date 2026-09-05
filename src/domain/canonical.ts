@@ -25,6 +25,10 @@ export function chainedHash(parentHash: string, payloadHash: string): string {
 	return sha256(`pi-continuity-checkpoint-v1\n${parentHash}\n${payloadHash}`);
 }
 
+export function escapeXmlText(input: string): string {
+	return input.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
 export function boundedStrings(values: readonly string[] | undefined, maximum = 200): string[] {
 	if (!values) return [];
 	const unique = new Set<string>();

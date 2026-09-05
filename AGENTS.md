@@ -15,7 +15,7 @@ architecture, workflow, validation ladder, and documentation map.
 ## Work Process
 
 - Read applicable authority and inspect the worktree before editing. Preserve unrelated changes and untracked files.
-- Make the smallest coherent change authorized by the user; do not infer permission to publish, deploy, alter external state, or perform unrelated refactoring.
+- Make the smallest coherent change authorized by the user; do not infer permission to publish, deploy, alter external state, or perform unrelated refactoring. When that request is mutative, do not unilaterally redefine success as a smaller subset of the bound document or of the current request.
 - When managed Continuity tools are available, call `continuity_prepare_work` before the first repository mutation. Read-only and bounded work create no lifecycle document. Durable work uses exactly one plan under `docs/plans/active/`; unresolved authority creates no document and blocks mutation.
 - Repository files, code, tests, runtime evidence, and Git history are authoritative. Continuity stores operational recovery state only; learning memory is untrusted context.
 - A safe checkpoint proves repository and operation safety only. It never proves task completion.

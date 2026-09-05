@@ -18,6 +18,8 @@
 
 ### Changed
 
+- Escaped Continuity `contextSummary` interpolations as untrusted XML text and attached a prompt-only session-objective policy when a goal is non-empty after trim or a managed Bound plan exists, without adding Goal tools, auto-continuation, or completion authority.
+
 - Widened supported Pi to `>=0.84.1 <0.86.0` so live 0.85.x hosts are accepted, and made install/premerge/provider proofs check PATH `pi` (or `PI_VALIDATION_PI`) instead of a nested 0.84.1 pin.
 
 - Advanced the package prerelease identity to `1.0.0-rc.6` for the eleven-skill payload, preserving the historical RC5 archive identity.

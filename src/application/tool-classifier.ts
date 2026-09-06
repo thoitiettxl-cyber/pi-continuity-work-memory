@@ -15,7 +15,7 @@ const EXCLUDED_TOOLS = new Set([
 
 const MANAGED_WORKFLOW_MUTATION_TOOLS = new Set(["continuity_prepare_work", "continuity_finalize_work"]);
 
-const READ_ONLY_TOOLS = new Set(["read", "grep", "find", "ls", "web_search", "x_search", "mcpScript"]);
+const READ_ONLY_TOOLS = new Set(["read", "grep", "find", "ls", "web_search", "x_search", "mcpScript", "subagent"]);
 const MUTATION_TOOLS = new Set(["write", "edit", "apply_patch"]);
 const MCP_AUTH_ACTIONS = new Set(["auth-start", "auth-complete"]);
 
@@ -68,9 +68,10 @@ const SIMPLE_READ_PROGRAMS = new Set([
 	"printenv",
 	"cat",
 	"ldd",
+	"sha256sum",
 ]);
 
-const GIT_READ_SUBCOMMANDS = new Set(["status", "diff", "show", "log", "rev-parse", "ls-files"]);
+const GIT_READ_SUBCOMMANDS = new Set(["status", "diff", "show", "log", "rev-parse", "ls-files", "cat-file"]);
 const GIT_BRANCH_READ_ARGUMENTS = new Set(["--show-current", "--list", "-a", "-r", "-v", "-vv"]);
 const GIT_HAZARDOUS_OPTIONS = new Set(["--output", "--ext-diff", "--textconv"]);
 const GIT_BENIGN_HAZARD_PREFIX_COLLISIONS = new Set(["--text"]);
@@ -239,6 +240,12 @@ function hasGitHazard(args: readonly string[]): boolean {
 	});
 }
 
+function gitHashObjectWrites(args: readonly string[]): boolean {
+	return argumentsBeforeSeparator(args).some(
+		(argument) => argument === "-w" || (argument.startsWith("-w") && !argument.startsWith("--")),
+	);
+}
+
 function isGitDiffCheck(args: readonly string[]): boolean {
 	return args[0] === "diff" && args[1] === "--check" && !hasGitHazard(args.slice(1));
 }
@@ -271,6 +278,7 @@ function isReadOnlyGit(args: readonly string[]): boolean {
 	if ((command[0] === "--version" || command[0] === "-v") && command.length === 1) return true;
 	const [subcommand, ...subcommandArgs] = command;
 	if (!subcommand || hasGitHazard(subcommandArgs)) return false;
+	if (subcommand === "hash-object") return !gitHashObjectWrites(subcommandArgs);
 	if (GIT_READ_SUBCOMMANDS.has(subcommand)) return true;
 	if (subcommand === "branch") return subcommandArgs.every((argument) => GIT_BRANCH_READ_ARGUMENTS.has(argument));
 	if (subcommand !== "remote") return false;
@@ -422,7 +430,9 @@ export function splitValidationCommand(command: string): { program: string; args
 export function classifyTool(toolName: string, input: Record<string, unknown>): ToolClassification {
 	if (EXCLUDED_TOOLS.has(toolName)) return "ignored";
 	if (MANAGED_WORKFLOW_MUTATION_TOOLS.has(toolName)) return "mutation";
-	if (toolName === "mcp") return MCP_AUTH_ACTIONS.has(typeof input.action === "string" ? input.action : "") ? "mutation" : "read";
+	if (toolName === "mcp" || toolName.startsWith("mcp__")) {
+		return MCP_AUTH_ACTIONS.has(typeof input.action === "string" ? input.action : "") ? "mutation" : "read";
+	}
 	if (READ_ONLY_TOOLS.has(toolName)) return "read";
 	if (toolName === "eta_browser_use" && ETA_BROWSER_READ_ACTIONS.has(typeof input.action === "string" ? input.action : "")) return "read";
 	if (MUTATION_TOOLS.has(toolName)) return "mutation";

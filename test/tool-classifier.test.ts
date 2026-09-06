@@ -212,6 +212,41 @@ test("MCP auth actions remain external mutations", () => {
 	}
 });
 
+test("session-observed discovery remains read-only", () => {
+	assert.equal(classifyTool("subagent", { task: "read session jsonl" }), "read");
+	assert.equal(classifyMutationConsequence("subagent", { task: "read session jsonl" }), "none");
+	assert.equal(classifyTool("mcp__context7", { tool: "query-docs", args: { query: "Pi tools" } }), "read");
+	assert.equal(classifyMutationConsequence("mcp__context7", { tool: "query-docs", args: { query: "Pi tools" } }), "none");
+	assert.equal(classifyTool("mcp__openai_docs", { tool: "search" }), "read");
+	for (const command of [
+		"git hash-object proof/ACCEPTANCE.md",
+		"git hash-object README.md",
+		"git cat-file -p HEAD:README.md",
+		"git cat-file -t HEAD",
+		"sha256sum docs/plans/active/example.md",
+	]) {
+		assert.equal(classifyTool("bash", { command }), "read", command);
+		assert.equal(classifyMutationConsequence("bash", { command }), "none", command);
+	}
+});
+
+test("write-capable neighbors of discovery stay external mutations", () => {
+	assert.equal(classifyTool("novel_harness_tool", {}), "mutation");
+	assert.equal(classifyMutationConsequence("novel_harness_tool", {}), "external");
+	assert.equal(classifyTool("mcp__context7", { action: "auth-start" }), "mutation");
+	assert.equal(classifyMutationConsequence("mcp__context7", { action: "auth-start" }), "external");
+	for (const command of [
+		"git hash-object -w README.md",
+		"git hash-object -w --stdin",
+		"bash /root/.pi/agent/skills/librarian/checkout.sh",
+		"git push origin main",
+		"gh repo clone example/project",
+	]) {
+		assert.equal(classifyTool("bash", { command }), "mutation", command);
+		assert.equal(classifyMutationConsequence("bash", { command }), "external", command);
+	}
+});
+
 test("managed workflow document tools retain their authority and mutation boundaries", () => {
 	assert.equal(classifyTool("continuity_workflow_status", {}), "ignored");
 	assert.equal(classifyTool("continuity_workflow_read", { document: "workflow" }), "ignored");

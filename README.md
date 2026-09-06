@@ -219,15 +219,16 @@ The workflow is lazy and observable:
 
 The preparation gate applies to agent-issued repository tools. Direct user `!`/`!!` commands remain explicit human actions: they are operation-ledger tracked and invalidate stale evidence, but are not reinterpreted or blocked as agent workflow decisions.
 
-Simple information discovery is not repository mutation. `web_search`, `x_search`, `mcp` discovery/status/tool calls, `mcpScript`, and explicitly non-interactive Eta Browser observation/navigation actions are classified as read-only for managed workflow gating, even though they may use the network or leave the shared browser on a results or document page. Continuity does not require `continuity_prepare_work` for those discovery tools and does not track them as retry-blocking external operations. Interactive browser actions such as clicking, typing, selecting, pressing keys, resetting the browser, or requesting human help, and MCP `auth-start`/`auth-complete`, remain external mutations and fail closed unless the current workflow state authorizes them.
+Simple information discovery is not repository mutation. `web_search`, `x_search`, `mcp` discovery/status/tool calls, namespaced `mcp__*` proxies, `mcpScript`, `subagent`, and explicitly non-interactive Eta Browser observation/navigation actions are classified as read-only for managed workflow gating, even though they may use the network or leave the shared browser on a results or document page. Continuity does not require `continuity_prepare_work` for those discovery tools and does not track them as retry-blocking external operations. Interactive browser actions such as clicking, typing, selecting, pressing keys, resetting the browser, or requesting human help, and MCP `auth-start`/`auth-complete`, remain external mutations and fail closed unless the current workflow state authorizes them.
 
 Agent shell discovery is classified from parsed argv rather than reconstructed
 shell text. Ordinary `command -v`, `cat`, `ldd`, `pi --version`/`-v`, Git
-version/status/diff/log/remote inspection, safe `rg`/`find` queries, and
+version/status/diff/log/remote inspection, `git hash-object` without `-w`,
+`git cat-file`, `sha256sum`, safe `rg`/`find` queries, and
 non-mutating GitHub CLI auth/repository/issue/label/PR/run/workflow views plus
 REST GET requests remain read-only. Quoted metacharacters stay literal data.
-GitHub writes or token display, Git output files/external filters, `find`
-execution/deletion/file-output actions, `rg --pre`/archive helpers, unknown
+GitHub writes or token display, Git output files/external filters, `git hash-object -w`,
+`find` execution/deletion/file-output actions, `rg --pre`/archive helpers, unknown
 forms, and non-GET/ambiguous `gh api` requests remain external operations.
 
 A steering or follow-up input received during an active agent run preserves that

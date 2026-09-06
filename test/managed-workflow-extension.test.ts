@@ -275,6 +275,11 @@ test("web search, X search, and MCP discovery stay unblocked before managed work
 			["discover-gh-pr", "bash", { command: "gh pr view 1 --json number,title" }],
 			["discover-find", "bash", { command: "find test -name '*.test.ts' -print" }],
 			["discover-rg-literal", "bash", { command: "rg -n 'memory|classifier' src test" }],
+			["discover-subagent", "subagent", { task: "read session jsonl" }],
+			["discover-mcp-proxy", "mcp__context7", { tool: "query-docs", args: { query: "Pi tools" } }],
+			["discover-hash-object", "bash", { command: "git hash-object README.md" }],
+			["discover-cat-file", "bash", { command: "git cat-file -p HEAD:README.md" }],
+			["discover-sha256sum", "bash", { command: "sha256sum README.md" }],
 		] as const) {
 			const decision = (await emit(proof, "tool_call", {
 				type: "tool_call",
@@ -298,6 +303,13 @@ test("web search, X search, and MCP discovery stay unblocked before managed work
 			input: { action: "auth-start", server: "openai-docs" },
 		}))[0];
 		assert.equal(blockedAuth?.block, true);
+		const blockedHashWrite = (await emit(proof, "tool_call", {
+			type: "tool_call",
+			toolCallId: "hash-object-write-still-gated",
+			toolName: "bash",
+			input: { command: "git hash-object -w README.md" },
+		}))[0];
+		assert.equal(blockedHashWrite?.block, true);
 		await emit(proof, "session_shutdown", { type: "session_shutdown", reason: "quit" });
 	} finally {
 		if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;

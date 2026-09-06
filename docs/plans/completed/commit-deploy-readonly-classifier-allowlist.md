@@ -6,7 +6,7 @@ Date: 2026-08-25
 
 ## Status
 
-Active
+Ready for completion
 
 ## Outcome
 
@@ -53,22 +53,24 @@ Out of scope:
 
 ## Progress
 
-- [ ] Implement the approved outcome.
-- [ ] Run behavior-appropriate and repository-required proof.
-- [ ] Record the verified result before finalization.
+- [x] Stage and commit the classifier files plus this plan.
+- [x] Run npm run release to rebuild dist and the rc.5 ZIP.
+- [x] Deploy the new archive to the user Pi package path.
+- [x] Record the verified result before finalization.
 
 ## Decisions
 
-- No task-local decision recorded yet.
+- Leave unrelated dirty and untracked docs/plans files uncommitted.
+- Treat local user-package deploy as an authorized external side effect of this request.
 
 Promote lasting product or architecture decisions into repository-owned decision documentation only after authority exists.
 
 ## Validation
 
-- npm run typecheck and npm test already passed on the classifier change.
-- npm run release must succeed before deploy.
-- After deploy, the installed classifier must treat cat, ldd, pi --version/-v, and gh label list as read-only.
+- npm run typecheck and npm test already passed on the classifier change (197 tests).
+- npm run release succeeded and produced sha256 e8b92478805337a320a030a02d7409113a2b802d1a0e42734aefd204de6c870d.
+- Deployed package at /root/.pi/agent/packages/pi-continuity-work-memory contains cat, ldd, gh label list, and pi --version/-v in the classifier.
 
 ## Result
 
-Pending implementation and executable proof.
+Committed `35ffbf110462c46ee812415604de112f52ebe4b9`. Rebuilt and deployed `pi-continuity-work-memory@1.0.0-rc.5` (`sha256:e8b92478805337a320a030a02d7409113a2b802d1a0e42734aefd204de6c870d`) to `/root/.pi/agent/packages/pi-continuity-work-memory`. Installed classifier treats `cat`, `ldd`, `pi --version`/`-v`, and `gh label list` as read-only and keeps unquoted operators plus mutating `pi`/`gh label` forms fail-closed. A fresh Pi process is required.

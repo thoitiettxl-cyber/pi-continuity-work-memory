@@ -6,7 +6,7 @@ Date: 2026-08-24
 
 ## Status
 
-Active
+Ready for completion
 
 ## Outcome
 
@@ -55,10 +55,10 @@ Out of scope:
 ## Progress
 
 - [x] Create and bind this execution plan.
-- [ ] Stage and commit the intended MCP-ungate files plus this plan.
-- [ ] Run npm run release to rebuild dist and the rc.5 ZIP.
-- [ ] Deploy the new archive to the user Pi package path.
-- [ ] Record the verified result before finalization.
+- [x] Stage and commit the intended MCP-ungate files plus this plan.
+- [x] Run npm run release to rebuild dist and the rc.5 ZIP.
+- [x] Deploy the new archive to the user Pi package path.
+- [x] Record the verified result before finalization.
 
 ## Decisions
 
@@ -75,4 +75,4 @@ Promote lasting product or architecture decisions into repository-owned decision
 
 ## Result
 
-Pending implementation and executable proof.
+Committed `d26c11f7ee1bbab570a79572d846a2b53c3f9ba8`. Rebuilt and deployed `pi-continuity-work-memory@1.0.0-rc.5` (`sha256:2839186a487d975e69fde70d16625a338c15b17a19cb123b00816576a4ced6a7`) to `/root/.pi/agent/packages/pi-continuity-work-memory`. Installed classifier treats `mcp` discovery/`mcpScript` as read-only and keeps `auth-start`/`auth-complete` as mutation. A fresh Pi process is required before a live MCP test.

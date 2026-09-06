@@ -105,4 +105,11 @@ Observed 2026-09-05 on this worktree, live Pi 0.85.1, Node v22.23.2:
 - `npm run validate`: PASS; `validate:install`, `validate:git-install`, and `validate:release` each reported `"pi":"0.85.1","piRange":">=0.84.1 <0.86.0"`
 - `git diff --check`: PASS
 
-Not claimed: `scripts/validate-premerge.sh` rerun after the follow-on (equivalent validate + `git diff --check` already passed), live TUI overlay, commit, push, deploy of this follow-on, or provider proof. Finalization still needs fresh receipt-bound validation.
+Delivered 2026-09-05:
+
+- Commit `b0423c5` `fix(pi): accept live 0.85.x hosts` (28 files)
+- Push `origin/dev-next` `40112b5..b0423c5`
+- `npm run release` PASS: `release/pi-continuity-work-memory-1.0.0-rc.6.zip`, sha256 `6671563a7fc1f6aff4f1a5abccca25b223c35e8160c0db5be8a7d73e916112fa`
+- Local user-package deploy PASS against PATH host Pi (no nested `--pi`); target `/root/.pi/agent/packages/pi-continuity-work-memory`; backup `/root/.pi/agent/backups/pi-continuity-work-memory/2026-09-05T15-30-34-555Z-12347-049780fe`; installed `peerDependencies` and `SUPPORTED_PI_RANGE` are `>=0.84.1 <0.86.0`; `storesChanged: false`; `restartRequired: true`
+
+Not claimed: `scripts/validate-premerge.sh` rerun after the follow-on (equivalent validate + `git diff --check` already passed), live TUI overlay, GitHub release publication, version bump, or provider proof. Finalization still needs fresh receipt-bound validation after a new Pi process.

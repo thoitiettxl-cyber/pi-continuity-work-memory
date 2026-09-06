@@ -6,7 +6,7 @@ Date: 2026-08-24
 
 ## Status
 
-Active
+Ready for completion
 
 ## Outcome
 
@@ -55,9 +55,9 @@ Out of scope:
 
 - [x] Classify `web_search` and `x_search` as read-only discovery and add focused tests.
 - [x] Run `npm run typecheck` and `npm test`.
-- [ ] Commit the intended files only.
-- [ ] Rebuild and deploy the user package.
-- [ ] Record the verified result before finalization.
+- [x] Commit the intended files only.
+- [x] Rebuild and deploy the user package.
+- [x] Record the verified result before finalization.
 
 ## Decisions
 
@@ -75,4 +75,4 @@ Promote lasting product or architecture decisions into repository-owned decision
 
 ## Result
 
-Pending implementation and executable proof.
+Committed `c97edd34fb12f5119557180235a4022b0af721c1`. Rebuilt and deployed `pi-continuity-work-memory@1.0.0-rc.5` (`sha256:fb9286b7ce68c4cba4909547e93487edb542f8a97db9f27e0c6e7955f1fa5b5b`) to `/root/.pi/agent/packages/pi-continuity-work-memory`. Installed classifier allowlist includes `web_search` and `x_search`. A fresh Pi process is required before a live search test.

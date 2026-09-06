@@ -6,7 +6,7 @@ Date: 2026-08-25
 
 ## Status
 
-Active
+Completed
 
 ## Outcome
 
@@ -82,7 +82,7 @@ Out of scope:
 - [x] Reproduce and fix confirmed PR logic findings with regression coverage.
 - [x] Fix basic read-only shell/GitHub classification and steer lifecycle gating without opening mutation bypasses.
 - [x] Run focused and full validation; review the final scoped diff and pass the premerge gate.
-- [ ] Commit and push only the authorized PR files while preserving unrelated dirty plans.
+- [x] Commit and push only the authorized PR files while preserving unrelated dirty plans.
 
 ## Decisions
 
@@ -110,4 +110,4 @@ Promote lasting product or architecture decisions into repository-owned decision
 
 ## Result
 
-The reviewed candidate passes the focused memory/classifier/extension/Continuity suite (84/84), `npm run typecheck`, the full source-local suite (178/178), `npm run validate` including isolated install and release-payload proof, `scripts/validate-premerge.sh`, and `git diff --check`. No surviving Standards or Intent/Behavior finding remained in the final scoped review. Real-provider memory proof was not rerun because provider runtime paths did not change and remains explicitly historical/deferred. The focused commit and push to draft PR #1 are the remaining delivery actions; plan finalization, release, deploy, merge, and unrelated dirty files remain out of scope.
+The reviewed candidate passed the focused memory/classifier/extension/Continuity suite (84/84), `npm run typecheck`, the full source-local suite (178/178), `npm run validate` including isolated install and release-payload proof, `scripts/validate-premerge.sh`, and `git diff --check`. No surviving Standards or Intent/Behavior finding remained in the final scoped review. Commit `898d4294ae9d459a3ab339904a7aad091a958a92` was pushed to PR #1 and rebase-merged into `dev-next` as `f81d432e2d6a9180b60ef78ab921e3dc274731e8`; the merged and source trees matched. Real-provider memory proof was not rerun and remains explicitly deferred. Separately authorized release and deployment work did not alter the repository completion evidence, and unrelated dirty files were preserved.

@@ -2,6 +2,12 @@ import { randomUUID } from "node:crypto";
 
 import { PROVIDER_SOURCE_MAX_CHARS, redactSecrets, sanitizeProviderBoundText, sha256 } from "../domain/canonical.js";
 import {
+	characterBudget,
+	MEMORY_WRAPPER_SEPARATOR_CHARACTERS,
+	shouldOmitMemoryBlock,
+	sliceUtf16Safe,
+} from "../domain/memory-context-budget.js";
+import {
 	isMemoryKind,
 	type MemoryKind,
 	type MemoryRecord,
@@ -58,7 +64,6 @@ const DEFAULT_LEASE_POLICY: PipelineLeasePolicy = {
 const PROVIDER_STAGE1_RECORDS_MAX_CHARS = 80_000;
 const PROVIDER_STAGE2_BASELINES_MAX_CHARS = 32_000;
 const EXTRACT_TURN_THRESHOLD = 3;
-const CONTEXT_PROMPT_MAX_CHARS = 64_000;
 const CONTEXT_PROMPT_RECORD_RESERVE = 33_000;
 
 function boundedTextItems(items: readonly string[], maximum: number): string {
@@ -67,8 +72,10 @@ function boundedTextItems(items: readonly string[], maximum: number): string {
 		const separator = output ? "\n\n" : "";
 		const remaining = maximum - output.length - separator.length;
 		if (remaining <= 0) break;
-		output += separator + item.slice(0, remaining);
-		if (item.length > remaining) break;
+		const piece = sliceUtf16Safe(item, remaining);
+		if (piece.length === 0) break;
+		output += separator + piece;
+		if (piece.length < item.length) break;
 	}
 	return output;
 }
@@ -218,7 +225,7 @@ export class MemoryService {
 		return this.store.recordCitations(visibleIds, this.identity.sessionKey);
 	}
 
-	contextPrompt(query?: string): string {
+	contextPrompt(query?: string, contextWindow?: number): string {
 		const baselines = this.store.publishedBaselines(this.selectors());
 		let records: MemoryRecord[] = [];
 		const trimmedQuery = query?.trim() ?? "";
@@ -237,13 +244,18 @@ export class MemoryService {
 			"When a memory materially influences the answer, cite its exact token [memory:UUID].",
 		].join("\n\n");
 		const footer = "</persistent-memory>";
-		const contentBudget = CONTEXT_PROMPT_MAX_CHARS - preamble.length - footer.length - 4;
+		const budget = characterBudget(contextWindow);
+		if (shouldOmitMemoryBlock(budget, preamble.length, footer.length)) return "";
+		const contentBudget = budget - preamble.length - footer.length - MEMORY_WRAPPER_SEPARATOR_CHARACTERS;
 		const baselineItems = baselines.map((item) => `Baseline (${item.scope}):\n${item.content}`);
 		const recordItems = records.map((item) => `[memory:${item.id}] (${item.scope}/${item.kind}) ${item.content}\nSource: ${item.citation}`);
 		let body = "";
 		if (baselineItems.length > 0 && recordItems.length > 0) {
 			const sharedBudget = Math.max(0, contentBudget - 2);
-			const initialRecordBudget = Math.min(sharedBudget, Math.max(Math.floor(sharedBudget / 2), CONTEXT_PROMPT_RECORD_RESERVE));
+			const halfShare = Math.floor(sharedBudget / 2);
+			const initialRecordBudget = CONTEXT_PROMPT_RECORD_RESERVE >= sharedBudget
+				? halfShare
+				: Math.min(sharedBudget, Math.max(halfShare, CONTEXT_PROMPT_RECORD_RESERVE));
 			let recordText = boundedTextItems(recordItems, initialRecordBudget);
 			const baselineText = boundedTextItems(baselineItems, sharedBudget - recordText.length);
 			recordText = boundedTextItems(recordItems, sharedBudget - baselineText.length);

@@ -18,6 +18,8 @@
 
 ### Changed
 
+- Changed learning-memory search to rank every visible published record instead of a 500-record recency window, and budgeted `before_agent_start` injection from the selected model `contextWindow` using a labeled `ceil(chars/4)` estimate. Default and mid windows half-split the first atom share so long matches cannot drop baselines.
+
 - Escaped Continuity `contextSummary` interpolations as untrusted XML text and attached a prompt-only session-objective policy when a goal is non-empty after trim or a managed Bound plan exists, without adding Goal tools, auto-continuation, or completion authority.
 
 - Widened supported Pi to `>=0.84.1 <0.86.0` so live 0.85.x hosts are accepted, and made install/premerge/provider proofs check PATH `pi` (or `PI_VALIDATION_PI`) instead of a nested 0.84.1 pin.
@@ -26,7 +28,7 @@
 
 ### Fixed
 
-- Hardened query-conditioned memory after PR review: matched atoms retain a reserved prompt budget and closing delimiter, search scores the latest 500 candidates before usage tie-breaks, batch/concurrent exact-content duplicates are removed, and cursor advancement is atomic with publication.
+- Hardened query-conditioned memory after PR review: matched atoms retain a reserved prompt budget and closing delimiter, batch/concurrent exact-content duplicates are removed, and cursor advancement is atomic with publication.
 - Classified ordinary tokenized shell, Git, and read-only GitHub CLI discovery without reopening mutating/output-writing/executable/credential forms; steering and follow-up input no longer erase managed-workflow eligibility for the active run.
 - Classified `cat`, `ldd`, `pi --version`/`-v`, and `gh label list` as read-only discovery, and kept quoted `gh api --jq` filters with brackets read-only, without reopening unquoted operators or mutating GitHub label/Pi command forms.
 

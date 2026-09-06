@@ -73,6 +73,16 @@ function tokenOverlapScore(tokens: readonly string[], haystack: string): number 
 	return tokens.reduce((score, token) => score + (present.has(token) ? 1 : 0), 0);
 }
 
+function compareSearchHits(
+	left: { record: MemoryRecord; score: number },
+	right: { record: MemoryRecord; score: number },
+): number {
+	return right.score - left.score
+		|| right.record.usageCount - left.record.usageCount
+		|| right.record.updatedAt - left.record.updatedAt
+		|| left.record.id.localeCompare(right.record.id);
+}
+
 function scopeClause(selectors: readonly ScopeSelector[], alias = ""): { sql: string; params: string[] } {
 	if (selectors.length === 0) return { sql: "0", params: [] };
 	const prefix = alias ? `${alias}.` : "";
@@ -485,15 +495,29 @@ ORDER BY updated_at DESC, id ASC LIMIT ?`).all(...clause.params, Math.max(1, Mat
 	search(query: string, selectors: readonly ScopeSelector[], limit = 50): MemoryRecord[] {
 		const tokens = uniqueTokens(query);
 		if (tokens.length === 0) return [];
-		return this.latestRecords(selectors, 500)
-			.map((record) => ({ record, score: tokenOverlapScore(tokens, `${record.content}\n${record.citation}`) }))
-			.filter((item) => item.score > 0)
-			.sort((left, right) => right.score - left.score
-				|| right.record.usageCount - left.record.usageCount
-				|| right.record.updatedAt - left.record.updatedAt
-				|| left.record.id.localeCompare(right.record.id))
-			.slice(0, Math.max(1, Math.min(limit, 100)))
-			.map((item) => item.record);
+		const clause = scopeClause(selectors);
+		if (!clause.params.length) return [];
+		const topK = Math.max(1, Math.min(limit, 100));
+		const statement = this.db.prepare(`SELECT * FROM memory_records
+WHERE status = 'published' AND (${clause.sql})`);
+		const top: Array<{ record: MemoryRecord; score: number }> = [];
+		for (const row of statement.iterate(...clause.params)) {
+			const record = rowToMemory(row as Record<string, unknown>);
+			const score = tokenOverlapScore(tokens, `${record.content}\n${record.citation}`);
+			if (score <= 0) continue;
+			const hit = { record, score };
+			if (top.length < topK) {
+				top.push(hit);
+				top.sort(compareSearchHits);
+				continue;
+			}
+			const worst = top[top.length - 1];
+			if (worst && compareSearchHits(hit, worst) < 0) {
+				top[top.length - 1] = hit;
+				top.sort(compareSearchHits);
+			}
+		}
+		return top.map((item) => item.record);
 	}
 
 	publishedBaselines(selectors: readonly ScopeSelector[]): PublishedBaseline[] {

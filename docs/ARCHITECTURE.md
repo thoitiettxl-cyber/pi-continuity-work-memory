@@ -106,6 +106,7 @@ stay at the boundaries.
 | Workflow orchestration | Asset access, work preparation, plan materialization, binding, alignment, and finalization | `src/application/managed-workflow-service.ts`, `src/application/workflow-context.ts` |
 | Context-pressure policy | Pure thresholds, input validation, monotonic epochs, bounded advisories, and status projection | `src/application/context-pressure-governor.ts` |
 | Tool policy | Read/validation/mutation classification and simple-command parsing | `src/application/tool-classifier.ts` |
+| Memory injection budget | Estimated character ceilings from model window, omit-vs-keep, UTF-16-safe truncation | `src/domain/memory-context-budget.ts` |
 | Memory orchestration | Scope selection, two-stage extraction/consolidation, leases, fencing, and publication | `src/application/memory-service.ts`, `src/application/memory-scheduler.ts`, `src/application/memory-ports.ts` |
 | Continuity persistence | Branch snapshots, operation ledger, receipts, reconciliation, and checkpoints | `src/infrastructure/continuity-store.ts` |
 | Memory persistence | Records, baseline generations, pipeline runs, leases, and citation usage | `src/infrastructure/memory-store.ts` |
@@ -259,10 +260,18 @@ files, reconcile uncertainty, replay side effects, or authorize a retry.
    `work-item`, and `session`. There is no implicit repository-wide `default`
    work-item bucket.
 6. `before_agent_start` injects published baselines plus at most 12
-   query-matched atoms from `event.prompt`. Search scores the latest 500 visible
-   records by token overlap, and the 64,000-character renderer reserves bounded
-   space for both baselines and atoms while retaining its closing delimiter.
-   Memory remains untrusted learning context.
+   query-matched atoms from `event.prompt`, passing `ctx.model?.contextWindow`
+   into the renderer. Search scans every visible published record and ranks
+   token overlap; the full-set scan can recall old unique matches a recency
+   cutoff would miss, at cost that grows with corpus size. Recall stays lexical
+   and transcript-history lookup remains deferred. Character budget is
+   `min(64000, min(16000, floor(window/8))*4)` using `ceil(chars/4)` as a labeled
+   estimate, not a tokenizer; missing or invalid windows fall back to 16384
+   tokens / 8192 characters. A window that cannot hold the wrapper plus 64 body
+   characters omits the entire block. When both sides fit, rendering reserves
+   room for baselines and atoms and keeps the closing delimiter. Hybrid
+   ownership is unchanged: Pi compaction, retained session JSONL, repository
+   plans, operational Continuity, and untrusted learning memory.
 
 ## Persistence And Generated Data
 

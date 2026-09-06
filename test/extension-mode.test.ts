@@ -7,6 +7,8 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 
 import extension from "../src/extension.js";
 import { ContinuityStore } from "../src/infrastructure/continuity-store.js";
+import { MemoryStore } from "../src/infrastructure/memory-store.js";
+import { sessionKey } from "../src/interface/session-adapter.js";
 import { temporaryDirectory } from "./helpers.js";
 
 interface FakeRuntime {
@@ -178,8 +180,10 @@ for (const reason of ["manual", "threshold"] as const) {
 	});
 }
 
-async function emit(runtime: FakeRuntime, name: string, event: unknown): Promise<void> {
-	for (const handler of runtime.handlers.get(name) ?? []) await handler(event, runtime.ctx);
+async function emit(runtime: FakeRuntime, name: string, event: unknown): Promise<unknown> {
+	let result: unknown;
+	for (const handler of runtime.handlers.get(name) ?? []) result = await handler(event, runtime.ctx);
+	return result;
 }
 
 for (const mode of ["rpc", "json", "print"] as const) {
@@ -202,6 +206,94 @@ for (const mode of ["rpc", "json", "print"] as const) {
 			assert.ok(runtime.toolNames.includes("memory_search"));
 			assert.deepEqual(runtime.commandNames.sort(), ["continuity", "memory"]);
 			assert.equal(runtime.gitCalls, 0);
+			await emit(runtime, "session_shutdown", { type: "session_shutdown", reason: "quit" });
+		} finally {
+			if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;
+			else process.env.PI_CONTINUITY_HOME = oldContinuity;
+			if (oldMemory === undefined) delete process.env.PI_WORK_MEMORY_HOME;
+			else process.env.PI_WORK_MEMORY_HOME = oldMemory;
+		}
+	});
+}
+
+function memoryBlock(systemPrompt: string): string {
+	const start = systemPrompt.indexOf("<persistent-memory");
+	if (start < 0) return "";
+	const endToken = "</persistent-memory>";
+	const end = systemPrompt.indexOf(endToken, start);
+	if (end < 0) return systemPrompt.slice(start);
+	return systemPrompt.slice(start, end + endToken.length);
+}
+
+const ZERO_USAGE = {
+	inputTokens: 0,
+	outputTokens: 0,
+	cacheReadTokens: 0,
+	cacheWriteTokens: 0,
+	cost: 0,
+};
+
+for (const mode of ["tui", "rpc", "json", "print"] as const) {
+	test(`${mode} before_agent_start budgets memory injection from the selected model contextWindow`, async () => {
+		const root = temporaryDirectory(`mode-memory-window-${mode}`);
+		const oldContinuity = process.env.PI_CONTINUITY_HOME;
+		const oldMemory = process.env.PI_WORK_MEMORY_HOME;
+		process.env.PI_CONTINUITY_HOME = join(root, "continuity");
+		const memoryHome = join(root, "memory");
+		process.env.PI_WORK_MEMORY_HOME = memoryHome;
+		try {
+			const runtime = fakeRuntime(mode, root);
+			const seed = new MemoryStore(join(memoryHome, "memory.sqlite"));
+			const sourceSessionKey = sessionKey(runtime.ctx);
+			const lease = seed.claimPipeline(sourceSessionKey, `window-source-${mode}`, `window-generation-${mode}`, `window-owner-${mode}`);
+			assert.ok(lease);
+			assert.equal(seed.publish(lease, [
+				{
+					id: `baseline-session-${mode}`,
+					scope: "session",
+					scopeKey: sourceSessionKey,
+					content: `useful-baseline-marker ${"M".repeat(20_000)}`,
+				},
+			], ZERO_USAGE), true);
+			seed.addPublished({
+				id: `00000000-0000-4000-8000-00000000000${mode === "tui" ? "1" : mode === "rpc" ? "2" : mode === "json" ? "3" : "4"}`,
+				scope: "session",
+				scopeKey: sourceSessionKey,
+				kind: "fact",
+				content: "useful-atom-marker matched recall needle",
+				citation: "useful-citation-marker source",
+				sourceSessionKey,
+				sourceHash: `atom-${mode}`,
+			});
+			seed.close();
+			extension(runtime.api);
+			await emit(runtime, "session_start", { type: "session_start", reason: "startup" });
+			const event = {
+				type: "before_agent_start",
+				prompt: "needle",
+				systemPrompt: "base",
+				systemPromptOptions: { contextFiles: [] },
+			};
+			(runtime.ctx as { model: { contextWindow: number } }).model = { contextWindow: 16_384 };
+			const smallResult = await emit(runtime, "before_agent_start", event) as { systemPrompt?: string };
+			const small = memoryBlock(smallResult.systemPrompt ?? "");
+			assert.ok(small.length > 0);
+			assert.ok(small.length <= 8_192);
+			assert.match(small, /useful-baseline-marker/);
+			assert.match(small, /useful-atom-marker/);
+			assert.match(small, /useful-citation-marker/);
+			assert.ok(small.startsWith("<persistent-memory authority=\"learning-only\">"));
+			assert.ok(small.endsWith("</persistent-memory>"));
+			(runtime.ctx as { model: { contextWindow: number } }).model = { contextWindow: 32_768 };
+			const midResult = await emit(runtime, "before_agent_start", event) as { systemPrompt?: string };
+			const mid = memoryBlock(midResult.systemPrompt ?? "");
+			assert.ok(mid.length <= 16_384);
+			assert.ok(mid.length > small.length);
+			(runtime.ctx as { model: { contextWindow: number } }).model = { contextWindow: 128_000 };
+			const largeResult = await emit(runtime, "before_agent_start", event) as { systemPrompt?: string };
+			const large = memoryBlock(largeResult.systemPrompt ?? "");
+			assert.ok(large.length <= 64_000);
+			assert.ok(large.length > mid.length);
 			await emit(runtime, "session_shutdown", { type: "session_shutdown", reason: "quit" });
 		} finally {
 			if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;

@@ -328,12 +328,24 @@ windows include one previous entry as background.
 
 Injection at `before_agent_start` keeps the learning-only preamble and published
 baselines, then adds at most 12 query-matched atoms from the current user
-prompt. With no prompt, only baselines are injected. Search takes the latest 500
-visible records before ranking token overlap, then uses usage and recency as
-tie-breaks; it does not require a contiguous substring. Recall failures omit
-atoms and keep the agent running. The complete injected block remains capped at
-64,000 characters, reserves space for both baselines and matched atoms, and
-always retains its closing authority delimiter.
+prompt. With no prompt, only baselines are injected. Search scans every visible
+published record and ranks token overlap, then uses usage and recency as
+tie-breaks; it does not require a contiguous substring. The full-visible-record
+scan can recall old unique matches that a 500-candidate recency window would
+miss, at a cost that grows with corpus size. Ranking remains lexical token
+overlap, not semantic retrieval, and transcript-history lookup stays deferred.
+Recall failures omit atoms and keep the agent running. The injected block is
+budgeted from the selected model's `contextWindow` using `ceil(chars/4)` as a
+labeled estimate, not a tokenizer: the character ceiling is
+`min(64000, min(16000, floor(window/8))*4)`. Missing or invalid windows fall
+back to 16384 tokens / 8192 characters. If that budget cannot hold the wrapper
+plus 64 body characters, the entire block is omitted rather than emitting a
+broken delimiter. When the budget can hold the wrapper plus some of each,
+rendering reserves space for both baselines and matched atoms and retains its
+closing authority delimiter. Hybrid ownership is unchanged: Pi owns compaction,
+session JSONL remains the transcript, repository plans own durable task truth,
+Continuity owns operational lineage, and learning memory stays untrusted
+context.
 
 Each pipeline attempt receives a unique owner token and a renewable lease. The
 default 120-second lease is heartbeated every 30 seconds across both provider
@@ -376,7 +388,8 @@ scripts/validate-premerge.sh
 git diff --check
 ```
 
-`npm run validate:git-install` additionally serves a clean temporary Git source
+`npm run validate` includes `npm run validate:git-install`, which can also be
+run separately. This proof serves a clean temporary Git source
 over loopback, runs Pi's real `install git:...` command with its default
 `npm install --omit=dev` lifecycle, verifies the managed checkout and commands,
 then advances the source and proves `pi update --extensions` cleans and rebuilds

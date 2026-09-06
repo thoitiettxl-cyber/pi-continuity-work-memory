@@ -649,7 +649,7 @@ export default function extension(pi: ExtensionAPI): void {
 				`Package workflow ${workflowAsset.path} is checksum-verified at sha256:${workflowAsset.digest.slice(0, 12)}. Use continuity_workflow_read when the full workflow or a template is needed.`,
 			)
 			: "";
-		const memoryPrompt = memory.contextPrompt(event.prompt);
+		const memoryPrompt = memory.contextPrompt(event.prompt, ctx.model?.contextWindow);
 		return { systemPrompt: `${event.systemPrompt}\n\n${continuity.contextSummary()}${workflowPrompt ? `\n\n${workflowPrompt}` : ""}${memoryPrompt ? `\n\n${memoryPrompt}` : ""}` };
 	});
 

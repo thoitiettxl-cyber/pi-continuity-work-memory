@@ -6,7 +6,7 @@ Date: 2026-09-07
 
 ## Status
 
-Active
+Ready for completion
 
 ## Outcome
 
@@ -65,10 +65,10 @@ Out of scope:
 
 ## Progress
 
-- [ ] Commit the clone classifier files and this plan.
-- [ ] Push `dev-next` to `origin/dev-next` without force.
-- [ ] Rebuild and deploy the rc.6 archive to the user Pi package path.
-- [ ] Record the verified result before finalization.
+- [x] Commit the clone classifier files and this plan.
+- [x] Push `dev-next` to `origin/dev-next` without force.
+- [x] Rebuild and deploy the rc.6 archive to the user Pi package path.
+- [x] Record the verified result before finalization.
 
 ## Decisions
 
@@ -87,4 +87,4 @@ Promote lasting product or architecture decisions into repository-owned decision
 
 ## Result
 
-Pending implementation and executable proof.
+Committed `60275c4eb0160a00deaba99a9cfd769051ec2c0e`. Fast-forward pushed `5867c8b..60275c4` to `origin/dev-next` without force; local `HEAD` and `origin/dev-next` both resolve to `60275c4`. Rebuilt and deployed `pi-continuity-work-memory@1.0.0-rc.6` (`sha256:2c952968120bd09c04f680327c3b49d6b9e23d6885e6501f0bd8c681f8bf79d2`, 150 sanitized ZIP files, `unzip -t` PASS) to `/root/.pi/agent/packages/pi-continuity-work-memory`. Deploy receipt: `storesChanged: false`, `restartRequired: true`, backup `/root/.pi/agent/backups/pi-continuity-work-memory/2026-09-07T12-16-47-793Z-14789-cfb1a5e4`. Installed `dist/application/tool-classifier.js` contains `isReadOnlyGitClone`. A fresh Pi process is required.

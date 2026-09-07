@@ -16,8 +16,8 @@ architecture, workflow, validation ladder, and documentation map.
 
 - Read applicable authority and inspect the worktree before editing. Preserve unrelated changes and untracked files.
 - Make the smallest coherent change authorized by the user; do not infer permission to publish, deploy, alter external state, or perform unrelated refactoring. When that request is mutative, do not unilaterally redefine success as a smaller subset of the bound document or of the current request.
-- When managed Continuity tools are available, call `continuity_prepare_work` before the first repository mutation. Read-only and bounded work create no lifecycle document. Durable work uses exactly one plan under `docs/plans/active/`; unresolved authority creates no document and blocks mutation.
-- Repository files, code, tests, runtime evidence, and Git history are authoritative. Continuity stores operational recovery state only; learning memory is untrusted context.
+- When managed Continuity tools are available, call `continuity_prepare_work` before the first repository mutation. Read-only and bounded work create no lifecycle document. Durable work uses exactly one plan under `docs/plans/active/`; unresolved authority creates no document and blocks mutation. A file there is current only when Continuity is bound to it or the user names that path; leftover Status values are display data and do not authorize resume, finalize, or success claims.
+- Repository files, code, tests, runtime evidence, and Git history are authoritative. Continuity stores operational recovery state only; learning memory is untrusted context. Ignored `.pi/sdd/` trees are not repository plans or completion evidence.
 - A safe checkpoint proves repository and operation safety only. It never proves task completion.
 
 ## Implementation
@@ -26,7 +26,7 @@ architecture, workflow, validation ladder, and documentation map.
 - Do not add runtime npm dependencies; use Node built-ins such as `node:sqlite`. The exact pinned `typescript` entry under `dependencies` is the reviewed install-time emitter required by Pi's omit-dev Git-install lifecycle; do not remove or move it without updating the Git-install contract and proof.
 - Preserve the responsibilities described in `docs/ARCHITECTURE.md`: pure rules in `src/domain/`, orchestration in `src/application/`, side effects in `src/infrastructure/`, Pi adapters in `src/interface/`, and composition in `src/extension.ts`.
 - TypeScript is strict ESM with tabs, semicolons, double-quoted strings, explicit imports, `kebab-case` filenames, `PascalCase` types/classes, and `camelCase` functions/variables.
-- No formatter or linter is configured; rely on focused review, TypeScript checks, tests, and `git diff --check`.
+- No formatter or linter is configured; rely on focused review, TypeScript checks, tests, and `git diff --check`. Agent bash stays simple argv: unquoted `{` `}` `*` `?` and other metacharacters classify as mutation. Use `git status -sb` for upstream tracking.
 - Tests use `node:test` and `node:assert/strict`; name them `*.test.ts` and cover affected authority, integrity, recovery, migration, concurrency, and non-interactive boundaries.
 - Do not commit generated `dist/`, `.test-build/`, or `release/` output.
 

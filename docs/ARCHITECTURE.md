@@ -380,7 +380,7 @@ deferred, and skipped checks separately.
 | `workflow/manifest.json` | Sorted checksum inventory for package workflow assets |
 | `skills/README.md`, `skills/UPSTREAM.md` | Shipped skill inventory, shared authority contract, source provenance, and adaptation/update process |
 | `skills/*/SKILL.md` | Pi-discovered engineering workflows and bounded optional references |
-| `docs/plans/active/*.md` | Lazily created authoritative records for current durable work |
+| `docs/plans/active/*.md` | Execution-plan files for durable work. A file is current task truth only while Continuity is bound to it or the user names it; presence and recorded Status do not prove currency or completion |
 | `docs/plans/completed/*.md` | Completed durable-work history and task-local decisions/results |
 | `proof/ACCEPTANCE.md` | Acceptance criteria, executable evidence map, and PASS/DEFERRED policy |
 | `proof/RESULTS.json` | Structured historical release/proof observations |

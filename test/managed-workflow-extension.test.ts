@@ -280,6 +280,8 @@ test("web search, X search, and MCP discovery stay unblocked before managed work
 			["discover-hash-object", "bash", { command: "git hash-object README.md" }],
 			["discover-cat-file", "bash", { command: "git cat-file -p HEAD:README.md" }],
 			["discover-sha256sum", "bash", { command: "sha256sum README.md" }],
+			["discover-git-clone", "bash", { command: "git clone https://github.com/example/project.git" }],
+			["discover-gh-repo-clone", "bash", { command: "gh repo clone example/project" }],
 		] as const) {
 			const decision = (await emit(proof, "tool_call", {
 				type: "tool_call",
@@ -310,6 +312,13 @@ test("web search, X search, and MCP discovery stay unblocked before managed work
 			input: { command: "git hash-object -w README.md" },
 		}))[0];
 		assert.equal(blockedHashWrite?.block, true);
+		const blockedCloneUploadPack = (await emit(proof, "tool_call", {
+			type: "tool_call",
+			toolCallId: "clone-upload-pack-still-gated",
+			toolName: "bash",
+			input: { command: "git clone --upload-pack /bin/sh https://github.com/example/project.git" },
+		}))[0];
+		assert.equal(blockedCloneUploadPack?.block, true);
 		await emit(proof, "session_shutdown", { type: "session_shutdown", reason: "quit" });
 	} finally {
 		if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;

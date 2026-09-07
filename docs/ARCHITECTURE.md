@@ -195,8 +195,9 @@ reinterpret them as workflow decisions.
    editor.
 
 Read-only shell discovery is recognized from parsed argv, including narrow Git
-and GitHub CLI views; output-writing, executable, credential-revealing,
-ambiguous, and mutating forms remain fail-closed external operations. Streaming
+and GitHub CLI views and ordinary clone discovery; output-writing, executable,
+credential-revealing, ambiguous, and mutating forms remain fail-closed external
+operations. Streaming
 steer/follow-up input preserves the current run's assessed eligibility because
 Pi does not emit a second `before_agent_start` for that queued input.
 

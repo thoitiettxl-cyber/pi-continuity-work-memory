@@ -55,6 +55,10 @@ test("ordinary shell, Git, and GitHub discovery remains read-only", () => {
 		"gh api --method GET -f state=open repos/example/project/issues",
 		"find test -maxdepth 2 -type f -name '*.test.ts' -print",
 		"rg -n 'memory|classifier' src test",
+		"git clone https://github.com/example/project.git",
+		"git clone --filter=blob:none --depth 1 --single-branch --branch main https://github.com/example/project.git /root/.cache/checkouts/github.com/example/project",
+		"gh repo clone example/project",
+		"gh repo clone example/project dest -- --filter=blob:none",
 	]) {
 		assert.equal(classifyTool("bash", { command }), "read", command);
 		assert.equal(classifyMutationConsequence("bash", { command }), "none", command);
@@ -77,7 +81,12 @@ test("executable, output-writing, mutating, and credential-revealing command for
 		"pi -p prompt",
 		"gh auth token",
 		"gh auth status --show-token",
-		"gh repo clone example/project",
+		"git clone --upload-pack /bin/sh https://github.com/example/project.git",
+		"git clone --template /tmp/hooks https://github.com/example/project.git",
+		"git clone -c core.sshCommand=id https://github.com/example/project.git",
+		"git clone --recurse-submodules https://github.com/example/project.git",
+		"git clone https://github.com/example/project.git .",
+		"gh repo clone example/project -- --upload-pack /bin/sh",
 		"gh label create bug",
 		"gh label delete bug",
 		"gh pr checkout 1",
@@ -240,7 +249,8 @@ test("write-capable neighbors of discovery stay external mutations", () => {
 		"git hash-object -w --stdin",
 		"bash /root/.pi/agent/skills/librarian/checkout.sh",
 		"git push origin main",
-		"gh repo clone example/project",
+		"git clone --config core.sshCommand=id https://github.com/example/project.git",
+		"gh repo clone example/project -- --template /tmp/hooks",
 	]) {
 		assert.equal(classifyTool("bash", { command }), "mutation", command);
 		assert.equal(classifyMutationConsequence("bash", { command }), "external", command);

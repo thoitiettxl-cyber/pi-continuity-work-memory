@@ -246,6 +246,106 @@ function gitHashObjectWrites(args: readonly string[]): boolean {
 	);
 }
 
+const GIT_CLONE_FLAGS = new Set([
+	"--quiet",
+	"-q",
+	"--verbose",
+	"-v",
+	"--progress",
+	"--no-checkout",
+	"-n",
+	"--single-branch",
+	"--no-single-branch",
+	"--no-tags",
+	"--sparse",
+	"--reject-shallow",
+	"--no-reject-shallow",
+	"--no-hardlinks",
+	"--dissociate",
+	"--ipv4",
+	"--ipv6",
+]);
+
+const GIT_CLONE_VALUE_OPTIONS = new Set([
+	"--filter",
+	"--depth",
+	"--branch",
+	"-b",
+	"--origin",
+	"-o",
+	"--shallow-since",
+	"--shallow-exclude",
+	"--revision",
+]);
+
+const UNSAFE_CLONE_DESTINATIONS = new Set([".", "./", "..", "../", "/"]);
+
+function parseGitCloneArguments(args: readonly string[]): readonly string[] | undefined {
+	const positionals: string[] = [];
+	let separator = false;
+	for (let index = 0; index < args.length; index += 1) {
+		const argument = args[index]!;
+		if (!separator && argument === "--") {
+			separator = true;
+			continue;
+		}
+		if (!separator && argument.startsWith("-") && argument !== "-") {
+			if (positionals.length > 0) return undefined;
+			const name = argument.includes("=") ? argument.slice(0, argument.indexOf("=")) : argument;
+			if (GIT_CLONE_FLAGS.has(name)) {
+				if (argument.includes("=")) return undefined;
+				continue;
+			}
+			if (!GIT_CLONE_VALUE_OPTIONS.has(name)) return undefined;
+			if (argument.includes("=")) {
+				if (argument.slice(argument.indexOf("=") + 1).length === 0) return undefined;
+				continue;
+			}
+			if (index + 1 >= args.length) return undefined;
+			index += 1;
+			continue;
+		}
+		positionals.push(argument);
+	}
+	return positionals;
+}
+
+function isUnsafeCloneDestination(destination: string): boolean {
+	return UNSAFE_CLONE_DESTINATIONS.has(destination);
+}
+
+function isReadOnlyGitClone(args: readonly string[]): boolean {
+	const positionals = parseGitCloneArguments(args);
+	if (!positionals || positionals.length < 1 || positionals.length > 2) return false;
+	return positionals[1] === undefined || !isUnsafeCloneDestination(positionals[1]);
+}
+
+function isReadOnlyGhRepoClone(args: readonly string[]): boolean {
+	const separator = args.indexOf("--");
+	const ghArgs = separator < 0 ? args : args.slice(0, separator);
+	const gitFlags = separator < 0 ? [] : args.slice(separator + 1);
+	const positionals: string[] = [];
+	for (let index = 0; index < ghArgs.length; index += 1) {
+		const argument = ghArgs[index]!;
+		if (argument === "-u" || argument === "--upstream-remote-name") {
+			if (index + 1 >= ghArgs.length) return false;
+			index += 1;
+			continue;
+		}
+		if (argument.startsWith("--upstream-remote-name=")) {
+			if (argument.slice("--upstream-remote-name=".length).length === 0) return false;
+			continue;
+		}
+		if (argument.startsWith("-") && argument !== "-") return false;
+		positionals.push(argument);
+	}
+	if (positionals.length < 1 || positionals.length > 2) return false;
+	if (positionals[1] !== undefined && isUnsafeCloneDestination(positionals[1])) return false;
+	if (gitFlags.length === 0) return true;
+	const flagPositionals = parseGitCloneArguments(gitFlags);
+	return flagPositionals?.length === 0;
+}
+
 function isGitDiffCheck(args: readonly string[]): boolean {
 	return args[0] === "diff" && args[1] === "--check" && !hasGitHazard(args.slice(1));
 }
@@ -277,7 +377,9 @@ function isReadOnlyGit(args: readonly string[]): boolean {
 	if (!command || command.length === 0) return false;
 	if ((command[0] === "--version" || command[0] === "-v") && command.length === 1) return true;
 	const [subcommand, ...subcommandArgs] = command;
-	if (!subcommand || hasGitHazard(subcommandArgs)) return false;
+	if (!subcommand) return false;
+	if (subcommand === "clone") return isReadOnlyGitClone(subcommandArgs);
+	if (hasGitHazard(subcommandArgs)) return false;
 	if (subcommand === "hash-object") return !gitHashObjectWrites(subcommandArgs);
 	if (GIT_READ_SUBCOMMANDS.has(subcommand)) return true;
 	if (subcommand === "branch") return subcommandArgs.every((argument) => GIT_BRANCH_READ_ARGUMENTS.has(argument));
@@ -385,6 +487,7 @@ function isReadOnlyGh(args: readonly string[]): boolean {
 	if (group === "auth" && action === "status") {
 		return !hasGhFlag(actionArgs, new Set(["--show-token", "-t"]));
 	}
+	if (group === "repo" && action === "clone") return isReadOnlyGhRepoClone(actionArgs);
 	return GH_READ_ACTIONS.get(group)?.has(action) === true;
 }
 

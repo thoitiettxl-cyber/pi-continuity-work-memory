@@ -28,7 +28,9 @@
 
 ### Fixed
 
-- Classified `subagent`, namespaced `mcp__*` proxies, `git hash-object` without `-w`, `git cat-file`, and `sha256sum` as read-only discovery so managed workflow no longer treats those session-observed lookups as mutations. `git hash-object -w`, bash scripts, clone, push, publish, unknown tools, and MCP auth remain external.
+- Classified ordinary `git clone` and `gh repo clone` as read-only discovery so managed workflow no longer treats reference clones as mutations. Config, template, upload-pack, submodule, cwd-overwrite, and other write/exec clone forms, bash scripts, push, publish, unknown tools, and MCP auth remain external.
+
+- Classified `subagent`, namespaced `mcp__*` proxies, `git hash-object` without `-w`, `git cat-file`, and `sha256sum` as read-only discovery so managed workflow no longer treats those session-observed lookups as mutations. `git hash-object -w`, bash scripts, push, publish, unknown tools, and MCP auth remain external.
 
 - Hardened query-conditioned memory after PR review: matched atoms retain a reserved prompt budget and closing delimiter, batch/concurrent exact-content duplicates are removed, and cursor advancement is atomic with publication.
 - Classified ordinary tokenized shell, Git, and read-only GitHub CLI discovery without reopening mutating/output-writing/executable/credential forms; steering and follow-up input no longer erase managed-workflow eligibility for the active run.

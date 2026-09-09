@@ -6,7 +6,7 @@ Date: 2026-09-09
 
 ## Status
 
-Active
+Ready for completion
 
 ## Outcome
 
@@ -35,7 +35,7 @@ Out of scope:
 - Do not open a pull request or GitHub release.
 - Do not change the package version.
 - Do not force-push, rewrite history, or publish to npm.
-- Do not restart this Pi process or move Continuity/memory stores.
+- Do not restart this Pi process or move Continuity or memory stores.
 - Do not include leftover docs/plans/active/commit-push-deploy-clone-classifier.md.
 - Do not deploy a stale pre-fix archive.
 
@@ -68,13 +68,15 @@ Out of scope:
 
 ## Progress
 
-- [ ] Implement the approved outcome.
-- [ ] Run behavior-appropriate and repository-required proof.
-- [ ] Record the verified result before finalization.
+- [x] Implement the approved outcome.
+- [x] Run behavior-appropriate and repository-required proof.
+- [x] Record the verified result before finalization.
 
 ## Decisions
 
-- No task-local decision recorded yet.
+- Include this plan in the product commit; record push/deploy receipts in a follow-up documentation commit.
+- Treat local user-package deploy as an authorized external side effect of this request.
+- Leave leftover `docs/plans/active/commit-push-deploy-clone-classifier.md` unstaged.
 
 Promote lasting product or architecture decisions into repository-owned decision documentation only after authority exists.
 
@@ -88,4 +90,4 @@ Promote lasting product or architecture decisions into repository-owned decision
 
 ## Result
 
-Pending implementation and executable proof.
+Product commit `f0f51f639266bdc5518066cc6f741e611f7e8ef2`. Fast-forward pushed `d830ab2..f0f51f6` to `origin/dev-next` without force. Local `HEAD` and `origin/dev-next` both resolve to `f0f51f6`. Rebuilt and deployed `pi-continuity-work-memory@1.0.0-rc.6` (`sha256:20d2eb34656d8ac6ce63aabba8b786693ae1d09617e89df2903be1051af5d5e5`, 150 sanitized ZIP files, `unzip -t` PASS) to `/root/.pi/agent/packages/pi-continuity-work-memory`. Deploy receipt: `storesChanged: false`, `restartRequired: true`, backup `/root/.pi/agent/backups/pi-continuity-work-memory/2026-09-09T10-10-33-706Z-10624-d5bf8b8d`. Installed `dist/application/tool-classifier.js` contains `isReadOnlyGistSummarize`; installed `dist/application/continuity-service.js` contains the same-run finalize duty. A fresh Pi process is required. Leftover clone-classifier plan was not included.

@@ -195,9 +195,9 @@ reinterpret them as workflow decisions.
    editor.
 
 Read-only shell discovery is recognized from parsed argv, including narrow Git
-and GitHub CLI views and ordinary clone discovery; output-writing, executable,
-credential-revealing, ambiguous, and mutating forms remain fail-closed external
-operations. Streaming
+and GitHub CLI views, ordinary clone discovery, and gist.github.com document
+fetches; output-writing, executable, credential-revealing, ambiguous, and
+mutating forms remain fail-closed external operations. Streaming
 steer/follow-up input preserves the current run's assessed eligibility because
 Pi does not emit a second `before_agent_start` for that queued input.
 
@@ -349,6 +349,11 @@ deferred, and skipped checks separately.
 ### 5. Complete And Deliver
 
 - Update a durable plan's progress, validation, and result in the plan itself.
+- When in-scope work is done, proof is recorded, and Result is no longer
+  pending, set Status to Ready for completion and call
+  `continuity_finalize_work` in the same run. Do not wait for a second user
+  request. Remaining in-scope delivery such as commit, push, or deploy keeps
+  the plan active. `agent_settled` never auto-finalizes.
 - Do not treat moving a plan, updating Continuity, writing memory, or creating a
   checkpoint as completion evidence.
 - Commit only when explicitly requested, using a focused Conventional Commit

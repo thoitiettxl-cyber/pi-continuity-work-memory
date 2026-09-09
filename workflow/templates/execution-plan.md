@@ -43,6 +43,7 @@ Out of scope:
 - [ ] Implement the approved outcome.
 - [ ] Run behavior-appropriate and repository-required proof.
 - [ ] Record the verified result before finalization.
+- [ ] Set Status to Ready for completion and finalize in this run unless remaining in-scope delivery is unfinished.
 
 ## Decisions
 

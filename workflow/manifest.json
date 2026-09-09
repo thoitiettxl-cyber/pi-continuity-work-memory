@@ -4,7 +4,7 @@
   "assets": [
     {
       "path": "WORKFLOW.md",
-      "sha256": "1cee312c3bb4550d02be1f468fb91200322e67b0f24706bc35ee21ab94f231a0"
+      "sha256": "ea697bf2c0e3f9eb977830ca6b1bdc82c6e4fbc97a2551b6a9cb6d8c01094fff"
     },
     {
       "path": "templates/application-runbook.md",
@@ -16,7 +16,7 @@
     },
     {
       "path": "templates/execution-plan.md",
-      "sha256": "ea62bf490e521b946c9719c0959d0eb13db590623a8571a5a797444b19f0e561"
+      "sha256": "13bd62669c370f4c97751279e63f53cb3c5e99af0295adb3659f3f3ced06211f"
     }
   ]
 }

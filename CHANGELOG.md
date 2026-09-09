@@ -18,6 +18,8 @@
 
 ### Changed
 
+- Instructed agents to set a bound plan to `Ready for completion` and call `continuity_finalize_work` in the same run once in-scope work, proof, and Result are recorded, without waiting for a second user request. Remaining in-scope delivery still keeps the plan active; `agent_settled` still never auto-finalizes.
+
 - Changed learning-memory search to rank every visible published record instead of a 500-record recency window, and budgeted `before_agent_start` injection from the selected model `contextWindow` using a labeled `ceil(chars/4)` estimate. Default and mid windows half-split the first atom share so long matches cannot drop baselines.
 
 - Escaped Continuity `contextSummary` interpolations as untrusted XML text and attached a prompt-only session-objective policy when a goal is non-empty after trim or a managed Bound plan exists, without adding Goal tools, auto-continuation, or completion authority.
@@ -27,6 +29,8 @@
 - Advanced the package prerelease identity to `1.0.0-rc.6` for the eleven-skill payload, preserving the historical RC5 archive identity.
 
 ### Fixed
+
+- Classified `gh gist list`/`view`, simple HTTPS GET-to-stdout fetches of `gist.github.com` and `gist.githubusercontent.com`, and `node …/skills/summarize/to-markdown.mjs` gist URL conversion with optional `--tmp` as read-only document discovery. Gist create/delete, `--web`, curl/wget output files or non-gist hosts, summarize `--out`/`--summary`, credential headers, uvx, unknown tools, and MCP auth remain external.
 
 - Classified ordinary `git clone` and `gh repo clone` as read-only discovery so managed workflow no longer treats reference clones as mutations. Config, template, upload-pack, submodule, cwd-overwrite, and other write/exec clone forms, bash scripts, push, publish, unknown tools, and MCP auth remain external.
 

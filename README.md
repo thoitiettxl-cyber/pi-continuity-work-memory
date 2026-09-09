@@ -215,7 +215,7 @@ The workflow is lazy and observable:
 5. Durable work records an exact branch-bound intent, then exclusively creates one identity-bearing execution plan under `docs/plans/active/`, or explicitly binds an existing plan. Root/path/symlink checks, Pi's file-mutation queue, and exclusive creation prevent escape, lost updates, and overwrite; interrupted operations remain recoverable rather than pretending the database and filesystem form one transaction.
 6. Once bound, the repository plan owns durable progress, decisions, validation, and result. Continuity stores only its path, work-item identity, template version, digest, phase, and operational resume hint.
 7. Repository changes win over the stored binding. Drift requires re-reading and explicit rebinding; recovery never restores an older template, recreates a missing document, or retries an uncertain write.
-8. `continuity_finalize_work` accepts only a bound active plan whose status is `Ready for completion` or `Completed`, whose Result is no longer pending, and whose immediately preceding receipt-bound executable validation still matches the pre-operation ledger and stable repository fingerprint. It moves the file to `docs/plans/completed/` without claiming task completion and requires fresh post-move validation.
+8. `continuity_finalize_work` accepts only a bound active plan whose status is `Ready for completion` or `Completed`, whose Result is no longer pending, and whose immediately preceding receipt-bound executable validation still matches the pre-operation ledger and stable repository fingerprint. It moves the file to `docs/plans/completed/` without claiming task completion and requires fresh post-move validation. When those conditions are met and no remaining authorized in-scope delivery is listed, the same agent run must set that status and call the tool; do not wait for a second user request to complete the plan.
 
 The preparation gate applies to agent-issued repository tools. Direct user `!`/`!!` commands remain explicit human actions: they are operation-ledger tracked and invalidate stale evidence, but are not reinterpreted or blocked as agent workflow decisions.
 
@@ -226,13 +226,17 @@ shell text. Ordinary `command -v`, `cat`, `ldd`, `pi --version`/`-v`, Git
 version/status/diff/log/remote inspection, ordinary `git clone` and
 `gh repo clone`, `git hash-object` without `-w`, `git cat-file`, `sha256sum`,
 safe `rg`/`find` queries, and non-mutating GitHub CLI
-auth/repository/issue/label/PR/run/workflow views plus REST GET requests remain
-read-only. Quoted metacharacters stay literal data. GitHub writes or token
-display, Git output files/external filters, `git hash-object -w`, clone
+auth/repository/issue/label/PR/run/workflow/gist views plus REST GET requests
+remain read-only. Simple HTTPS GET-to-stdout fetches of `gist.github.com` and
+`gist.githubusercontent.com`, and `node …/skills/summarize/to-markdown.mjs`
+with a gist HTTPS URL and optional `--tmp`, are document discovery rather than
+repository mutation. Quoted metacharacters stay literal data. GitHub writes or
+token display, Git output files/external filters, `git hash-object -w`, clone
 `--config`/`-c`/`--template`/`--upload-pack`/`--recurse-submodules` and cwd
 overwrite forms, `find` execution/deletion/file-output actions,
-`rg --pre`/archive helpers, unknown forms, and non-GET/ambiguous `gh api`
-requests remain external operations.
+`rg --pre`/archive helpers, curl/wget output files or non-gist hosts, summarize
+`--out`/`--summary`, unknown forms, and non-GET/ambiguous `gh api` requests
+remain external operations.
 
 A steering or follow-up input received during an active agent run preserves that
 run's already assessed repository eligibility; it does not create a second

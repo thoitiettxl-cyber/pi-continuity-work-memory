@@ -135,8 +135,9 @@ real target and do not retry it. `continuity_recover` restores context only;
 resolution requires human-only reconciliation and fresh executable validation.
 When the plan has a non-pending decision and result, use `continuity_validate`
 for the repository's authoritative command, then call
-`continuity_finalize_work` only when the plan is ready. The move is a new
-mutation and requires fresh post-move validation.
+`continuity_finalize_work` in the same run once the plan is ready. Do not wait
+for a second user request unless remaining in-scope delivery is unfinished. The
+move is a new mutation and requires fresh post-move validation.
 
 ## Report Honestly
 

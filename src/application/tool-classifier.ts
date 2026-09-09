@@ -86,6 +86,7 @@ const GH_READ_ACTIONS = new Map<string, ReadonlySet<string>>([
 	["release", new Set(["list", "view"])],
 	["search", new Set(["code", "commits", "issues", "prs", "repos"])],
 	["config", new Set(["get", "list"])],
+	["gist", new Set(["list", "view"])],
 ]);
 
 const FIND_MUTATING_ACTIONS = new Set([
@@ -495,6 +496,143 @@ function isReadOnlyNpm(args: readonly string[]): boolean {
 	return args.length > 0 && new Set(["view", "list", "ls", "explain"]).has(args[0]!);
 }
 
+const GIST_HOSTS = new Set(["gist.github.com", "gist.githubusercontent.com"]);
+const CURL_SAFE_LONG_FLAGS = new Set([
+	"--silent",
+	"--show-error",
+	"--fail",
+	"--fail-early",
+	"--location",
+	"--compressed",
+	"--globoff",
+	"--get",
+	"--head",
+	"--no-progress-meter",
+]);
+const CURL_SAFE_SHORT_CLUSTER = new Set(["s", "S", "f", "L", "g", "I", "G"]);
+const CURL_SAFE_VALUE_LONG = new Set([
+	"--max-time",
+	"--connect-timeout",
+	"--max-redirs",
+	"--retry",
+	"--retry-delay",
+	"--user-agent",
+	"--header",
+	"--url",
+	"--request",
+]);
+const CURL_SAFE_VALUE_SHORT = new Set(["m", "A", "H", "X"]);
+const SENSITIVE_HEADER = /^(?:authorization|proxy-authorization|cookie|set-cookie|x-api-key|api-key)\s*:/i;
+
+function isGistHttpsUrl(value: string): boolean {
+	let url: URL;
+	try {
+		url = new URL(value);
+	} catch {
+		return false;
+	}
+	if (url.protocol !== "https:") return false;
+	if (url.username !== "" || url.password !== "") return false;
+	return GIST_HOSTS.has(url.hostname);
+}
+
+function isSensitiveHeader(value: string): boolean {
+	return SENSITIVE_HEADER.test(value.trim());
+}
+
+function isReadOnlyGistCurl(args: readonly string[]): boolean {
+	const urls: string[] = [];
+	for (let index = 0; index < args.length; index += 1) {
+		const argument = args[index]!;
+		if (argument === "--") {
+			for (const positional of args.slice(index + 1)) {
+				if (!isGistHttpsUrl(positional)) return false;
+				urls.push(positional);
+			}
+			break;
+		}
+		if (argument.startsWith("--")) {
+			const name = argument.includes("=") ? argument.slice(0, argument.indexOf("=")) : argument;
+			if (CURL_SAFE_LONG_FLAGS.has(name)) {
+				if (argument.includes("=")) return false;
+				continue;
+			}
+			if (!CURL_SAFE_VALUE_LONG.has(name)) return false;
+			const value = argument.includes("=") ? argument.slice(argument.indexOf("=") + 1) : args[++index];
+			if (value === undefined || value.length === 0) return false;
+			if (name === "--url") {
+				if (!isGistHttpsUrl(value)) return false;
+				urls.push(value);
+				continue;
+			}
+			if (name === "--request" && value.toUpperCase() !== "GET" && value.toUpperCase() !== "HEAD") return false;
+			if (name === "--header" && isSensitiveHeader(value)) return false;
+			continue;
+		}
+		if (argument.startsWith("-") && argument !== "-") {
+			if (argument.startsWith("-X") && argument.length > 2) {
+				const method = argument.slice(2);
+				if (method.toUpperCase() !== "GET" && method.toUpperCase() !== "HEAD") return false;
+				continue;
+			}
+			if (argument.startsWith("-H") && argument.length > 2) {
+				const value = argument.slice(2).replace(/^=/, "");
+				if (isSensitiveHeader(value)) return false;
+				continue;
+			}
+			if (argument.length === 2 && CURL_SAFE_VALUE_SHORT.has(argument.slice(1))) {
+				const name = argument.slice(1);
+				const value = args[++index];
+				if (value === undefined) return false;
+				if (name === "X" && value.toUpperCase() !== "GET" && value.toUpperCase() !== "HEAD") return false;
+				if (name === "H" && isSensitiveHeader(value)) return false;
+				continue;
+			}
+			if (argument.length > 1 && [...argument.slice(1)].every((flag) => CURL_SAFE_SHORT_CLUSTER.has(flag))) continue;
+			return false;
+		}
+		if (!isGistHttpsUrl(argument)) return false;
+		urls.push(argument);
+	}
+	return urls.length > 0;
+}
+
+function isReadOnlyGistWget(args: readonly string[]): boolean {
+	let stdout = false;
+	const urls: string[] = [];
+	for (let index = 0; index < args.length; index += 1) {
+		const argument = args[index]!;
+		if (argument === "-q" || argument === "--quiet" || argument === "--no-verbose") continue;
+		if (argument === "-O" || argument === "--output-document") {
+			const value = args[++index];
+			if (value !== "-") return false;
+			stdout = true;
+			continue;
+		}
+		if (argument === "-O-" || argument === "--output-document=-") {
+			stdout = true;
+			continue;
+		}
+		if (argument.startsWith("-")) return false;
+		if (!isGistHttpsUrl(argument)) return false;
+		urls.push(argument);
+	}
+	return stdout && urls.length === 1;
+}
+
+function isReadOnlyGistSummarize(args: readonly string[]): boolean {
+	if (args.length < 2) return false;
+	if (!args[0]!.endsWith("/skills/summarize/to-markdown.mjs")) return false;
+	let url: string | undefined;
+	for (const argument of args.slice(1)) {
+		if (argument === "--tmp") continue;
+		if (argument.startsWith("-")) return false;
+		if (url !== undefined) return false;
+		url = argument;
+	}
+	return url !== undefined && isGistHttpsUrl(url);
+}
+
 function isReadOnlyShellCommand(parsed: ReturnType<typeof splitSimpleCommand>): boolean {
 	if (SIMPLE_READ_PROGRAMS.has(parsed.program)) return true;
 	switch (parsed.program) {
@@ -504,7 +642,13 @@ function isReadOnlyShellCommand(parsed: ReturnType<typeof splitSimpleCommand>): 
 		case "rg": return isReadOnlyRipgrep(parsed.args);
 		case "find": return isReadOnlyFind(parsed.args);
 		case "npm": return isReadOnlyNpm(parsed.args);
-		case "node": return parsed.args.length === 1 && (parsed.args[0] === "--version" || parsed.args[0] === "-v");
+		case "curl": return isReadOnlyGistCurl(parsed.args);
+		case "wget": return isReadOnlyGistWget(parsed.args);
+		case "node":
+			return (
+				(parsed.args.length === 1 && (parsed.args[0] === "--version" || parsed.args[0] === "-v"))
+				|| isReadOnlyGistSummarize(parsed.args)
+			);
 		case "pi": return parsed.args.length === 1 && (parsed.args[0] === "--version" || parsed.args[0] === "-v");
 		default: return false;
 	}

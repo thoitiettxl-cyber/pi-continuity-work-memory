@@ -631,6 +631,7 @@ test("a repository change after provisional insert prevents checkpoint promotion
 });
 
 const UNIQUE_BOUND_ACTIVE = "An authorized mutative turn may make the smallest coherent increment toward the current request";
+const UNIQUE_FINALIZE_READY = "call continuity_finalize_work in this turn without waiting for a second user request";
 const UNIQUE_BOUND_UNALIGNED = "The bound repository work document is not aligned";
 const UNIQUE_BOUND_COMPLETED = "A completed or finalized repository work document does not require further increments";
 const UNIQUE_GOAL_ONLY = "Completion remains with the authorized user outcome";
@@ -746,6 +747,7 @@ test("contextSummary wraps a hostile goal once and emits exactly one goal-only p
 		UNIQUE_BOUND_UNALIGNED,
 		UNIQUE_BOUND_COMPLETED,
 		UNIQUE_BOUND_ACTIVE,
+		UNIQUE_FINALIZE_READY,
 	]);
 	assert.ok(block.includes("This turn's scope is the current user request"));
 	assert.ok(block.includes("Read-only requests stay read-only"));
@@ -847,6 +849,7 @@ test("contextSummary emits bound-active policy for an aligned managed binding", 
 	const block = assertKind(summary, UNIQUE_BOUND_ACTIVE, [UNIQUE_BOUND_UNALIGNED, UNIQUE_BOUND_COMPLETED, UNIQUE_GOAL_ONLY]);
 	assert.ok(block.includes(YIELD_OUTRANKS));
 	assert.ok(block.includes("unilaterally"));
+	assert.ok(block.includes(UNIQUE_FINALIZE_READY));
 	assert.ok(block.includes(F8_NO_WRITE_TO_LOG));
 	assert.ok(block.includes("Repository-document drift, path or identity conflict, and uncertain workflow or mutation operations are stop-first"));
 	assert.ok(summary.includes("repository document owns durable plan truth"));

@@ -139,11 +139,12 @@ contract. Review the final diff.
 
 For bounded documentation work, ordinary repository proof is sufficient. When
 an authorized durable task is ready to close, use `continuity_validate` for an
-allow-listed executable receipt, then `continuity_finalize_work` only after the
-plan itself records a ready status and non-pending result. The plan move is a new
-mutation and requires fresh post-move validation. Use `continuity_checkpoint`
-only when a safe repository/operation boundary is needed; a checkpoint is never
-completion evidence.
+allow-listed executable receipt, then `continuity_finalize_work` in the same run
+after the plan itself records a ready status and non-pending result. Do not wait
+for a second user request unless remaining in-scope delivery is unfinished. The
+plan move is a new mutation and requires fresh post-move validation. Use
+`continuity_checkpoint` only when a safe repository/operation boundary is needed;
+a checkpoint is never completion evidence.
 
 Report resolved language, evidence, document paths, unresolved questions, and
 validation separately. Do not commit, push, publish, deploy, or mutate external

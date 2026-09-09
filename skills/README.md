@@ -46,7 +46,11 @@ They must:
 - use exactly one bound execution plan for durable task truth instead of
   creating competing specs, experiment records, ticket maps, or memory state;
 - use repository-native executable or observable proof;
-- treat learning memory and safe checkpoints as non-completion authority; and
+- treat learning memory and safe checkpoints as non-completion authority;
+- when a bound plan's in-scope outcome is done with recorded Result and no
+  remaining authorized delivery, set Status to Ready for completion and call
+  `continuity_finalize_work` in the same run without waiting for a second user
+  request; and
 - commit, push, publish, deploy, or mutate external state only when the user
   explicitly requests the exact action and target.
 

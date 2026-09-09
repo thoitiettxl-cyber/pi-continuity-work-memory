@@ -53,6 +53,8 @@ Choose proof for the behavior:
 
 Plans, checklists, assistant prose, learning memory, and checkpoints do not prove product behavior by themselves. Finalizing a plan requires an immediately preceding receipt-bound executable validation whose ledger and stable Git fingerprint still match, and only moves a ready, result-bearing document from `docs/plans/active/` to `docs/plans/completed/`. The move is a new mutation and requires fresh post-move executable validation before a safe checkpoint.
 
+When the bound plan's in-scope outcome is implemented, required proof is recorded, and Result is no longer pending, the same agent run must set Status to `Ready for completion` and call `continuity_finalize_work`. Do not wait for a second user request to complete the plan. Remaining authorized in-scope delivery such as commit, push, or deploy keeps the plan active. `session_start`, user input, agent completion, and `agent_settled` still never create or finalize repository documents.
+
 A verified Continuity checkpoint proves repository and operation safety for its bound fingerprint, receipt, ledger, and hash chain. It never marks the task or repository plan complete.
 
 ## Application Operation

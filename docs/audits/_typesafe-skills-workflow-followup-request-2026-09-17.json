@@ -1,0 +1,170 @@
+{
+  "state": {
+    "audit_kind": "TypeSafe System One SKILLS+WORKFLOW follow-up after implementing priority actions",
+    "audit_date_ict": "2026-09-17",
+    "branch": "harden/tests-rc6",
+    "base_commit_before_changes": "3724ae0fb74543743384aa39d17c1a82fd072e73",
+    "note": "Working tree has uncommitted skills/workflow improvements implementing prior TypeSafe priority_actions=strengthen_workflow_onboarding_contracts (+ cross-links, README discoverability, inventory tests). Extension src unchanged.",
+    "prior_scores": {
+      "skill_pack_completeness": 2.09,
+      "workflow_completeness": 1.98,
+      "skill_workflow_alignment_with_extension": 1.91,
+      "install_discoverability": 2.31,
+      "docs_clarity": 2.28,
+      "ready_to_ship_skills_workflow": 0.73,
+      "biggest_gap": "install_docs_discoverability",
+      "priority_actions": "strengthen_workflow_onboarding_contracts"
+    },
+    "implemented_changes": {
+      "WORKFLOW_new_sections": [
+        "## Agent Onboarding",
+        "## Continuity Tool Contract",
+        "## Packaged Engineering Skills"
+      ],
+      "WORKFLOW_tools_documented": [
+        "continuity_workflow_status",
+        "continuity_bind_work_document",
+        "continuity_checkpoint",
+        "continuity_recover",
+        "continuity_status",
+        "continuity_validate",
+        "continuity_prepare_work",
+        "continuity_finalize_work"
+      ],
+      "skills_readme_has_tool_alignment": true,
+      "main_readme_has_discoverability_map": true,
+      "skills_crosslinked_finalize": [
+        {
+          "name": "tdd",
+          "finalize": true,
+          "workflow_status": true
+        },
+        {
+          "name": "contract-first",
+          "finalize": true,
+          "workflow_status": true
+        },
+        {
+          "name": "codebase-design",
+          "finalize": true,
+          "workflow_status": true
+        },
+        {
+          "name": "diagnosing-bugs",
+          "finalize": true,
+          "workflow_status": false
+        },
+        {
+          "name": "grill-with-docs",
+          "finalize": true,
+          "workflow_status": true
+        },
+        {
+          "name": "encode-invariant",
+          "finalize": true,
+          "workflow_status": true
+        }
+      ],
+      "tests_added": [
+        "WORKFLOW.md encodes onboarding and Continuity tool contracts",
+        "skills README aligns with package list and Continuity/workflow contracts",
+        "mutative engineering skills cross-link finalize when Continuity applies"
+      ],
+      "manifest_hashes_refreshed": true,
+      "extension_code_unchanged": true
+    },
+    "WORKFLOW_excerpt_onboarding": "## Agent Onboarding\n\n1. Load applicable repository `AGENTS.md` / override and confirm project trust before any managed document write.\n2. Prefer `continuity_workflow_status` (and `continuity_status` when recovery or evidence is unclear) before mutative work so eligibility, binding, drift, and uncertain operations are visible.\n3. Choose a work shape below. Do not invent a second lifecycle document type.\n4. For process technique (TDD, review, onboarding, etc.), load the matching packaged skill under `skills/`; those skills are process guidance only and defer to this workflow plus repository authority.\n5. Keep learning memory and checkpoints out of product-completion authority.\n\n## Continuity Tool Contract\n\nUse Continuity tools as operational controls, not as a second system of record:\n\n| Tool | Role |\n| --- | --- |\n| `continuity_workflow_status` | Inspect managed-workflow eligibility, binding, document drift, and recovery hints before mutating. |\n| `continuity_status` | Inspect Continuity/evidence state when resume, uncertainty, or checkpoint context matters. |\n| `continuity_prepare_work` | Required before the first agent repository mutation when managed mode is eligible; classifies work shape from structured signals. |\n| `continuity_bind_work_document` | Explicitly rebind an existing verified execution-plan path after drift or when binding an existing plan; never silently overwrite. |\n| `continuity_finalize_work` | Move a ready, result-bearing active plan to `docs/plans/completed/` under receipt-bound validation rules; same run when ready. |\n| `continuity_checkpoint` | Record repository/operation safety for a bound fingerprint only; never task completion. |\n| `continuity_recover` | Store-only context restore; never Git mutation, file rewrite, or automatic retry of uncert",
+    "skills_readme_tool_alignment_excerpt": "## Continuity Tool Alignment\n\nSkills follow the package-owned [workflow/WORKFLOW.md](../workflow/WORKFLOW.md)\ncontract. Before mutative work when Continuity is available:\n\n1. Prefer `continuity_workflow_status` (and `continuity_status` when resume or\n   evidence is unclear).\n2. Call `continuity_prepare_work` before the first repository mutation when\n   managed mode is eligible.\n3. Keep durable truth in exactly one bound execution plan; rebind with\n   `continuity_bind_work_document` only after re-reading a verified existing\n   plan.\n4. When a bound plan's in-scope outcome is done with recorded Result and no\n   remaining authorized delivery, set Status to Ready for completion and call\n   `continuity_finalize_work` in the same run.\n5. Use `continuity_validate` for allow-listed proof, `continuity_checkpoint`\n   only for repository/operation safety, and `continuity_recover` only for\n   store-"
+  },
+  "model": "jev-latest",
+  "questions": {
+    "skill_pack_completeness": {
+      "type": "score",
+      "instructions": "After the implemented skills cross-links and README Continuity Tool Alignment, score skill pack completeness.",
+      "criteria": [
+        "0 broken",
+        "1 prototype",
+        "2 RC solid \u2014 eleven skills consistent; authority+tool alignment clear; minor polish OK",
+        "3 production-complete"
+      ]
+    },
+    "workflow_completeness": {
+      "type": "score",
+      "instructions": "After adding Agent Onboarding, Continuity Tool Contract, Packaged Engineering Skills, and stronger prepare/recovery wording, score WORKFLOW completeness.",
+      "criteria": [
+        "0 broken",
+        "1 prototype",
+        "2 RC solid \u2014 clear onboarding, tools, work shapes, prep, validation, recovery",
+        "3 production-complete"
+      ]
+    },
+    "skill_workflow_alignment_with_extension": {
+      "type": "score",
+      "instructions": "After cross-linking status/bind/finalize across mutative skills and documenting the tool table in WORKFLOW, score alignment with Continuity extension contracts.",
+      "criteria": [
+        "0 contradicted",
+        "1 partial",
+        "2 RC solid",
+        "3 exemplary"
+      ]
+    },
+    "install_discoverability": {
+      "type": "score",
+      "instructions": "After adding README post-install discoverability map and pointers to skills/README + WORKFLOW.md, score discoverability.",
+      "criteria": [
+        "0 undiscoverable",
+        "1 weak",
+        "2 good RC",
+        "3 excellent"
+      ]
+    },
+    "docs_clarity": {
+      "type": "score",
+      "instructions": "Score docs clarity after WORKFLOW/skills README/main README updates.",
+      "criteria": [
+        "0 confusing",
+        "1 usable but uneven",
+        "2 clear RC",
+        "3 exemplary"
+      ]
+    },
+    "ready_to_ship_skills_workflow": {
+      "type": "noul",
+      "instructions": "Ready to update PR #2 with these skills+workflow improvements for human RC review?",
+      "criteria": {
+        "true": "Ready to push/update PR for review",
+        "false": "Blocking gaps remain"
+      }
+    },
+    "biggest_gap": {
+      "type": "choice",
+      "instructions": "Biggest remaining gap after these improvements.",
+      "criteria": {
+        "none_material": "No material gap for RC review",
+        "skill_frontmatter_or_paths": "Broken frontmatter/paths",
+        "readme_package_list_drift": "List drift",
+        "workflow_contract_gaps": "WORKFLOW still incomplete",
+        "skill_extension_alignment": "Still misaligned with extension",
+        "missing_tests_validators": "Tests still insufficient",
+        "install_docs_discoverability": "Still hard to discover",
+        "template_quality": "Templates still thin",
+        "upstream_provenance": "Provenance issues"
+      }
+    },
+    "priority_actions": {
+      "type": "choice",
+      "instructions": "Best remaining action now.",
+      "criteria": {
+        "fix_broken_refs_frontmatter_only": "Fix refs only",
+        "align_lists_strengthen_skills_readme": "Align lists",
+        "strengthen_workflow_onboarding_contracts": "More WORKFLOW work",
+        "add_skill_workflow_inventory_tests": "More tests",
+        "improve_main_readme_discoverability": "More README",
+        "polish_templates_and_manifest": "Polish templates",
+        "cross_link_skills_to_workflow_tools": "More cross-links",
+        "docs_audit_only_no_code": "Audit docs only",
+        "ship_as_is_after_audit_docs": "Ship/push after recording audit docs"
+      }
+    }
+  }
+}

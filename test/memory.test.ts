@@ -75,6 +75,19 @@ test("untrusted memory never injects repository scope or promotes beyond session
 	store.close();
 });
 
+test("trusted memory_add via agent-tool cannot create global-user and rejects empty content", () => {
+	const root = temporaryDirectory("memory-global-agent-gate");
+	const store = new MemoryStore(join(root, "memory.sqlite"));
+	const service = new MemoryService(identity(), () => emptyWorkState(), store);
+	assert.throws(() => service.add("global via agent", "global-user", "agent-tool"), /Global-user memory requires an explicit user command/);
+	assert.throws(() => service.add("", "session", "agent-tool"), /Memory content is empty/);
+	assert.throws(() => service.add("   \t\n", "session", "agent-tool"), /Memory content is empty/);
+	const viaUser = service.add("global via user", "global-user", "user-command");
+	assert.equal(viaUser.scope, "global-user");
+	assert.equal(service.read(viaUser.id)?.content, "global via user");
+	store.close();
+});
+
 test("Stage 1 and Stage 2 publish atomically with usage and citations", async () => {
 	const root = temporaryDirectory("memory-pipeline");
 	const store = new MemoryStore(join(root, "memory.sqlite"));

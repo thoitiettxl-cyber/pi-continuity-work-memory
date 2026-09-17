@@ -79,7 +79,10 @@ For design-only work, remain read-only and report:
 - deliberate trade-offs and rejected alternatives; and
 - acceptance evidence for a future change.
 
-If implementation is requested, follow applicable authority and call
+If implementation is requested, follow applicable authority, prefer
+`continuity_workflow_status` when Continuity is available, and call
 `continuity_prepare_work` before the first repository mutation when managed
-workflow eligibility is active. Do not create a competing plan, commit, or
-external action unless explicitly authorized.
+workflow eligibility is active. Keep durable progress in one bound execution
+plan; when that plan is ready with recorded Result and no remaining authorized
+delivery, call `continuity_finalize_work` in the same run. Do not create a
+competing plan, commit, or external action unless explicitly authorized.

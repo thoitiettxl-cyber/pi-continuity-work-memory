@@ -29,10 +29,12 @@ change product behavior, compatibility, security, migration, or recovery. When
 interface shape itself is unresolved, load `codebase-design` from its discovered
 `SKILL.md` location before writing tests.
 
-Before the first repository mutation, call `continuity_prepare_work` when
-managed workflow eligibility is active. Update a bound execution plan for
-durable work; do not create a parallel test plan or task checklist as durable
-truth.
+When Continuity tools are available, prefer `continuity_workflow_status`
+before mutative work. Before the first repository mutation, call
+`continuity_prepare_work` when managed workflow eligibility is active. Update a
+bound execution plan for durable work; do not create a parallel test plan or
+task checklist as durable truth. Rebind with `continuity_bind_work_document`
+only after re-reading a verified existing plan.
 
 Read [tests.md](tests.md) for behavior-test examples and
 [mocking.md](mocking.md) before introducing a test double.
@@ -107,6 +109,9 @@ then every mandatory repository gate. Use `continuity_validate` for an
 allow-listed authoritative command when available and review the final diff.
 
 Report observed red and green commands, broader validation, skipped/deferred
-checks, and residual risk separately. Do not claim completion from a plan,
-learning memory, or checkpoint. Do not commit, push, publish, or deploy unless
-the user explicitly requested that exact action and target.
+checks, and residual risk separately. When a bound plan's in-scope outcome is
+done with recorded Result and no remaining authorized delivery, set Status to
+Ready for completion and call `continuity_finalize_work` in the same run. Do
+not claim completion from a plan, learning memory, or `continuity_checkpoint`.
+Do not commit, push, publish, or deploy unless the user explicitly requested
+that exact action and target.

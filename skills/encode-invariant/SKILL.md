@@ -104,7 +104,10 @@ a green run is not proof that branch protection requires it.
 
 Report the accepted authority, encoded scope, validation owner, actionable
 diagnostic, positive and negative results, four enforcement levels, and any
-remaining exception or authority gap. A safe checkpoint proves
-repository/operation safety only; a checkpoint never establishes policy or task
-completion. Do not commit, push, publish, deploy, or change external enforcement
-unless the user explicitly requested that exact action and target.
+remaining exception or authority gap. When a bound plan's in-scope outcome is
+done with recorded Result and no remaining authorized delivery, set Status to
+Ready for completion and call `continuity_finalize_work` in the same run. A
+safe checkpoint proves repository/operation safety only; a checkpoint never
+establishes policy or task completion. Do not commit, push, publish, deploy, or
+change external enforcement unless the user explicitly requested that exact
+action and target.

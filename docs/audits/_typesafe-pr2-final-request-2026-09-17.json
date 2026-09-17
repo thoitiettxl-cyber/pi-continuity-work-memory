@@ -1,0 +1,233 @@
+{
+  "state": {
+    "audit_kind": "TypeSafe System One FINAL merge-readiness review for PR #2",
+    "audit_date_ict": "2026-09-17 13:56:43 ICT",
+    "goal": "Produce go/no-go merge advice for harden/tests-rc6 into dev-next. User will merge themselves. Prefer review+docs over more feature work. Do not invent blockers that are already explicitly deferred.",
+    "target": {
+      "path": "/workspace/pi-continuity-work-memory",
+      "package": "pi-continuity-work-memory",
+      "version": "1.0.0-rc.6",
+      "branch": "harden/tests-rc6",
+      "head_sha": "c15135ea6b5c3f017cef9f1b575accdecde05356",
+      "commit_subject": "docs(skills/workflow): TypeSafe-driven completeness and Continuity tool contracts",
+      "engines_node": ">=22.19.0",
+      "pr": "https://github.com/thoitiettxl-cyber/pi-continuity-work-memory/pull/2",
+      "base": "dev-next @ cfbbf04a92638c492c6c1397c2a580c72d4630a0",
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "commits_on_pr": 4,
+      "diff_vs_dev_next": "35 files, +2171/-106"
+    },
+    "prior_audits": {
+      "logic": {
+        "file": "docs/audits/TYPESafe-logic-audit-2026-09-17.md",
+        "overall_logic_completeness": 2.05,
+        "ready_for_dev_next_merge_noul": 0.85,
+        "top_remaining_risk": "memory_provider_deferred",
+        "priority_followup": "add_ci"
+      },
+      "followup_ci": {
+        "file": "docs/audits/TYPESafe-followup-ci-2026-09-17.md",
+        "overall_logic_completeness": 1.99,
+        "ci_adequacy": 1.96,
+        "test_proof_maturity": 1.99,
+        "ready_to_update_pr_noul": 0.81,
+        "blocks": "memory_provider_deferred"
+      },
+      "skills_workflow": {
+        "file": "docs/audits/TYPESafe-skills-workflow-audit-2026-09-17.md",
+        "followup_alignment": 2.43,
+        "install_discoverability": 2.73,
+        "workflow_completeness": 2.02,
+        "ready_to_ship_noul_followup": 0.55,
+        "priority_actions": "ship_as_is_after_audit_docs",
+        "note": "Follow-up noul conservative; treated as ship-for-human-review after implemented WORKFLOW/skills contracts + green tests"
+      }
+    },
+    "extension_surface": {
+      "entry": "dist/extension.js (src/extension.ts)",
+      "layers": [
+        "domain",
+        "application",
+        "infrastructure",
+        "interface"
+      ],
+      "key_services": [
+        "continuity-service (branch-correct continuity, checkpoints, recover non-mutating)",
+        "memory-service + memory-scheduler + memory-ports (scoped memory; PiMemoryProvider throws MemoryProviderDeferredError without model/auth)",
+        "tool-classifier (fail-closed; allow-listed validation/reads; managed-workflow gates)",
+        "managed-workflow-service + workflow-context",
+        "context-pressure-governor (advisory only; never aborts/compacts itself)"
+      ],
+      "classifier_posture": "fail-closed hardened; no weakening in this PR",
+      "src_rewrites_this_pr": "none material in final skills push; earlier commits were tests/proof/CI/docs/skills/workflow only"
+    },
+    "tests_ci_proof": {
+      "local_suite_claimed": "279/279 PASS Node v22.19.0 (prior harden+CI contract; skills push added more contract tests)",
+      "typecheck": "PASS historically this branch",
+      "github_actions": {
+        "file": ".github/workflows/ci.yml",
+        "node": "22.19.0",
+        "steps": [
+          "npm ci",
+          "npm run typecheck",
+          "npm test"
+        ],
+        "omits": "validate:release (needs local Pi binary)",
+        "head_check_runs": "success on c15135e (two runs both conclusion=success ~13:37 ICT)"
+      },
+      "proof": {
+        "packageVersion": "1.0.0-rc.6",
+        "status": "RC6SourceLocalHardenCiValidated",
+        "deferred": [
+          "real-provider memory execution (historical RC2 only)",
+          "real-provider memory still DEFERRED this PR (scaffold only; no authorized live run)",
+          "Alpine Linux 3.24 ARM64 matrix revalidation on this host",
+          "isolated Pi Git-install / global-install proof on this worktree",
+          "fresh managed deployment / GitHub release republication"
+        ],
+        "real_provider_memory": "DEFERRED — scaffold only; historical RC2 only; ACCEPTANCE/RESULTS explicit"
+      }
+    },
+    "skills_workflow": {
+      "skills_count": 11,
+      "skills": [
+        "audit-onboarding-proposal",
+        "code-review",
+        "codebase-design",
+        "contract-first",
+        "diagnosing-bugs",
+        "domain-modeling",
+        "encode-invariant",
+        "grill-with-docs",
+        "improve-harness",
+        "onboard-repository",
+        "tdd"
+      ],
+      "workflow": "workflow/WORKFLOW.md + workflow/manifest.json",
+      "recent_improvements": [
+        "Agent Onboarding section",
+        "Continuity Tool Contract table (status/prepare/bind/finalize/checkpoint/recover/validate)",
+        "skills README Continuity Tool Alignment",
+        "mutative skills cross-linked to status/bind/finalize",
+        "README post-install discoverability map",
+        "contract tests for WORKFLOW tools/onboarding and skills inventory"
+      ]
+    },
+    "deferred_items": [
+      "real-provider memory (authorized live Pi model/auth) — not a merge blocker if documented",
+      "validate:release inside GHA (Pi binary)",
+      "Alpine ARM64 matrix revalidation",
+      "isolated Pi Git-install / global-install proof on this worktree",
+      "fresh managed deployment / GitHub release republication",
+      "actual model retrieval/adherence for skills (prompt-only proof)"
+    ],
+    "pr_change_summary": {
+      "added": [
+        ".github/workflows/ci.yml",
+        "docs/audits/* TypeSafe artifacts"
+      ],
+      "hardened_tests": [
+        "continuity",
+        "memory",
+        "memory-context-budget",
+        "tool-classifier",
+        "git-install",
+        "skills-package",
+        "workflow-assets"
+      ],
+      "docs_skills_workflow": [
+        "README",
+        "skills/* SKILL.md cross-links",
+        "skills/README",
+        "workflow/WORKFLOW.md",
+        "proof ACCEPTANCE/RESULTS"
+      ],
+      "no_classifier_weakening": true,
+      "no_fake_provider_pass": true
+    },
+    "merge_context": {
+      "user_intent": "Final review for merge readiness; user merges themselves",
+      "prefer": "review+docs over more feature work",
+      "blocking_means": "critical logic bug, failing tests/CI, or fake/misleading proof — NOT already-documented deferrals"
+    }
+  },
+  "model": "jev-latest",
+  "questions": {
+    "overall_merge_quality": {
+      "type": "score",
+      "instructions": "Score overall merge quality of PR #2 (harden/tests-rc6 → dev-next) for an RC6 working-logic package: tests+CI green, skills/workflow contracts strengthened, real-provider memory explicitly deferred, no classifier weakening.",
+      "criteria": [
+        "0 reject — critical bugs, red CI, or misleading proof",
+        "1 weak — material gaps that should block merge into dev-next",
+        "2 solid merge — RC-appropriate; deferred items documented; safe for human merge to dev-next",
+        "3 excellent merge — production-complete including fresh real-provider and Pi validate-in-CI"
+      ]
+    },
+    "logic_soundness": {
+      "type": "score",
+      "instructions": "Score continuity/memory/classifier/managed-workflow logic soundness given prior TypeSafe ~2.0 RC solid scores, green suite, and no src logic rewrites in the final skills commit.",
+      "criteria": [
+        "0 broken",
+        "1 prototype with serious gaps",
+        "2 RC solid — invariants documented/enforced; minor deferred OK",
+        "3 production-complete logic with live provider proofs"
+      ]
+    },
+    "skills_workflow_readiness": {
+      "type": "score",
+      "instructions": "Score skills+workflow readiness after Continuity tool contract table, onboarding, cross-links, discoverability map, and contract tests. Prior follow-up alignment ~2.43 / discoverability ~2.73.",
+      "criteria": [
+        "0 missing/misaligned",
+        "1 thin docs",
+        "2 RC ready — contracts clear; skills defer to WORKFLOW; tests cover inventory/links",
+        "3 production-complete with live model adherence proof"
+      ]
+    },
+    "test_ci_proof_readiness": {
+      "type": "score",
+      "instructions": "Score test/CI/proof readiness: claimed 279/279 + GHA success on HEAD; RESULTS/ACCEPTANCE mark deferred memory; validate:release omitted from CI intentionally.",
+      "criteria": [
+        "0 red or fake",
+        "1 thin/local only",
+        "2 RC solid — suite green + CI on PR; deferred proofs explicit",
+        "3 production-complete — CI + fresh provider/install/Alpine"
+      ]
+    },
+    "recommend_merge_now": {
+      "type": "noul",
+      "instructions": "Should the human merge PR #2 into dev-next now (after this final audit lands), treating documented deferrals as non-blocking?",
+      "criteria": {
+        "true": "Yes — merge-ready for human merge; remaining gaps are explicit deferrals, not merge blockers",
+        "false": "No — a critical bug, red CI, or misleading claim still blocks merge"
+      }
+    },
+    "blocking_issues_present": {
+      "type": "noul",
+      "instructions": "Are there blocking issues that should prevent merge into dev-next right now? Documented deferrals (real-provider memory, validate:release in CI, Alpine) do NOT count as blocking.",
+      "criteria": {
+        "true": "Yes — critical logic bug, failing tests/CI, or fake/misleading proof",
+        "false": "No blocking issues beyond already-documented deferrals"
+      }
+    },
+    "top_post_merge_priority": {
+      "type": "choice",
+      "instructions": "After merge to dev-next, what should be the top priority?",
+      "criteria": {
+        "ci_watch": "Watch/stabilize GitHub Actions and optionally add Pi validate:release later",
+        "real_provider_memory": "Authorized real-provider memory proof / pipeline completion",
+        "more_docs": "More documentation/skills polish",
+        "none": "Nothing urgent; leave as RC deferred posture"
+      }
+    },
+    "merge_advice": {
+      "type": "choice",
+      "instructions": "Single merge advice label for the human merging PR #2.",
+      "criteria": {
+        "merge_as_is": "Merge now as-is after this audit; no further PR changes required",
+        "merge_with_notes": "Merge OK with notes (watch CI; deferred memory remains; not production-complete)",
+        "wait_for_fixes": "Do not merge yet — fix blocking issues first"
+      }
+    }
+  }
+}

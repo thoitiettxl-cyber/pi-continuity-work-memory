@@ -1,0 +1,282 @@
+{
+  "state": {
+    "audit_kind": "comprehensive TypeSafe System One LOGIC audit",
+    "audit_date_ict": "2026-09-17",
+    "target": {
+      "path": "/workspace/pi-continuity-work-memory",
+      "package": "pi-continuity-work-memory",
+      "version": "1.0.0-rc.6",
+      "branch": "harden/tests-rc6",
+      "commit": "0ba7cb9a0e1a72309a55e6054bab18c89020cd84",
+      "commit_short": "0ba7cb9",
+      "commit_subject": "test: harden continuity/memory/classifier coverage and refresh RC6 proof",
+      "license": "MIT",
+      "description": "Managed repository workflow, branch-correct Pi continuity, evidence-backed checkpoints, scoped persistent memory, and Pi-native engineering skills.",
+      "engines_node": ">=22.19.0",
+      "peerDependencies": {
+        "@earendil-works/pi-ai": ">=0.84.1 <0.86.0",
+        "@earendil-works/pi-coding-agent": ">=0.84.1 <0.86.0",
+        "typebox": "*"
+      }
+    },
+    "pi_packaging": {
+      "pi.extensions": [
+        "./dist/extension.js"
+      ],
+      "pi.skills_count": 11,
+      "pi.skills": [
+        "audit-onboarding-proposal",
+        "code-review",
+        "codebase-design",
+        "contract-first",
+        "diagnosing-bugs",
+        "domain-modeling",
+        "encode-invariant",
+        "grill-with-docs",
+        "improve-harness",
+        "onboard-repository",
+        "tdd"
+      ],
+      "prepare": "build:git-install",
+      "has_github_ci_workflows": false,
+      "worktree_has_dist": true,
+      "worktree_has_node_modules": true
+    },
+    "extension_registration_surface": {
+      "hooks_count": 18,
+      "hooks": [
+        "session_start",
+        "session_before_fork",
+        "session_before_compact",
+        "session_compact",
+        "session_tree",
+        "model_select",
+        "input",
+        "agent_start",
+        "agent_end",
+        "agent_settled",
+        "context",
+        "tool_call",
+        "tool_result",
+        "user_bash",
+        "turn_end",
+        "before_agent_start",
+        "message_end",
+        "session_shutdown"
+      ],
+      "tools_count": 14,
+      "tools": [
+        "continuity_workflow_status",
+        "continuity_workflow_read",
+        "continuity_prepare_work",
+        "continuity_bind_work_document",
+        "continuity_finalize_work",
+        "continuity_status",
+        "continuity_update",
+        "continuity_validate",
+        "continuity_checkpoint",
+        "continuity_recover",
+        "memory_list",
+        "memory_read",
+        "memory_search",
+        "memory_add"
+      ],
+      "commands": [
+        "continuity",
+        "memory"
+      ],
+      "commands_count": 2
+    },
+    "architecture_layering": {
+      "layers": "interface → application → domain ← infrastructure (side effects)",
+      "domain_owns": [
+        "types/WorkState",
+        "canonical integrity+redaction",
+        "checkpoint-chain",
+        "validation-receipt",
+        "operation-ledger",
+        "managed-workflow policy",
+        "memory-context-budget"
+      ],
+      "application_owns": [
+        "ContinuityService",
+        "MemoryService",
+        "MemoryScheduler",
+        "ManagedWorkflowService",
+        "tool-classifier",
+        "context-pressure-governor",
+        "workflow-context",
+        "memory-ports"
+      ],
+      "infrastructure_owns": [
+        "ContinuityStore",
+        "MemoryStore",
+        "sqlite+migrations",
+        "git-fingerprint",
+        "execution-plan-files",
+        "pi-memory-provider",
+        "workflow-assets",
+        "paths"
+      ],
+      "critical_invariants_quoted": [
+        "Checkpoint: verifyCheckpointChain walks ancestry; payload/projection mismatch or cycle invalidates authority.",
+        "Continuity checkpoint: blocks if mutationUncertain/pending/unresolved ledger; requires trusted Git + receipt-bound validation after latest mutation; drift after validation fails.",
+        "Managed workflow: requires continuity_prepare_work before first repo mutation; read-only / ambiguous authority / missing execution-plan binding blocks mutation.",
+        "Tool classifier: non-bash unknown tools default to mutation (fail-closed); bash not on validation allow-list or not simple-read → mutation; EXCLUDED continuity/memory tools ignored.",
+        "Memory: global-user writes require origin user-command (agent tool blocked); untrusted projects may write only session scope; empty content rejected; MemoryProviderDeferredError handled as deferred provider path.",
+        "Context pressure: advisory-only; never aborts/compacts/sends synthetic input/persists; TUI-only status."
+      ]
+    },
+    "continuity_logic_summary": {
+      "branch_correct": "reconstructs from embedded branch states + store; fork/copy does not grant child authority from parent embedded checkpoint",
+      "checkpoints": "hash-chained v1/v2 payloads; v2 binds validationReceiptDigest + operationLedgerDigest; quarantine on corrupt ancestry",
+      "recovery": "non-mutating recovery of work state only; does not run repo commands; reconciliation is human-only with evidence note + digest",
+      "harden_delta": "added/strengthened uncertain-checkpoint block coverage in continuity.test.ts"
+    },
+    "memory_logic_summary": {
+      "scopes": [
+        "global-user",
+        "repository",
+        "work-item",
+        "session"
+      ],
+      "budget": "memory-context-budget character ceilings, UTF-16-safe slice, omit-vs-keep, separator accounting",
+      "redaction": "redactSecrets + sanitizeProviderBoundText; private path stripping; bounded provider DTOs",
+      "ports": "MemoryProvider extract/consolidate; PiMemoryProvider; MemoryProviderDeferredError when provider unavailable",
+      "pipeline": "two-stage extract+consolidate with leases/fencing/cursors; EXTRACT_TURN_THRESHOLD=3",
+      "harden_delta": "agent-tool global-user gate + empty content; budget estimatedTokenCount/separator/UTF-16 edges"
+    },
+    "safety_classifier_logic_summary": {
+      "fail_closed": "unknown non-bash tools → mutation; compound/expanding shell cannot be tracked → block",
+      "allowlists": "VALIDATION_COMMANDS regex allow-list; SIMPLE_READ_PROGRAMS; GIT_READ_SUBCOMMANDS; GH_READ_ACTIONS; ETA_BROWSER_READ_ACTIONS",
+      "mutation_gates": "managed workflow prepare/bind/finalize; mutationUncertain blocks checkpoint; ledger atomic claim",
+      "harden_delta": "ignored tools, local write/edit, shell-wrapper fail-closed, validation allow-list, git read globals coverage in tool-classifier.test.ts"
+    },
+    "proof_after_harden": {
+      "RESULTS_status": "RC6SourceLocalHardenValidated",
+      "generatedAt": "2026-09-17T12:49:20+07:00",
+      "packageVersion": "1.0.0-rc.6",
+      "tests": "278/278 serial pass (npm test on Node v22.19.0)",
+      "typecheck": "PASS",
+      "validate_release": "PASS on Pi 0.84.1",
+      "hardenedAreas": "continuity uncertain checkpoint; memory agent-tool global-user gate + empty content; memory-context-budget edges; tool-classifier safety edges; git-install proof identity alignment",
+      "ACCEPTANCE_highlight": "Current source-local harden PASS; RESULTS now records packageVersion 1.0.0-rc.6 (previously stale RC5). Real-provider memory remains DEFERRED."
+    },
+    "test_inventory": {
+      "observed_serial_pass": "278/278",
+      "test_files": 31,
+      "approx_test_fn_declarations": 247,
+      "new_harden_areas": [
+        "continuity uncertain-checkpoint block",
+        "memory global-user agent-tool gate",
+        "memory empty content rejection",
+        "memory-context-budget estimatedTokenCount/separator/UTF-16",
+        "tool-classifier ignored tools / local write-edit / shell-wrapper fail-closed / validation allow-list / git read globals",
+        "git-install proof identity alignment (engines, peers, skills, proof files)"
+      ]
+    },
+    "deferred_items": [
+      "real-provider memory execution (historical RC2 only; not rerun for RC6 harden)",
+      "Alpine Linux 3.24 ARM64 matrix revalidation",
+      "isolated Pi Git-install / global-install proof on this worktree",
+      "fresh managed deployment / GitHub release republication",
+      "no .github CI workflows in repo",
+      "optional validate:install / validate:git-install on this worktree"
+    ],
+    "prior_typesafe_audit_note": "Earlier audit on dev-next@cfbbf04 scored overall_completeness~1.78 (RC solid leaning), biggest_gap=tests, recommended_next=harden_tests. This audit is post-harden on harden/tests-rc6@0ba7cb9 with RESULTS refreshed to RC6 and 278/278 tests."
+  },
+  "model": "jev-latest",
+  "questions": {
+    "architecture_soundness": {
+      "type": "score",
+      "instructions": "Score clean layering and encoded invariants of this Pi extension (interface/application/domain/infrastructure).",
+      "criteria": [
+        "0 broken — layers mixed; critical invariants missing or contradicted by code",
+        "1 weak — some separation but major invariant holes or leaky side effects",
+        "2 solid RC — clear layering with documented/enforced invariants; minor gaps OK",
+        "3 production-grade — exemplary separation; invariants complete and consistently enforced"
+      ]
+    },
+    "continuity_logic": {
+      "type": "score",
+      "instructions": "Score branch-correct continuity, checkpoint chain authority, and recovery/reconciliation logic.",
+      "criteria": [
+        "0 broken — continuity/checkpoint/recovery unsafe or largely missing",
+        "1 prototype — core paths exist but authority/recovery edges weak",
+        "2 RC solid — branch-correct continuity, chained checkpoints, non-mutating recovery with tested uncertain/pending gates",
+        "3 production-complete — all continuity edges fully proven including every recovery/fork/compaction scenario"
+      ]
+    },
+    "memory_logic": {
+      "type": "score",
+      "instructions": "Score scoped memory, budget, redaction, and provider ports after harden.",
+      "criteria": [
+        "0 broken — scopes/budget/redaction missing or unsafe",
+        "1 prototype — basic scopes exist; budget/redaction/ports incomplete",
+        "2 RC solid — scoped memory + budget + redaction + ports with agent-tool global-user gate; real provider deferred is documented",
+        "3 production-complete — including current fresh real-provider memory proof"
+      ]
+    },
+    "safety_classifier_logic": {
+      "type": "score",
+      "instructions": "Score fail-closed tool classification, allowlists, and mutation gates.",
+      "criteria": [
+        "0 broken — classifier open-by-default or mutation gates absent",
+        "1 prototype — some classification but bypasses likely",
+        "2 RC solid — fail-closed defaults, allow-listed validation/reads, managed-workflow mutation gates, hardened edge tests",
+        "3 production-complete — exhaustive classification with no meaningful residual bypass risk"
+      ]
+    },
+    "test_proof_maturity": {
+      "type": "score",
+      "instructions": "Score test and proof maturity AFTER the harden/tests-rc6 pass (278/278, RESULTS RC6 identity).",
+      "criteria": [
+        "0 none — little/no tests or stale contradictory proof",
+        "1 thin — tests exist but major gaps; proof stale vs package",
+        "2 RC solid — large suite green, RESULTS/ACCEPTANCE aligned to current version after harden; some deferred proofs OK",
+        "3 production-complete — full CI + fresh provider/install/Alpine proofs current"
+      ]
+    },
+    "overall_logic_completeness": {
+      "type": "score",
+      "instructions": "Overall logic completeness of the extension as a release candidate after harden.",
+      "criteria": [
+        "0 skeleton",
+        "1 prototype",
+        "2 RC solid",
+        "3 production-complete"
+      ]
+    },
+    "ready_for_dev_next_merge": {
+      "type": "noul",
+      "instructions": "Is it safe to merge harden/tests-rc6 into dev-next for review (test harden + proof refresh only; not claiming production-complete provider/CI)?",
+      "criteria": {
+        "true": "Yes — harden improves tests/proof without regressing safety; suitable for PR review into dev-next",
+        "false": "No — remaining logic/safety issues should block merge even for review"
+      }
+    },
+    "top_remaining_risk": {
+      "type": "choice",
+      "instructions": "Single largest remaining risk after this harden.",
+      "criteria": {
+        "memory_provider_deferred": "Real-provider memory still deferred / not freshly proven",
+        "missing_ci": "No GitHub CI workflows; reliance on local npm test",
+        "classifier_bypass": "Meaningful residual classifier/mutation bypass risk",
+        "continuity_edge_cases": "Important continuity/recovery edge cases still under-tested",
+        "proof_stale": "Proof/RESULTS still stale or misaligned with package",
+        "none": "No material remaining risk for an RC review merge"
+      }
+    },
+    "priority_followup": {
+      "type": "choice",
+      "instructions": "Best next engineering follow-up after merging this harden.",
+      "criteria": {
+        "add_ci": "Add CI workflow to run npm test/typecheck/validate on PRs",
+        "real_provider_memory": "Re-run authorized real-provider memory proof",
+        "more_edge_tests": "Add more continuity/classifier edge tests",
+        "docs_only": "Documentation polish only",
+        "ship_as_is": "Ship/merge without further work"
+      }
+    }
+  }
+}

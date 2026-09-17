@@ -21,10 +21,12 @@ relevant decisions, and current worktree state. Redact secrets from every
 command, output, trace, screenshot, and report; use `<REDACTED>` and environment
 references rather than exposing credential values.
 
-Clarification and inspection are read-only. `continuity_prepare_work` classifies
-already-authorized work; it does not grant mutation authority. Create a test,
-fixture, harness, log, or code change only when the user's current request
-explicitly authorizes that outcome, then call `continuity_prepare_work` before
+Clarification and inspection are read-only. Prefer `continuity_workflow_status`
+when Continuity is available before any fix-authorized mutation.
+`continuity_prepare_work` classifies already-authorized work; it does not grant
+mutation authority. Create a test, fixture, harness, log, or code change only
+when the user's current request explicitly authorizes that outcome, then call
+`continuity_prepare_work` before
 the first repository mutation when managed workflow eligibility is active.
 Request separate exact authority before production instrumentation,
 external-system mutation, credential use, service restart, or another
@@ -131,6 +133,9 @@ focused proof and every repository-required gate. Use `continuity_validate` for
 an allow-listed authoritative command when available. Review the final diff.
 
 Report cause, evidence, fix, validation, limitations, and remaining risk
-separately. A safe checkpoint proves repository/operation safety only. Do not
-commit, push, publish, deploy, or update external systems unless the user
+separately. When fix-authorized durable work used a bound execution plan and
+its in-scope outcome is done with recorded Result and no remaining authorized
+delivery, set Status to Ready for completion and call `continuity_finalize_work`
+in the same run. A safe checkpoint proves repository/operation safety only. Do
+not commit, push, publish, deploy, or update external systems unless the user
 explicitly requested that exact action and target.

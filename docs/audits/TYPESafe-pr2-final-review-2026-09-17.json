@@ -1,0 +1,136 @@
+{
+  "audit": "TypeSafe System One FINAL PR #2 merge-readiness review",
+  "when_ict": "2026-09-17 13:56:43 ICT",
+  "branch": "harden/tests-rc6",
+  "head_sha": "c15135ea6b5c3f017cef9f1b575accdecde05356",
+  "package": "1.0.0-rc.6",
+  "pr": "https://github.com/thoitiettxl-cyber/pi-continuity-work-memory/pull/2",
+  "base": "dev-next",
+  "model": "jev-1.13.0",
+  "usage": {
+    "input_tokens": 3009,
+    "output_tokens": 206
+  },
+  "github": {
+    "mergeable": true,
+    "mergeable_state": "clean",
+    "ci_on_head": "success"
+  },
+  "headline": {
+    "overall_merge_quality": 1.9,
+    "overall_merge_quality_confidence": 0.88,
+    "logic_soundness": 1.98,
+    "skills_workflow_readiness": 1.98,
+    "test_ci_proof_readiness": 1.96,
+    "recommend_merge_now_noul": 0.85,
+    "blocking_issues_present_noul": 0.12,
+    "top_post_merge_priority": "ci_watch",
+    "merge_advice": "merge_with_notes"
+  },
+  "answers": {
+    "overall_merge_quality": {
+      "type": "score",
+      "score": 1.9,
+      "confidence": 0.88,
+      "legend": {
+        "0": "0 reject — critical bugs, red CI, or misleading proof",
+        "1": "1 weak — material gaps that should block merge into dev-next",
+        "2": "2 solid merge — RC-appropriate; deferred items documented; safe for human merge to dev-next",
+        "3": "3 excellent merge — production-complete including fresh real-provider and Pi validate-in-CI"
+      },
+      "probabilities": {
+        "0": 0,
+        "1": 0.1,
+        "2": 0.89,
+        "3": 0.01
+      }
+    },
+    "logic_soundness": {
+      "type": "score",
+      "score": 1.98,
+      "confidence": 0.98,
+      "legend": {
+        "0": "0 broken",
+        "1": "1 prototype with serious gaps",
+        "2": "2 RC solid — invariants documented/enforced; minor deferred OK",
+        "3": "3 production-complete logic with live provider proofs"
+      },
+      "probabilities": {
+        "0": 0.01,
+        "1": 0,
+        "2": 0.99,
+        "3": 0
+      }
+    },
+    "skills_workflow_readiness": {
+      "type": "score",
+      "score": 1.98,
+      "confidence": 0.97,
+      "legend": {
+        "0": "0 missing/misaligned",
+        "1": "1 thin docs",
+        "2": "2 RC ready — contracts clear; skills defer to WORKFLOW; tests cover inventory/links",
+        "3": "3 production-complete with live model adherence proof"
+      },
+      "probabilities": {
+        "0": 0.01,
+        "1": 0.02,
+        "2": 0.97,
+        "3": 0
+      }
+    },
+    "test_ci_proof_readiness": {
+      "type": "score",
+      "score": 1.96,
+      "confidence": 0.95,
+      "legend": {
+        "0": "0 red or fake",
+        "1": "1 thin/local only",
+        "2": "2 RC solid — suite green + CI on PR; deferred proofs explicit",
+        "3": "3 production-complete — CI + fresh provider/install/Alpine"
+      },
+      "probabilities": {
+        "0": 0.02,
+        "1": 0.01,
+        "2": 0.97,
+        "3": 0
+      }
+    },
+    "recommend_merge_now": {
+      "type": "noul",
+      "noul": 0.85
+    },
+    "blocking_issues_present": {
+      "type": "noul",
+      "noul": 0.12
+    },
+    "top_post_merge_priority": {
+      "type": "choice",
+      "choice": "ci_watch",
+      "confidence": 0.62,
+      "probabilities": {
+        "none": 0.01,
+        "more_docs": 0.01,
+        "ci_watch": 0.72,
+        "real_provider_memory": 0.26
+      }
+    },
+    "merge_advice": {
+      "type": "choice",
+      "choice": "merge_with_notes",
+      "confidence": 0.83,
+      "probabilities": {
+        "merge_as_is": 0.11,
+        "merge_with_notes": 0.89,
+        "wait_for_fixes": 0
+      }
+    }
+  },
+  "notes_for_human_merge": [
+    "Merge with notes: not production-complete",
+    "Watch GitHub Actions after merge (post-merge priority: ci_watch)",
+    "Real-provider memory remains DEFERRED",
+    "validate:release stays local until stable Pi-in-CI path exists"
+  ],
+  "blocking_issues": []
+}

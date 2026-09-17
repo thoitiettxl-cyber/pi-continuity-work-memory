@@ -311,3 +311,42 @@ test("source provenance and all three MIT notices are shipped", () => {
 	assert.match(eccLicense, /Copyright \(c\) 2026 Affaan Mustafa/);
 	assert.match(eccLicense, /Permission is hereby granted/);
 });
+
+test("skills README aligns with package list and Continuity/workflow contracts", () => {
+	const readme = readFileSync(join(skillsRoot, "README.md"), "utf8");
+	assert.match(readme, /eleven Pi-native engineering skills/i);
+	assert.match(readme, /## Shared Authority Contract/);
+	assert.match(readme, /## Continuity Tool Alignment/);
+	assert.match(readme, /workflow\/WORKFLOW\.md/);
+	for (const name of expectedSkills) {
+		assert.ok(readme.includes("`" + name + "`"), `skills README must list ${name}`);
+	}
+	for (const tool of [
+		"continuity_workflow_status",
+		"continuity_prepare_work",
+		"continuity_bind_work_document",
+		"continuity_finalize_work",
+		"continuity_validate",
+		"continuity_checkpoint",
+		"continuity_recover",
+	]) assert.ok(readme.includes("`" + tool + "`"), `skills README must mention ${tool}`);
+	assert.ok(readme.includes("explicit-only through `/skill:"));
+});
+
+test("mutative engineering skills cross-link finalize when Continuity applies", () => {
+	for (const name of [
+		"tdd",
+		"contract-first",
+		"codebase-design",
+		"diagnosing-bugs",
+		"grill-with-docs",
+		"encode-invariant",
+		"domain-modeling",
+		"improve-harness",
+	] as const) {
+		assert.ok(skillText(name).includes("continuity_finalize_work"), `${name} must mention continuity_finalize_work`);
+	}
+	assert.ok(skillText("tdd").includes("continuity_workflow_status"));
+	assert.ok(skillText("grill-with-docs").includes("continuity_bind_work_document"));
+	assert.match(skillText("code-review"), /workflow\/WORKFLOW\.md/);
+});

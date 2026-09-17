@@ -1,0 +1,636 @@
+{
+  "state": {
+    "audit_kind": "TypeSafe System One SKILLS + WORKFLOW completeness audit",
+    "audit_date_ict": "2026-09-17",
+    "target": {
+      "path": "/workspace/pi-continuity-work-memory",
+      "package": "pi-continuity-work-memory",
+      "version": "1.0.0-rc.6",
+      "branch": "harden/tests-rc6",
+      "commit": "3724ae0fb74543743384aa39d17c1a82fd072e73",
+      "commit_subject": "ci: add GitHub Actions typecheck/test and document deferred memory",
+      "description": "Managed repository workflow, branch-correct Pi continuity, evidence-backed checkpoints, scoped persistent memory, and Pi-native engineering skills.",
+      "engines_node": ">=22.19.0",
+      "files_includes_skills": true,
+      "files_includes_workflow": true,
+      "files": [
+        "dist",
+        "skills",
+        "workflow",
+        "scripts/validate-install.mjs",
+        "scripts/pi-version.mjs",
+        "scripts/validate-provider.mjs",
+        "scripts/validate-alpine-arm64.sh",
+        "scripts/manage-user-install.mjs",
+        "proof/ACCEPTANCE.md",
+        "proof/RESULTS.json",
+        "README.md",
+        "LICENSE"
+      ]
+    },
+    "pi_skills_manifest": [
+      "./skills/audit-onboarding-proposal",
+      "./skills/code-review",
+      "./skills/codebase-design",
+      "./skills/contract-first",
+      "./skills/diagnosing-bugs",
+      "./skills/domain-modeling",
+      "./skills/encode-invariant",
+      "./skills/grill-with-docs",
+      "./skills/improve-harness",
+      "./skills/onboard-repository",
+      "./skills/tdd"
+    ],
+    "skills_count": 11,
+    "skills_inventory": [
+      {
+        "name": "audit-onboarding-proposal",
+        "bytes": 5893,
+        "lines": 118,
+        "description_len": 296,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; independent read-only repository and Git inspection; Alpine-compatible",
+        "license": "MIT; adapted from repository-harness \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": true,
+        "companions": [],
+        "local_links": [],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": true,
+          "continuity_finalize_work": false,
+          "disable-model-invocation": true,
+          "UPSTREAM_ref": true,
+          "read-only_mention": true,
+          "alpine": true,
+          "AGENTS.md": false,
+          "execution_plan": false
+        },
+        "first_heading": "# Audit Onboarding Proposal",
+        "body_excerpt": "# Audit Onboarding Proposal\nIndependently verify proposed agent-facing documentation before it is applied.\nThis skill is read-only. It never edits files, applies a hunk, grants approval,\nor expands the producer's authority.\n## Require An Independent Fixed Point\nUse an independent fresh reviewer that did not produce the onboarding proposal.\nA fresh Pi session is preferred. When an independent `subagent` call is\navailable, delegate one bounded audit task and provide only the fixed point,"
+      },
+      {
+        "name": "code-review",
+        "bytes": 3998,
+        "lines": 108,
+        "description_len": 218,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; read-only Git and repository tools; optional serialized subagents",
+        "license": "MIT; adapted from mattpocock/skills \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": false,
+        "companions": [],
+        "local_links": [],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": false,
+          "continuity_finalize_work": false,
+          "disable-model-invocation": false,
+          "UPSTREAM_ref": true,
+          "read-only_mention": true,
+          "alpine": false,
+          "AGENTS.md": false,
+          "execution_plan": true
+        },
+        "first_heading": "# Code Review",
+        "body_excerpt": "# Code Review\nReview is read-only. Do not edit files, post comments, resolve threads, stage,\ncommit, push, rerun CI, or create repository documents unless the user separately\nrequests that exact action.\n## 1. Establish The Fixed Point\nUse the fixed commit, tag, branch, or merge-base supplied by the user. If absent,\nderive the repository's default/base branch only when unambiguous; otherwise ask\nfor the smallest missing choice. Verify the ref resolves and inspect:"
+      },
+      {
+        "name": "codebase-design",
+        "bytes": 3800,
+        "lines": 86,
+        "description_len": 242,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; no runtime dependencies or desktop assumptions",
+        "license": "MIT; adapted from mattpocock/skills \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": false,
+        "companions": [
+          "DESIGN-IT-TWICE.md",
+          "DEEPENING.md"
+        ],
+        "local_links": [
+          [
+            "DEEPENING.md",
+            "DEEPENING.md"
+          ],
+          [
+            "DESIGN-IT-TWICE.md",
+            "DESIGN-IT-TWICE.md"
+          ]
+        ],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": true,
+          "continuity_finalize_work": false,
+          "disable-model-invocation": false,
+          "UPSTREAM_ref": true,
+          "read-only_mention": true,
+          "alpine": false,
+          "AGENTS.md": false,
+          "execution_plan": false
+        },
+        "first_heading": "# Codebase Design",
+        "body_excerpt": "# Codebase Design\nDesign **deep modules**: substantial behavior behind a small, stable interface\nat a clean seam. Applicable repository architecture and domain language remain\nauthoritative; use this vocabulary to reason, not to rename established concepts\nwithout authority.\n## Vocabulary\n- **Module**: anything with an interface and implementation, from a function to\n  a package or vertical slice."
+      },
+      {
+        "name": "contract-first",
+        "bytes": 6632,
+        "lines": 133,
+        "description_len": 312,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; repository-native contract formats and validation; no generator or network dependency",
+        "license": "MIT; adapted from affaan-m/ECC \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": false,
+        "companions": [],
+        "local_links": [],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": true,
+          "continuity_finalize_work": false,
+          "disable-model-invocation": false,
+          "UPSTREAM_ref": true,
+          "read-only_mention": false,
+          "alpine": false,
+          "AGENTS.md": false,
+          "execution_plan": true
+        },
+        "first_heading": "# Contract-First Collaboration",
+        "body_excerpt": "# Contract-First Collaboration\nCoordinate independently evolving consumers and providers through one\nrepository-owned boundary artifact. The contract describes observable behavior;\nit does not grant authority or replace applicable repository instructions,\naccepted product decisions, code, tests, or runtime evidence.\nAutomatic skill loading does not authorize repository mutation, dependency\ninstallation, network access, generated writes, commits, or external actions.\n## Use The Smallest Sufficient Boundary"
+      },
+      {
+        "name": "diagnosing-bugs",
+        "bytes": 6467,
+        "lines": 137,
+        "description_len": 292,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; Alpine-compatible; uses repository-native tools and optional Eta Browser handoff",
+        "license": "MIT; adapted from mattpocock/skills \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": false,
+        "companions": [],
+        "local_links": [],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": true,
+          "continuity_finalize_work": false,
+          "disable-model-invocation": false,
+          "UPSTREAM_ref": true,
+          "read-only_mention": true,
+          "alpine": true,
+          "AGENTS.md": false,
+          "execution_plan": false
+        },
+        "first_heading": "# Diagnosing Bugs",
+        "body_excerpt": "# Diagnosing Bugs\nDiagnose from observable evidence. A plausible theory without a feedback loop is\nnot a finding.\n## Safety And Authority\nRead applicable repository instructions, architecture, domain terminology,\nrelevant decisions, and current worktree state. Redact secrets from every\ncommand, output, trace, screenshot, and report; use `<REDACTED>` and environment\nreferences rather than exposing credential values."
+      },
+      {
+        "name": "domain-modeling",
+        "bytes": 7513,
+        "lines": 152,
+        "description_len": 303,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; repository-native documentation; managed-workflow aware",
+        "license": "MIT; adapted from mattpocock/skills \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": false,
+        "companions": [
+          "CONTEXT-FORMAT.md",
+          "ADR-FORMAT.md"
+        ],
+        "local_links": [
+          [
+            "CONTEXT-FORMAT.md",
+            "CONTEXT-FORMAT.md"
+          ],
+          [
+            "ADR-FORMAT.md",
+            "ADR-FORMAT.md"
+          ]
+        ],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": true,
+          "continuity_finalize_work": true,
+          "disable-model-invocation": false,
+          "UPSTREAM_ref": true,
+          "read-only_mention": true,
+          "alpine": false,
+          "AGENTS.md": false,
+          "execution_plan": true
+        },
+        "first_heading": "# Domain Modeling",
+        "body_excerpt": "# Domain Modeling\nActively sharpen the language used to describe the product domain. Merely\nreading existing terminology is normal repository orientation and does not\nrequire this workflow.\n## 1. Discover Authority And Operational State\nRead applicable instructions and the repository documentation map. Look for an\naccepted glossary/context document, architecture vocabulary, ADR/decision\nrecord convention, and any bound execution plan. Do not assume `CONTEXT.md` or"
+      },
+      {
+        "name": "encode-invariant",
+        "bytes": 5629,
+        "lines": 111,
+        "description_len": 444,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; repository-native validation; Alpine-compatible tools",
+        "license": "MIT; adapted from repository-harness \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": false,
+        "companions": [],
+        "local_links": [],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": true,
+          "continuity_finalize_work": false,
+          "disable-model-invocation": false,
+          "UPSTREAM_ref": true,
+          "read-only_mention": true,
+          "alpine": true,
+          "AGENTS.md": false,
+          "execution_plan": true
+        },
+        "first_heading": "# Encode Invariant",
+        "body_excerpt": "# Encode Invariant\nTurn an accepted repository rule into a focused mechanical guard without making\nthe guard a new source of policy.\n## Establish Authority\nRead applicable instructions, architecture and decision owners, the current\nworktree, and the repository's native validation entrypoints. Automatic skill loading does not authorize a repository mutation. Proceed only when the current\nrequest asks for enforcement and an accepted repository source states the rule.\nCode patterns, tests, defaults, and conventions do not establish normative"
+      },
+      {
+        "name": "grill-with-docs",
+        "bytes": 8342,
+        "lines": 174,
+        "description_len": 319,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; designed for pi-continuity-work-memory managed workflow and Alpine-compatible tools",
+        "license": "MIT; adapted from mattpocock/skills \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": true,
+        "companions": [],
+        "local_links": [],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": true,
+          "continuity_finalize_work": false,
+          "disable-model-invocation": true,
+          "UPSTREAM_ref": true,
+          "read-only_mention": true,
+          "alpine": true,
+          "AGENTS.md": true,
+          "execution_plan": true
+        },
+        "first_heading": "# Grill With Docs",
+        "body_excerpt": "# Grill With Docs\nTurn unclear intent into a confirmed **Shared Understanding** before mutation.\nThis is an alignment workflow, not permission to implement, commit, publish, or\noperate external state.\n## 1. Orient Read-Only\nRead applicable runtime instructions, repository `AGENTS.md` files, architecture\nand decision documents, relevant code/tests/configuration, and any bound\nexecution plan. Inspect facts rather than asking the user to retrieve facts the"
+      },
+      {
+        "name": "improve-harness",
+        "bytes": 7467,
+        "lines": 150,
+        "description_len": 383,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; managed-workflow aware; fresh-session rerun required for an improvement claim",
+        "license": "MIT; adapted from repository-harness \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": true,
+        "companions": [],
+        "local_links": [],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": true,
+          "continuity_finalize_work": true,
+          "disable-model-invocation": true,
+          "UPSTREAM_ref": true,
+          "read-only_mention": true,
+          "alpine": false,
+          "AGENTS.md": false,
+          "execution_plan": true
+        },
+        "first_heading": "# Improve Harness",
+        "body_excerpt": "# Improve Harness\nImprove one bounded future-agent behavior without turning every difficult task\ninto permanent process. Here **harness** means the repository-owned guidance,\nskills, tools, runbooks, validation, and environment boundaries an agent uses;\nit does not mean installing or depending on another product.\n## Confirm Exact Authority\nThis skill is explicit-only. Invocation authorizes analysis of the named\nexperiment, but mutation requires the current request to identify the"
+      },
+      {
+        "name": "onboard-repository",
+        "bytes": 8189,
+        "lines": 169,
+        "description_len": 347,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; first pass uses read-only repository and Git tools; Alpine-compatible",
+        "license": "MIT; adapted from repository-harness \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": true,
+        "companions": [],
+        "local_links": [],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": true,
+          "continuity_finalize_work": false,
+          "disable-model-invocation": true,
+          "UPSTREAM_ref": true,
+          "read-only_mention": true,
+          "alpine": true,
+          "AGENTS.md": true,
+          "execution_plan": true
+        },
+        "first_heading": "# Onboard Repository",
+        "body_excerpt": "# Onboard Repository\nBuild a verified map that helps a future agent work independently. The explicit\ninvocation authorizes inspection and proposals only; it does not authorize any\nrepository mutation.\n## First-Pass Safety Contract\nThe first pass is always read-only, even in a writable worktree. Read every\napplicable `AGENTS.md` or override before inspecting deeper files. Use\n`continuity_workflow_status` only when workflow context helps orientation; do not call `continuity_prepare_work` during the first pass because no mutation is"
+      },
+      {
+        "name": "tdd",
+        "bytes": 5335,
+        "lines": 113,
+        "description_len": 260,
+        "has_name_match": true,
+        "compatibility": "Pi >=0.84.1 <0.86.0; repository-native test runners; Alpine-compatible commands",
+        "license": "MIT; adapted from mattpocock/skills and affaan-m/ECC \u2014 see ../UPSTREAM.md",
+        "source": "",
+        "disable_model_invocation": false,
+        "companions": [
+          "tests.md",
+          "mocking.md"
+        ],
+        "local_links": [
+          [
+            "tests.md",
+            "tests.md"
+          ],
+          [
+            "mocking.md",
+            "mocking.md"
+          ]
+        ],
+        "missing_links": [],
+        "contract_keywords": {
+          "continuity_prepare_work": true,
+          "continuity_finalize_work": false,
+          "disable-model-invocation": false,
+          "UPSTREAM_ref": true,
+          "read-only_mention": false,
+          "alpine": true,
+          "AGENTS.md": false,
+          "execution_plan": true
+        },
+        "first_heading": "# Test-Driven Development",
+        "body_excerpt": "# Test-Driven Development\nBuild one observable behavior at a time through a public seam. Repository\ninstructions, accepted architecture, and the user's requested outcome define\nwhat behavior is authorized.\n## Prepare\nRead applicable instructions, relevant code/tests, architecture decisions, and\nthe current worktree. Identify the highest stable seam that can observe the\nbehavior without reaching through internals."
+      }
+    ],
+    "skills_readme_summary": {
+      "bytes": 3278,
+      "bullet_names_parsed": [
+        "grill-with-docs",
+        "codebase-design",
+        "contract-first",
+        "diagnosing-bugs",
+        "tdd",
+        "code-review",
+        "domain-modeling",
+        "encode-invariant",
+        "onboard-repository",
+        "audit-onboarding-proposal",
+        "improve-harness"
+      ],
+      "declares_eleven": true,
+      "explicit_only_named": [
+        "grill-with-docs",
+        "onboard-repository",
+        "audit-onboarding-proposal",
+        "improve-harness"
+      ],
+      "shared_authority_contract_present": true,
+      "upstream_link": true
+    },
+    "upstream_summary": {
+      "sources": [
+        "mattpocock/skills",
+        "hoangnb24/repository-harness",
+        "affaan-m/ECC"
+      ],
+      "licenses_present": [
+        "UPSTREAM_LICENSE.txt",
+        "REPOSITORY_HARNESS_LICENSE.txt",
+        "ECC_LICENSE.txt"
+      ],
+      "updating_from_source_section": true
+    },
+    "workflow": {
+      "WORKFLOW_md_bytes": 5976,
+      "WORKFLOW_sections": [
+        "Select The Work Shape",
+        "Managed Preparation",
+        "Repository Document Authority",
+        "Validation And Completion",
+        "Application Operation",
+        "Persistent Memory",
+        "Recovery"
+      ],
+      "manifest_assets": [
+        {
+          "path": "WORKFLOW.md",
+          "match": true,
+          "bytes": 5976
+        },
+        {
+          "path": "templates/application-runbook.md",
+          "match": true,
+          "bytes": 509
+        },
+        {
+          "path": "templates/decision-record.md",
+          "match": true,
+          "bytes": 406
+        },
+        {
+          "path": "templates/execution-plan.md",
+          "match": true,
+          "bytes": 1013
+        }
+      ],
+      "all_hashes_match": true,
+      "templates": {
+        "decision-record.md": {
+          "bytes": 406,
+          "lines": 24,
+          "headings": [
+            "# Decision: {{TITLE}}",
+            "## Status",
+            "## Context",
+            "## Decision",
+            "## Consequences",
+            "## Evidence"
+          ],
+          "excerpt": "# Decision: {{TITLE}}\nDate: {{DATE}}\n## Status\nProposed\n## Context\nDescribe the accepted repository authority and the decision that remains.\n## Decision\nRecord the chosen direction only after the responsible authority accepts it.\n## Consequences\nList expected effects, risks, and recovery options."
+        },
+        "application-runbook.md": {
+          "bytes": 509,
+          "lines": 24,
+          "headings": [
+            "# Application Runbook: {{TITLE}}",
+            "## Ownership And Authority",
+            "## Preconditions",
+            "## Procedure",
+            "## Validation",
+            "## Cleanup And Recovery"
+          ],
+          "excerpt": "# Application Runbook: {{TITLE}}\nDate: {{DATE}}\n## Ownership And Authority\nName the consumer-owned authority for commands, credentials, policy, and cleanup.\n## Preconditions\nList isolated resources, readiness checks, and deterministic starting state.\n## Procedure\nAdd only verified commands owned by the consumer repository.\n## Validation\nSpecify real-interface checks and correlated runtime evidence."
+        },
+        "execution-plan.md": {
+          "bytes": 1013,
+          "lines": 61,
+          "headings": [
+            "# Execution Plan: {{TITLE}}",
+            "## Status",
+            "## Outcome",
+            "## Authority And Context",
+            "## Scope",
+            "## Constraints",
+            "## Approach",
+            "## Risks And Recovery",
+            "## Progress",
+            "## Decisions",
+            "## Validation",
+            "## Result"
+          ],
+          "excerpt": "<!-- pi-continuity-work-document: {\"schemaVersion\":1,\"kind\":\"execution-plan\",\"workItemId\":\"{{WORK_ITEM_ID}}\",\"templateVersion\":1} -->\n# Execution Plan: {{TITLE}}\nDate: {{DATE}}\n## Status\nActive\n## Outcome\n{{OUTCOME}}\n## Authority And Context\n{{AUTHORITY_ITEMS}}\n## Scope"
+        }
+      },
+      "continuity_tool_mentions_in_WORKFLOW": {
+        "continuity_prepare_work": true,
+        "continuity_finalize_work": true,
+        "continuity_bind_work_document": false,
+        "continuity_workflow_status": false,
+        "continuity_checkpoint": false,
+        "continuity_recover": false
+      },
+      "authority_boundaries_excerpt": "# Managed Repository Workflow\n\nThis package-owned workflow supplements the applicable repository `AGENTS.md` files. Repository instructions, explicit user authority, repository documents, code, tests, runtime evidence, and Git history remain the system of record. Templates provide process scaffolding only; they cannot create product policy, validation authority, or completion evidence.\n\nConsumer repositories do not need `repository-harness` installed. This package neither invokes nor installs it.\n\n## Select The Work Shape\n\n### Read-only\n\nQuestions, explanations, reviews, diagnoses, plans, proposals, and status checks inspect only what the answer needs. They create no repository documents and perform no repository mutation.\n\n### Bounded mutation\n\nA small coherent change that can finish in one agent run and can safely resume from its diff uses ephemeral planning. It creates no lifecycle do",
+      "validation_completion_excerpt": "## Validation And Completion\n\nChoose proof for the behavior:\n\n- focused tests for local rules;\n- integration tests for boundaries;\n- real-interface checks for user-visible behavior;\n- recovery rehearsal for dangerous operations;\n- measurements for reliability or performance; and\n- repository-required commands from applicable instructions.\n\nPlans, checklists, assistant prose, learning memory, and checkpoints do not prove product behavior by themselves. Finalizing a plan requires an immediately preceding receipt-bound executable validation whose ledger and stable Git fingerprint still match, and only moves a ready, result-bearing document from `docs/plans/active/` to `docs/plans/completed/`. The move is a new mutation and requires fresh post-move executable validation before a safe checkpoint.\n\nWhen the bound plan's in-scope outcome is implemented, required proof is recorded, and Result is no longer pending, the same agent run must set Status to `Ready for completion` and call `continuity_finalize_work`. Do not wait for a second user request to complete the plan. Remaining authorized in-scope delivery such as commit, push, or deploy keeps the plan active. `session_start`, user input, agent completion, and `agent_settled` still never create or finalize repository documents.\n\nA verified Continuity checkpoint proves repository and operation safety for its bound fingerprint, receipt, ledger, and hash chain. It never marks the task or repository plan complete.\n\n"
+    },
+    "tests_and_validators": {
+      "skills_package_test_exists": true,
+      "workflow_assets_test_exists": true,
+      "git_install_test_exists": true,
+      "validate_release_mentions_skills": true,
+      "validate_release_mentions_workflow": true,
+      "validate_git_install_mentions_skills": true,
+      "skills_package_test_excerpt": "import assert from \"node:assert/strict\";\nimport { existsSync, readFileSync, readdirSync, statSync } from \"node:fs\";\nimport { dirname, extname, join, relative, resolve } from \"node:path\";\nimport test from \"node:test\";\n\nimport { loadSkillsFromDir } from \"@earendil-works/pi-coding-agent\";\n\nconst root = resolve(import.meta.dirname, \"..\", \"..\");\nconst skillsRoot = join(root, \"skills\");\nconst expectedSkills = [\n\t\"audit-onboarding-proposal\",\n\t\"code-review\",\n\t\"codebase-design\",\n\t\"contract-first\",\n\t\"diagnosing-bugs\",\n\t\"domain-modeling\",\n\t\"encode-invariant\",\n\t\"grill-with-docs\",\n\t\"improve-harness\",\n\t\"onboard-repository\",\n\t\"tdd\",\n] as const;\nconst mattPocockSkills = [\n\t\"code-review\",\n\t\"codebase-design\",\n\t\"diagnosing-bugs\",\n\t\"domain-modeling\",\n\t\"grill-with-docs\",\n\t\"tdd\",\n] as const;\nconst repositoryHarnessSkills = [\n\t\"audit-onboarding-proposal\",\n\t\"encode-invariant\",\n\t\"improve-harness\",\n\t\"onboard-repository\",\n] as const;\nconst eccSkills = [\n\t\"contract-first\",\n\t\"tdd\",\n] as const;\nconst explicitOnlySkills = new Set([\n\t\"audit-onboarding-proposal\",\n\t\"grill-with-docs\",\n\t\"improve-harness\",\n\t\"onboard-repository\",\n]);\nconst expectedSkillEntries = expectedSkills.map((name) => `./skills/${name}`);\nconst mattPocockCommit = \"5b15a47f2d7150f545fbcacbfe381787fc0230dc\";\nconst repositoryHarnessCommit = \"e765792b635b4d5e3e5fc0578f82f9ca5dea2681\";\nconst eccCommit = \"d8409a4b0813771235555e32e3d8046a73988bfa\";\n\nfunction sourceCommitsFor(name: typeof expectedSkills[number]): string[] {\n\tconst commits: string[]",
+      "workflow_assets_test_excerpt": "import assert from \"node:assert/strict\";\nimport { cp, symlink, writeFile } from \"node:fs/promises\";\nimport { join, resolve } from \"node:path\";\nimport test from \"node:test\";\n\nimport { loadWorkflowAssets, WorkflowAssetIntegrityError } from \"../src/infrastructure/workflow-assets.js\";\nimport { temporaryDirectory } from \"./helpers.js\";\n\nasync function copiedWorkflow(prefix: string): Promise<string> {\n\tconst root = temporaryDirectory(prefix);\n\tconst workflow = join(root, \"workflow\");\n\tawait cp(resolve(\"workflow\"), workflow, { recursive: true });\n\treturn workflow;\n}\n\ntest(\"package workflow assets match the sorted checksum manifest\", async () => {\n\tconst bundle = await loadWorkflowAssets(resolve(\"workflow\"));\n\tassert.deepEqual(bundle.manifest.assets.map((entry) => entry.path), [\n\t\t\"WORKFLOW.md\",\n\t"
+    },
+    "docs_discoverability": {
+      "README_skill_mentions": 22,
+      "README_workflow_mentions": 22,
+      "README_has_skills_section": false,
+      "README_section_titles": [
+        "Requirements",
+        "Install from GitHub",
+        "Deploy a verified release archive (advanced)",
+        "Bundled global engineering skills",
+        "Cooperative context pressure governor",
+        "Commands and tools",
+        "Managed repository workflow",
+        "Safe-boundary authority",
+        "Branch and crash behavior",
+        "Persistent-store upgrades",
+        "Persistent memory",
+        "Project trust",
+        "Validation"
+      ],
+      "AGENTS_mentions_skills": false,
+      "AGENTS_mentions_workflow": true
+    },
+    "heuristic_gaps_pre_audit": [],
+    "prior_audits": {
+      "logic_overall": 2.05,
+      "followup_after_ci": 1.99,
+      "note": "Prior audits focused on extension logic/CI; this audit focuses on skills+workflow packaging completeness"
+    },
+    "extension_alignment_notes": {
+      "skills_must_call_prepare_before_mutation": true,
+      "skills_must_finalize_when_ready": true,
+      "workflow_owned_by_package_checksummed": true,
+      "learning_memory_not_completion_authority": true,
+      "no_rewrite_extension_unless_contracts_broken": true
+    }
+  },
+  "model": "jev-latest",
+  "questions": {
+    "skill_pack_completeness": {
+      "type": "score",
+      "instructions": "Score completeness and quality of the 11 packaged Pi skills (frontmatter, companions, UPSTREAM, README alignment, authority contracts, Pi loadability).",
+      "criteria": [
+        "0 broken \u2014 missing skills, broken frontmatter, package/README mismatch, or unloadable",
+        "1 prototype \u2014 skills present but thin contracts, inconsistent metadata, weak companions/docs",
+        "2 RC solid \u2014 eleven skills consistent with pi.skills + README + tests; clear authority; minor polish gaps OK",
+        "3 production-complete \u2014 exemplary skill pack with no meaningful packaging/discoverability/contract gaps"
+      ]
+    },
+    "workflow_completeness": {
+      "type": "score",
+      "instructions": "Score WORKFLOW.md + templates + manifest integrity as the managed repository workflow contract.",
+      "criteria": [
+        "0 broken \u2014 missing/corrupt workflow assets or checksum mismatch",
+        "1 prototype \u2014 docs exist but authority/onboarding/validation contracts incomplete or ambiguous",
+        "2 RC solid \u2014 clear work shapes, preparation, document authority, validation/completion, recovery; hashes match",
+        "3 production-complete \u2014 exhaustive operator-ready workflow with no material ambiguity"
+      ]
+    },
+    "skill_workflow_alignment_with_extension": {
+      "type": "score",
+      "instructions": "Score how well skills + WORKFLOW align with Continuity/managed-workflow extension contracts (prepare/finalize/bind, read-only gates, memory non-authority, no competing truth).",
+      "criteria": [
+        "0 contradicted \u2014 skills/workflow conflict with extension tools or safety model",
+        "1 partial \u2014 mostly aligned but important tool/authority gaps or contradictions",
+        "2 RC solid \u2014 consistent prepare/finalize/plan authority; minor wording gaps OK",
+        "3 exemplary \u2014 skills and workflow perfectly encode extension contracts"
+      ]
+    },
+    "install_discoverability": {
+      "type": "score",
+      "instructions": "Score how discoverable skills+workflow are after pi install (package files, README, skills/README, pi.skills, validators/tests).",
+      "criteria": [
+        "0 undiscoverable \u2014 not packaged or undocumented",
+        "1 weak \u2014 packaged but hard to find or incomplete install docs",
+        "2 good RC \u2014 clear README/skills index and packaged correctly; minor doc gaps OK",
+        "3 excellent \u2014 install-to-use path crystal clear with proof"
+      ]
+    },
+    "docs_clarity": {
+      "type": "score",
+      "instructions": "Score clarity of skills README, UPSTREAM, WORKFLOW.md, and template guidance for agents and humans.",
+      "criteria": [
+        "0 confusing/contradictory",
+        "1 usable but uneven",
+        "2 clear RC \u2014 authority boundaries and steps readable",
+        "3 exemplary documentation"
+      ]
+    },
+    "ready_to_ship_skills_workflow": {
+      "type": "noul",
+      "instructions": "Is the skills+workflow pack ready to ship/update on PR #2 for human review as RC (not claiming production-complete)? True if materially complete and safe; false if blocking gaps remain.",
+      "criteria": {
+        "true": "Ready for PR review as RC skills+workflow",
+        "false": "Blocking gaps remain before updating PR"
+      }
+    },
+    "biggest_gap": {
+      "type": "choice",
+      "instructions": "Single biggest gap limiting skills+workflow completeness right now.",
+      "criteria": {
+        "none_material": "No material gap for an RC skills+workflow review",
+        "skill_frontmatter_or_paths": "Broken/missing skill frontmatter, companions, or local paths",
+        "readme_package_list_drift": "Drift between package.json pi.skills, skills/README, and directories",
+        "workflow_contract_gaps": "WORKFLOW.md or templates missing onboarding/authority/validation/recovery contracts",
+        "skill_extension_alignment": "Skills/workflow contradict Continuity prepare/finalize/bind/memory non-authority",
+        "missing_tests_validators": "Insufficient tests/validators for skill packaging or workflow inventory",
+        "install_docs_discoverability": "Hard to discover skills/workflow after install from main README/docs",
+        "template_quality": "Templates thin, ambiguous, or poorly aligned with WORKFLOW",
+        "upstream_provenance": "UPSTREAM/license/provenance incomplete or inaccurate"
+      }
+    },
+    "priority_actions": {
+      "type": "choice",
+      "instructions": "Highest-value next action set to raise skills+workflow completeness in this PR (pick the best concrete bundle).",
+      "criteria": {
+        "fix_broken_refs_frontmatter_only": "Fix only broken frontmatter/paths/references",
+        "align_lists_strengthen_skills_readme": "Align skill lists and strengthen skills/README authority/discoverability",
+        "strengthen_workflow_onboarding_contracts": "Strengthen WORKFLOW.md contracts, onboarding steps, tool mentions, authority boundaries",
+        "add_skill_workflow_inventory_tests": "Add/adjust tests validating skill packaging and workflow inventory",
+        "improve_main_readme_discoverability": "Improve main README install-to-skills/workflow discoverability",
+        "polish_templates_and_manifest": "Polish templates and refresh workflow manifest checksums",
+        "cross_link_skills_to_workflow_tools": "Cross-link skills to Continuity workflow tools more consistently",
+        "docs_audit_only_no_code": "Write audit docs only; no skill/workflow content changes",
+        "ship_as_is_after_audit_docs": "Ship current skills+workflow after recording audit docs"
+      }
+    }
+  }
+}

@@ -50,3 +50,29 @@ test("asset loader rejects a symlink package workflow root", async () => {
 	await symlink(resolve("workflow"), alias);
 	await assert.rejects(loadWorkflowAssets(alias), /root must be a real directory/);
 });
+
+test("WORKFLOW.md encodes onboarding and Continuity tool contracts", async () => {
+	const bundle = await loadWorkflowAssets(resolve("workflow"));
+	const workflow = bundle.assets["WORKFLOW.md"]!;
+	for (const section of [
+		"## Agent Onboarding",
+		"## Continuity Tool Contract",
+		"## Select The Work Shape",
+		"## Managed Preparation",
+		"## Validation And Completion",
+		"## Recovery",
+		"## Packaged Engineering Skills",
+	]) assert.ok(workflow.includes(section), `missing section ${section}`);
+	for (const tool of [
+		"continuity_workflow_status",
+		"continuity_status",
+		"continuity_prepare_work",
+		"continuity_bind_work_document",
+		"continuity_finalize_work",
+		"continuity_checkpoint",
+		"continuity_recover",
+		"continuity_validate",
+	]) assert.ok(workflow.includes("`" + tool + "`"), `WORKFLOW must document ${tool}`);
+	assert.match(workflow, /skills\/README\.md/);
+	assert.match(workflow, /do not need `repository-harness` installed/);
+});

@@ -64,6 +64,11 @@ test("crash between mutation call and result restores mutationUncertain", async 
 	const status = await resumed.status(active);
 	assert.equal(status.health, "degraded");
 	assert.match(status.reason, /uncertain/);
+	await assert.rejects(
+		() => resumed.createCheckpoint(active),
+		/(?:uncertain|Unresolved operation)/i,
+	);
+	assert.equal(runner.commands.length, 0, "blocked checkpoint must not run repository commands");
 	resumedStore.close();
 });
 

@@ -11,9 +11,10 @@ being inferred from source or prior artifacts.
 `npm test` passed **278/278** after high-value test hardening for continuity uncertain-checkpoint
 blocking, memory `agent-tool` global-user denial + empty content, memory-context-budget
 edges, tool-classifier safety edges, and install/proof identity alignment. `proof/RESULTS.json`
-now records packageVersion **1.0.0-rc.6** (previously stale RC5). Real-provider memory,
+now records packageVersion **1.0.0-rc.6** (previously stale RC5). Real-provider memory remains **DEFERRED** (scaffold/`MemoryProviderDeferredError` only; no fresh authorized provider run in this PR — do not treat ports as PASS).
 Alpine ARM64, isolated Pi Git-install, and release packaging were **not** re-observed on
 this worktree and remain deferred or historical per their rows below.
+GitHub Actions CI workflow is present for typecheck+test; see Enforcement levels.
 
 ## Current Git-install refinement
 
@@ -199,5 +200,5 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
   `git diff --check`. Recorded results above describe their reported runs;
   they do not establish a fresh PASS for the current worktree.
 - Optional hooks: none installed or required.
-- CI invocation: none present in the supplied source snapshot.
+- CI invocation: `.github/workflows/ci.yml` runs `npm ci`, `npm run typecheck`, and `npm test` on Node **22.19.0** for `pull_request`/`push` to `dev-next`/`main` and `push` to `harden/**`. `validate:release` stays local-only (requires a Pi binary).
 - Branch protection: unverified; no external repository policy was changed.

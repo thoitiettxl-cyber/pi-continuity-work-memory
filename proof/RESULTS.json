@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "status": "RC6SourceLocalHardenValidated",
-  "generatedAt": "2026-09-17T12:49:20+07:00",
+  "status": "RC6SourceLocalHardenCiValidated",
+  "generatedAt": "2026-09-17T13:13:33+07:00",
   "packageVersion": "1.0.0-rc.6",
-  "worktree": "source-local harden/tests-rc6 on 1.0.0-rc.6: strengthened continuity uncertain-checkpoint, memory global-user agent-tool gate, memory budget edges, tool-classifier safety edges, and install/proof identity alignment; RESULTS refreshed to match package version",
+  "worktree": "source-local harden/tests-rc6 on 1.0.0-rc.6: prior harden retained; added GitHub Actions CI (Node 22.19.0 npm ci/typecheck/test); real-provider memory remains explicitly DEFERRED; TypeSafe follow-up audit recorded",
   "environment": {
     "node": "v22.19.0",
     "npm": "10.9.3",
@@ -16,7 +16,11 @@
   "pass": [
     {
       "gate": "source-local npm test harden",
-      "evidence": "npm test on Node v22.19.0 / npm 10.9.3: 278/278 serial tests passed (build:test + node --test --test-concurrency=1). npm run typecheck PASS. npm run validate:release PASS on Pi 0.84.1 with eleven skills and four workflow assets."
+      "evidence": "npm test on Node v22.19.0: 279/279 serial tests passed after CI contract test. npm run typecheck PASS. Prior validate:release PASS on Pi 0.84.1 remains historical for this refresh."
+    },
+    {
+      "gate": "github-actions CI workflow",
+      "evidence": ".github/workflows/ci.yml added: Node 22.19.0, npm ci, npm run typecheck, npm test on pull_request/push to dev-next|main and push to harden/**. validate:release omitted (Pi binary). Contract test asserts workflow shape."
     },
     {
       "gate": "proof identity alignment",
@@ -37,40 +41,44 @@
   ],
   "deferred": [
     "real-provider memory execution (historical RC2 only)",
+    "real-provider memory still DEFERRED this PR (scaffold only; no authorized live run)",
     "Alpine Linux 3.24 ARM64 matrix revalidation on this host",
     "isolated Pi Git-install / global-install proof on this worktree",
     "fresh managed deployment / GitHub release republication"
   ],
   "pendingDelivery": [
-    "optional push of harden/tests-rc6 and PR into dev-next when credentials allow",
-    "optional validate:install / validate:git-install on this worktree"
+    "optional validate:install / validate:git-install on this worktree",
+    "optional validate:release in CI once a stable Pi binary install path exists"
   ],
   "developmentValidation": {
     "status": "PASS_SOURCE_LOCAL",
-    "generatedAt": "2026-09-17T12:49:20+07:00",
-    "scope": "harden/tests-rc6 source-local unit/integration suite on package 1.0.0-rc.6 after TypeSafe tests-gap remediation",
+    "generatedAt": "2026-09-17T13:13:33+07:00",
+    "scope": "harden/tests-rc6 source-local suite + CI workflow addition on 1.0.0-rc.6; TypeSafe follow-up after CI (overall ~1.99 RC solid; top risk memory_provider_deferred)",
     "commands": [
       "npm test",
       "npm run typecheck",
       "npm run validate:release"
     ],
     "observations": {
-      "tests": "278/278",
+      "tests": "279/279",
       "typecheck": "PASS",
       "build": "PASS via build:test / prepare git-install",
       "nodeConstraint": "engines node >=22.19.0; proof run used Node v22.19.0 (host previously Node 20)",
       "hardenedAreas": "continuity uncertain checkpoint block; memory agent-tool global-user gate + empty content; memory-context-budget estimatedTokenCount/separator/UTF-16 edges; tool-classifier ignored tools, local write/edit, shell-wrapper fail-closed, validation allow-list, git read globals; git-install proof identity alignment",
       "piInstallProof": "NOT RERUN on this worktree",
       "releaseStaticValidation": "PASS (npm run validate:release on Pi 0.84.1)",
-      "engineeringSkills": "contract tests still expect eleven skills"
+      "engineeringSkills": "contract tests still expect eleven skills",
+      "ciWorkflow": "PRESENT .github/workflows/ci.yml (typecheck+test; no validate:release)",
+      "realProviderMemory": "DEFERRED \u2014 not attempted in this PR; documented only"
     },
     "notRevalidated": [
       "real-provider memory execution",
       "Alpine ARM64",
       "isolated global/Git install proofs",
-      "npm run release packaging"
+      "npm run release packaging",
+      "CI validate:release with Pi binary"
     ],
-    "authority": "This result applies only to the harden/tests-rc6 source-local npm test run and proof-identity refresh for 1.0.0-rc.6. Historical RC6 release/deployment and RC2 provider evidence remain separately documented and are not re-observed here."
+    "authority": "Applies to harden/tests-rc6 source-local tests plus addition of GitHub Actions CI and proof/audit doc updates for 1.0.0-rc.6. Does not claim fresh real-provider memory, Alpine, install, or release republication."
   },
   "releaseIdentity": {
     "status": "selected",
@@ -82,5 +90,5 @@
     "artifactSha256": "83d17834af73149e426e168709731321736d7e64b72dcd1ad4e40cde43fb8b4e",
     "evidence": "Historical RC5 RESULTS identity retained for lineage; superseded packageVersion is 1.0.0-rc.6."
   },
-  "policy": "Record only observed source-local harden evidence. Do not promote deferred provider/Alpine/install/release gates from prior artifacts. Keep safety classifiers unchanged."
+  "policy": "Record observed source-local harden + CI workflow presence. Do not promote deferred provider/Alpine/install/release gates. Keep safety classifiers unchanged."
 }

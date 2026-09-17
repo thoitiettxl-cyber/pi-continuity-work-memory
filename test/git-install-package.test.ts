@@ -68,3 +68,14 @@ test("package engines, peer range, and proof identity stay aligned for RC6 insta
 	assert.match(acceptance, /1\.0\.0-rc\.6/);
 	assert.match(acceptance, /harden\/tests-rc6|source-local harden/i);
 });
+
+test("GitHub Actions CI runs Node 22.19 typecheck and test on PRs", () => {
+	const workflow = readFileSync(resolve(root, ".github/workflows/ci.yml"), "utf8");
+	assert.match(workflow, /node-version:\s*\["22\.19\.0"\]/);
+	assert.match(workflow, /npm ci/);
+	assert.match(workflow, /npm run typecheck/);
+	assert.match(workflow, /npm test/);
+	assert.match(workflow, /pull_request:/);
+	assert.match(workflow, /branches:\s*\[[^\]]*\bdev-next\b/);
+	assert.doesNotMatch(workflow, /^\s*run:\s*npm run validate:release\s*$/m);
+});

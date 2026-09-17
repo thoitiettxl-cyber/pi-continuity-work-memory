@@ -284,3 +284,63 @@ test("managed workflow document tools retain their authority and mutation bounda
 	assert.equal(classifyTool("continuity_finalize_work", {}), "mutation");
 	assert.equal(classifyMutationConsequence("continuity_finalize_work", {}), "local");
 });
+
+test("builtin Continuity and Memory tools stay ignored by the mutation classifier", () => {
+	for (const toolName of [
+		"continuity_status",
+		"continuity_update",
+		"continuity_validate",
+		"continuity_checkpoint",
+		"continuity_recover",
+		"memory_list",
+		"memory_read",
+		"memory_search",
+		"memory_add",
+	]) {
+		assert.equal(classifyTool(toolName, {}), "ignored");
+		assert.equal(classifyMutationConsequence(toolName, {}), "none");
+	}
+});
+
+test("write, edit, and apply_patch remain local mutations rather than external operations", () => {
+	for (const toolName of ["write", "edit", "apply_patch"]) {
+		assert.equal(classifyTool(toolName, { path: "src/x.ts" }), "mutation");
+		assert.equal(classifyMutationConsequence(toolName, { path: "src/x.ts" }), "local");
+	}
+});
+
+test("empty, non-string, and shell-wrapper validation forms fail closed as mutations", () => {
+	for (const input of [{}, { command: "" }, { command: "   " }, { command: 12 }, { command: null }]) {
+		assert.equal(classifyTool("bash", input as Record<string, unknown>), "mutation");
+		assert.equal(classifyMutationConsequence("bash", input as Record<string, unknown>), "external");
+	}
+	for (const command of ["bash -c 'npm test'", "sh -c npm test", "zsh -c 'cargo test'"]) {
+		assert.equal(isExecutableValidationCommand(command), false, command);
+		assert.equal(classifyTool("bash", { command }), "mutation", command);
+	}
+});
+
+test("allow-listed package and script validation commands remain executable validations", () => {
+	for (const command of [
+		"npm run typecheck",
+		"pnpm test",
+		"yarn run build",
+		"node --test .test-build/test/tool-classifier.test.js",
+		"cargo check",
+		"go test ./...",
+		"scripts/validate-premerge.sh",
+	]) {
+		assert.equal(isExecutableValidationCommand(command), true, command);
+		assert.equal(classifyTool("bash", { command }), "validation", command);
+		assert.equal(classifyMutationConsequence("bash", { command }), "none", command);
+	}
+});
+
+test("git read globals preserve read-only status while writing remotes stay external", () => {
+	for (const command of ["git --no-pager status", "git -C . rev-parse --show-toplevel", "git remote"]) {
+		assert.equal(classifyTool("bash", { command }), "read", command);
+		assert.equal(classifyMutationConsequence("bash", { command }), "none", command);
+	}
+	assert.equal(classifyTool("bash", { command: "git remote rename origin upstream" }), "mutation");
+	assert.equal(classifyMutationConsequence("bash", { command: "git remote rename origin upstream" }), "external");
+});

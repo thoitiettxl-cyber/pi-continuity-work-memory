@@ -5,6 +5,7 @@ import {
 	characterBudget,
 	effectiveContextWindow,
 	estimatedTokenBudget,
+	estimatedTokenCount,
 	sliceUtf16Safe,
 	shouldOmitMemoryBlock,
 } from "../src/domain/memory-context-budget.js";
@@ -62,4 +63,34 @@ test("sliceUtf16Safe does not emit a trailing high surrogate", () => {
 	assert.equal(sliceUtf16Safe("abc", 2), "ab");
 	assert.equal(sliceUtf16Safe("abc", 8), "abc");
 	assert.equal(sliceUtf16Safe("abc", 0), "");
+});
+
+test("estimatedTokenCount uses ceil(chars/4) including remainder boundaries", () => {
+	assert.equal(estimatedTokenCount(0), 0);
+	assert.equal(estimatedTokenCount(1), 1);
+	assert.equal(estimatedTokenCount(4), 1);
+	assert.equal(estimatedTokenCount(5), 2);
+	assert.equal(estimatedTokenCount(64_000), 16_000);
+});
+
+test("shouldOmitMemoryBlock honors an explicit separator length at the omit boundary", () => {
+	// preamble 10 + footer 10 + separator 0 + min body 64 = 84
+	assert.equal(shouldOmitMemoryBlock(83, 10, 10, 0), true);
+	assert.equal(shouldOmitMemoryBlock(84, 10, 10, 0), false);
+	// default separator 4: 10 + 10 + 4 + 64 = 88
+	assert.equal(shouldOmitMemoryBlock(87, 10, 10), true);
+	assert.equal(shouldOmitMemoryBlock(88, 10, 10), false);
+});
+
+test("sliceUtf16Safe rejects non-positive budgets and never truncates to a trailing high surrogate", () => {
+	assert.equal(sliceUtf16Safe("abc", -3), "");
+	const pair = "\uD83D\uDE00";
+	assert.equal(sliceUtf16Safe(pair + "Z", 1), "");
+	assert.equal(sliceUtf16Safe(pair + "Z", 2), pair);
+	assert.equal(sliceUtf16Safe(pair + "Z", 3), pair + "Z");
+	assert.equal(sliceUtf16Safe(`A${pair}`, 2), "A");
+	assert.equal(sliceUtf16Safe(`A${pair}`, 3), `A${pair}`);
+	// Budget 3 on A+emoji+Z lands on the low surrogate (safe); budget 2 backs off the high surrogate.
+	assert.equal(sliceUtf16Safe(`A${pair}Z`, 3), `A${pair}`);
+	assert.equal(sliceUtf16Safe(`A${pair}Z`, 4), `A${pair}Z`);
 });

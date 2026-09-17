@@ -5,6 +5,16 @@ complete only when every mandatory row has an observed `PASS`. Missing authority
 credentials, target hardware, or external proof remains `DEFERRED` rather than
 being inferred from source or prior artifacts.
 
+## Current source-local harden (tests + proof refresh)
+
+`PASS (source-local harden/tests-rc6)` — on Node **v22.19.0**, branch `harden/tests-rc6`,
+`npm test` passed **278/278** after high-value test hardening for continuity uncertain-checkpoint
+blocking, memory `agent-tool` global-user denial + empty content, memory-context-budget
+edges, tool-classifier safety edges, and install/proof identity alignment. `proof/RESULTS.json`
+now records packageVersion **1.0.0-rc.6** (previously stale RC5). Real-provider memory,
+Alpine ARM64, isolated Pi Git-install, and release packaging were **not** re-observed on
+this worktree and remain deferred or historical per their rows below.
+
 ## Current Git-install refinement
 
 `PASS (source-local, pre-delivery)` — `npm run validate` and

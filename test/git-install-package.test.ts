@@ -32,3 +32,39 @@ test("package declares the clean Git-install build and validation contract", () 
 	assert.equal(installConfig.compilerOptions?.outDir, "dist");
 	assert.match(readme, /pi install git:github\.com\/thoitiettxl-cyber\/pi-continuity-work-memory/);
 });
+
+test("package engines, peer range, and proof identity stay aligned for RC6 install validation", () => {
+	const manifest = readJson("package.json") as {
+		version?: string;
+		engines?: { node?: string };
+		peerDependencies?: Record<string, string>;
+		pi?: { extensions?: string[]; skills?: string[] };
+		files?: string[];
+	};
+	const results = readJson("proof/RESULTS.json") as {
+		packageVersion?: string;
+		status?: string;
+		developmentValidation?: { observations?: { tests?: string } };
+	};
+	const acceptance = readFileSync(resolve(root, "proof/ACCEPTANCE.md"), "utf8");
+
+	assert.equal(manifest.version, "1.0.0-rc.6");
+	assert.equal(manifest.engines?.node, ">=22.19.0");
+	assert.equal(manifest.peerDependencies?.["@earendil-works/pi-coding-agent"], ">=0.84.1 <0.86.0");
+	assert.equal(manifest.peerDependencies?.["@earendil-works/pi-ai"], ">=0.84.1 <0.86.0");
+	assert.deepEqual(manifest.pi?.extensions, ["./dist/extension.js"]);
+	assert.equal(manifest.pi?.skills?.length, 11);
+	for (const required of [
+		"scripts/validate-install.mjs",
+		"scripts/validate-provider.mjs",
+		"scripts/manage-user-install.mjs",
+		"proof/ACCEPTANCE.md",
+		"proof/RESULTS.json",
+	]) {
+		assert.ok(manifest.files?.includes(required), `missing release payload entry ${required}`);
+	}
+	assert.equal(results.packageVersion, manifest.version, "RESULTS.json packageVersion must match package.json");
+	assert.match(results.status ?? "", /RC6/);
+	assert.match(acceptance, /1\.0\.0-rc\.6/);
+	assert.match(acceptance, /harden\/tests-rc6|source-local harden/i);
+});

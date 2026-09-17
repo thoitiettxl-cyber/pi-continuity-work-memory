@@ -1,107 +1,86 @@
 {
   "schemaVersion": 1,
-  "status": "RC5CandidateValidated",
-  "generatedAt": "2026-08-21T16:20:10+00:00",
-  "packageVersion": "1.0.0-rc.5",
-  "worktree": "validated 1.0.0-rc.5 source with ten Pi-native engineering skills, based on the original 1.0.0-rc.1 source snapshot and the separately attributed skill adaptations",
+  "status": "RC6SourceLocalHardenValidated",
+  "generatedAt": "2026-09-17T12:49:20+07:00",
+  "packageVersion": "1.0.0-rc.6",
+  "worktree": "source-local harden/tests-rc6 on 1.0.0-rc.6: strengthened continuity uncertain-checkpoint, memory global-user agent-tool gate, memory budget edges, tool-classifier safety edges, and install/proof identity alignment; RESULTS refreshed to match package version",
   "environment": {
-    "node": "v24.18.1",
-    "npm": "11.12.1",
+    "node": "v22.19.0",
+    "npm": "10.9.3",
     "sqlite": "node:sqlite",
-    "platform": "Alpine Linux 3.24.1 ARM64 (aarch64)",
+    "platform": "Debian GNU/Linux 13 (trixie) x86_64",
     "piLowerBound": "0.84.1",
-    "piCurrent": "0.84.2",
-    "piRange": ">=0.84.1 <0.85.0"
+    "piCurrent": "0.84.1",
+    "piRange": ">=0.84.1 <0.86.0"
   },
   "pass": [
     {
-      "gate": "source provenance and release alignment",
-      "evidence": "The supplied source ZIP SHA-256 and all 43 original manifest entries remain verified. The six Matt Pocock adaptations retain pinned commit 5b15a47f2d7150f545fbcacbfe381787fc0230dc and its MIT notice; the four Repository Harness adaptations pin e765792b635b4d5e3e5fc0578f82f9ca5dea2681 and ship its separate MIT notice. Repository Harness is neither installed nor referenced as a Pi runtime resource."
+      "gate": "source-local npm test harden",
+      "evidence": "npm test on Node v22.19.0 / npm 10.9.3: 278/278 serial tests passed (build:test + node --test --test-concurrency=1). npm run typecheck PASS. npm run validate:release PASS on Pi 0.84.1 with eleven skills and four workflow assets."
     },
     {
-      "gate": "npm run validate",
-      "evidence": "Typecheck, build, 152/152 tests, isolated two-workspace global install on Pi 0.84.1, exact ten-skill package discovery, and release static validation passed for version 1.0.0-rc.5."
+      "gate": "proof identity alignment",
+      "evidence": "proof/RESULTS.json packageVersion matches package.json 1.0.0-rc.6; install-contract test asserts engines >=22.19.0, peer Pi range, eleven skills, and release payload proof files."
     },
     {
-      "gate": "package-owned Pi engineering skills",
-      "evidence": "Pi loaded exactly ten manifest-declared Markdown-only skill directories with zero loader diagnostics and no adjacent duplicate headings. grill-with-docs, onboard-repository, audit-onboarding-proposal, and improve-harness are explicit-only; encode-invariant is model-visible but cannot invent policy or grant mutation authority. Focused tests verify first-pass onboarding safety, independent per-hunk audit, baseline-to-fresh-rerun improvement evidence, managed Continuity preparation/recovery, and checkpoint non-completion boundaries."
+      "gate": "historical RC6 release and deployment",
+      "evidence": "Prior RC6 delivery remains documented in proof/ACCEPTANCE.md (commit 1140be1, ZIP SHA-256 8e85b9fce05be8dec0508630dc7ceac63d63f6ab6362f645e5b0b2c7ac3f399f, GitHub prerelease v1.0.0-rc.6). This RESULTS refresh does not re-claim Alpine, real-provider, or managed-deploy as freshly observed."
     },
     {
-      "gate": "provider-bound privacy and cost boundary",
-      "evidence": "Positive and negative tests capture Stage 1 and Stage 2 DTOs and prove ordinary text/bash/tool evidence remains while raw images, parameterized or wrapped base64, long opaque payloads, secrets, hidden thinking, opaque signatures, default/custom session paths, and excluded bash content do not cross the provider boundary. Provider source and Stage 2 DTOs remain bounded."
+      "gate": "historical RC5 candidate validation",
+      "evidence": "Immutable RC5 evidence remains historical (152/152 era RESULTS content superseded for packageVersion identity only)."
     },
     {
       "gate": "historical RC2 modified-source real provider",
-      "evidence": "Historical RC2 evidence only: with explicit owner authorization, cliproxy/gpt-5.6-sol on Pi 0.84.2 completed Stage 1 and Stage 2, published one record and one baseline, accounted usage/citations, and passed the secret scan. The RC5 skill/package-only change did not rerun or promote this as current provider authority."
-    },
-    {
-      "gate": "pipeline crash and lease recovery",
-      "evidence": "Tests prove unique attempt owners, heartbeat across both provider stages, post-lock expiry checks, expired-run startup recovery, atomic reclaim, orphan pending/building cleanup, stale-owner finish fencing, prior published-head preservation, retry after failure/expiry/supersession, and same-service concurrency exclusion."
-    },
-    {
-      "gate": "Pi support matrix",
-      "evidence": "Version fixtures accept 0.84.1 and 0.84.2, reject 0.85.0 with the peer-range diagnostic, and reports that reach a Pi binary include the detected version plus >=0.84.1 <0.85.0."
-    },
-    {
-      "gate": "global install on supported Pi versions",
-      "evidence": "The isolated two-workspace global-install proof passed on Pi 0.84.1 and Pi 0.84.2. Ten skill commands resolved to candidate package paths under an isolated HOME, repository scopes remained distinct, global-user memory crossed, and stores survived remove."
-    },
-    {
-      "gate": "Alpine Linux 3.24 ARM64",
-      "evidence": "scripts/validate-alpine-arm64.sh passed for RC5 on Alpine 3.24.1 aarch64 with Node v24.18.1 and Pi 0.84.2, including exact extension and ten-skill global-install discovery proof."
-    },
-    {
-      "gate": "preliminary release artifact workflow",
-      "evidence": "npm run release built a sanitized RC5 ZIP from package.json files, generated an exact 132-file release report, installed the staged payload with ten verified skill sources, passed unzip -t, and wrote SHA-256 plus release-report.json. The managed-installer dry-run reverified the candidate and reported storesChanged false. The definitive artifact checksum and deployment result belong to the bound execution plan outside the payload."
+      "evidence": "Historical RC2 evidence only; provider runtime unchanged; not rerun for this harden pass."
     }
   ],
-  "deferred": [],
+  "deferred": [
+    "real-provider memory execution (historical RC2 only)",
+    "Alpine Linux 3.24 ARM64 matrix revalidation on this host",
+    "isolated Pi Git-install / global-install proof on this worktree",
+    "fresh managed deployment / GitHub release republication"
+  ],
   "pendingDelivery": [
-    "final premerge validation on the completed source diff",
-    "definitive artifact generation and checksum-bound installer dry-run",
-    "commit, push, managed deployment, and fresh installed-source verification"
+    "optional push of harden/tests-rc6 and PR into dev-next when credentials allow",
+    "optional validate:install / validate:git-install on this worktree"
   ],
   "developmentValidation": {
     "status": "PASS_SOURCE_LOCAL",
-    "generatedAt": "2026-08-21T16:20:10+00:00",
-    "scope": "RC5 four-skill adaptation plus the existing package extension, managed workflow, persistent memory, and ten-skill inventory on dev-next",
+    "generatedAt": "2026-09-17T12:49:20+07:00",
+    "scope": "harden/tests-rc6 source-local unit/integration suite on package 1.0.0-rc.6 after TypeSafe tests-gap remediation",
     "commands": [
-      "node --test --test-concurrency=1 .test-build/test/skills-package.test.js",
-      "npm run validate",
-      "scripts/validate-alpine-arm64.sh",
-      "npm run release",
-      "node scripts/manage-user-install.mjs deploy --archive <RC5 archive> --dry-run"
+      "npm test",
+      "npm run typecheck",
+      "npm run validate:release"
     ],
     "observations": {
-      "tests": "152/152",
+      "tests": "278/278",
       "typecheck": "PASS",
-      "build": "PASS",
-      "piInstallProof": "PASS on Pi 0.84.1 and Pi 0.84.2 in two isolated AGENTS-bearing workspaces with isolated HOME and exact ten-skill package source paths",
-      "workflowAssets": "PASS: 4 checksum/inventory-bound package assets; no Repository Harness runtime/install dependency",
-      "managedWorkflowRuntime": "PASS: public Pi events/tools, eligibility, mutation gate, read-only/bounded no-doc behavior, durable intent/create/bind/drift/finalize/recovery, and non-interactive safety",
-      "engineeringSkills": "PASS: ten exact Pi skill directories, zero loader diagnostics, four explicit-only workflows, accepted-invariant authority gate, read-only onboarding/audit, fresh-rerun improvement boundary, resolved references, prompt-only resources, and dual MIT provenance",
-      "releaseStaticValidation": "PASS",
-      "packagedRelease": "PASS on preliminary Pi 0.84.1 candidate packaging: sanitized RC5 inventory, exact staged install, ten skill source paths, unzip test, external SHA-256 report, and managed-installer dry-run",
-      "diffCheck": "PASS before proof-result recording",
-      "sealedValidationReceipts": "PASS",
-      "consequentialOperationLedger": "PASS",
-      "orderedSqliteMigrations": "PASS",
-      "workStateMigration": "PASS: schema v1 external and embedded context migrate to v2 advisory workflow without fabricating repository authority"
+      "build": "PASS via build:test / prepare git-install",
+      "nodeConstraint": "engines node >=22.19.0; proof run used Node v22.19.0 (host previously Node 20)",
+      "hardenedAreas": "continuity uncertain checkpoint block; memory agent-tool global-user gate + empty content; memory-context-budget estimatedTokenCount/separator/UTF-16 edges; tool-classifier ignored tools, local write/edit, shell-wrapper fail-closed, validation allow-list, git read globals; git-install proof identity alignment",
+      "piInstallProof": "NOT RERUN on this worktree",
+      "releaseStaticValidation": "PASS (npm run validate:release on Pi 0.84.1)",
+      "engineeringSkills": "contract tests still expect eleven skills"
     },
     "notRevalidated": [
-      "real-provider memory execution"
+      "real-provider memory execution",
+      "Alpine ARM64",
+      "isolated global/Git install proofs",
+      "npm run release packaging"
     ],
-    "authority": "This result applies to the RC5 source-local worktree, skill discovery, supported-Pi install, Alpine, and preliminary packaging evidence. Historical RC2 real-provider proof remains history because provider runtime was unchanged. Final premerge, definitive artifact identity, branch push, and managed deployment completion belong to the bound repository execution plan and installer receipt."
+    "authority": "This result applies only to the harden/tests-rc6 source-local npm test run and proof-identity refresh for 1.0.0-rc.6. Historical RC6 release/deployment and RC2 provider evidence remain separately documented and are not re-observed here."
   },
   "releaseIdentity": {
     "status": "selected",
-    "version": "1.0.0-rc.5",
-    "reason": "The user explicitly authorized complete integration, commit, push, and managed global deployment of four additional skills; RC5 preserves the immutable RC4 artifact and gives the ten-skill payload a distinct identity."
+    "version": "1.0.0-rc.6",
+    "reason": "Package identity remains 1.0.0-rc.6; this commit hardens tests/proof freshness without advancing a new prerelease number."
   },
   "previousRelease": {
-    "version": "1.0.0-rc.4",
+    "version": "1.0.0-rc.5",
     "artifactSha256": "83d17834af73149e426e168709731321736d7e64b72dcd1ad4e40cde43fb8b4e",
-    "evidence": "docs/plans/completed/release-domain-modeling-refinement-rc4.md"
+    "evidence": "Historical RC5 RESULTS identity retained for lineage; superseded packageVersion is 1.0.0-rc.6."
   },
-  "policy": "Historical RC2 provider evidence and immutable RC3/RC4 release/deployment evidence remain separate. RC5 source, ten-skill discovery, supported-Pi install, Alpine ARM64, and preliminary release-workflow evidence are recorded here. Final premerge, definitive artifact, push, and managed deployment completion belong to the bound execution plan and installer receipt outside the release payload."
+  "policy": "Record only observed source-local harden evidence. Do not promote deferred provider/Alpine/install/release gates from prior artifacts. Keep safety classifiers unchanged."
 }

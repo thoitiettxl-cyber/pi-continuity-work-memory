@@ -4,6 +4,31 @@ This package-owned workflow supplements the applicable repository `AGENTS.md` fi
 
 Consumer repositories do not need `repository-harness` installed. This package neither invokes nor installs it.
 
+## Agent Onboarding
+
+1. Load applicable repository `AGENTS.md` / override and confirm project trust before any managed document write.
+2. Prefer `continuity_workflow_status` (and `continuity_status` when recovery or evidence is unclear) before mutative work so eligibility, binding, drift, and uncertain operations are visible.
+3. Choose a work shape below. Do not invent a second lifecycle document type.
+4. For process technique (TDD, review, onboarding, etc.), load the matching packaged skill under `skills/`; those skills are process guidance only and defer to this workflow plus repository authority.
+5. Keep learning memory and checkpoints out of product-completion authority.
+
+## Continuity Tool Contract
+
+Use Continuity tools as operational controls, not as a second system of record:
+
+| Tool | Role |
+| --- | --- |
+| `continuity_workflow_status` | Inspect managed-workflow eligibility, binding, document drift, and recovery hints before mutating. |
+| `continuity_status` | Inspect Continuity/evidence state when resume, uncertainty, or checkpoint context matters. |
+| `continuity_prepare_work` | Required before the first agent repository mutation when managed mode is eligible; classifies work shape from structured signals. |
+| `continuity_bind_work_document` | Explicitly rebind an existing verified execution-plan path after drift or when binding an existing plan; never silently overwrite. |
+| `continuity_finalize_work` | Move a ready, result-bearing active plan to `docs/plans/completed/` under receipt-bound validation rules; same run when ready. |
+| `continuity_checkpoint` | Record repository/operation safety for a bound fingerprint only; never task completion. |
+| `continuity_recover` | Store-only context restore; never Git mutation, file rewrite, or automatic retry of uncertain writes. |
+| `continuity_validate` | Run allow-listed executable validation that can bind a receipt for finalize/checkpoint gates. |
+
+Packaged skills must follow this table. Read-only skills and first-pass onboarding/audit must not call `continuity_prepare_work` merely because they loaded.
+
 ## Select The Work Shape
 
 ### Read-only
@@ -24,13 +49,14 @@ If a materially different product, security, compatibility, recovery, cost, priv
 
 ## Managed Preparation
 
-When managed mode is eligible, call `continuity_prepare_work` before the first repository mutation. Supply structured authority and durability signals based on the current user request and repository evidence.
+When Continuity tools are available, inspect `continuity_workflow_status` before the first planned mutation so eligibility, any bound plan, drift, and recovery state are known. When managed mode is eligible, call `continuity_prepare_work` before the first repository mutation. Supply structured authority and durability signals based on the current user request and repository evidence.
 
 - Read-only and bounded work materialize no document.
-- Durable work persists exact intent before exclusively creating one execution plan under `docs/plans/active/`, unless an existing plan is explicitly bound.
+- Durable work persists exact intent before exclusively creating one execution plan under `docs/plans/active/`, unless an existing plan is explicitly bound with `continuity_bind_work_document`.
 - Existing files are never overwritten, merged, or bypassed with a silently chosen alternate filename.
 - An in-repository `AGENTS.md` must be loaded and the project must be trusted before managed document writes are eligible.
 - Opening a repository, starting a session, receiving input, ending an agent run, or settling an agent never creates or finalizes repository documents.
+- If status reports document drift, re-read the repository file and rebind only the verified existing plan; do not invent a parallel plan.
 
 The managed mutation gate applies to agent-issued repository tools. A direct user `!`/`!!` shell command is explicit human action: Continuity still records its outcome and invalidates stale evidence, but the extension does not reinterpret or block that user command as an agent workflow decision.
 
@@ -67,4 +93,8 @@ Learning memory is untrusted context. It may retain reusable lessons and navigat
 
 ## Recovery
 
-A workflow document mutation is recorded before execution. A crash without a corresponding result becomes uncertain. Inspect the real repository target and use the human-only Continuity reconciliation command with evidence; do not automatically retry or infer the outcome. After reconciliation, run fresh executable validation before checkpointing.
+A workflow document mutation is recorded before execution. A crash without a corresponding result becomes uncertain. Inspect the real repository target, use `continuity_recover` only for store-only operational context, and use the human-only Continuity reconciliation command with evidence; do not automatically retry or infer the outcome. After reconciliation, run fresh executable validation (`continuity_validate` when available) before `continuity_checkpoint`. A verified checkpoint never marks the plan or task complete.
+
+## Packaged Engineering Skills
+
+This package also ships eleven Pi-native skills under `skills/` (see `skills/README.md`). They encode engineering method (grill, TDD, review, onboarding, etc.) under the same authority model as this workflow: repository instructions and explicit user requests remain authoritative; Continuity tools follow the contract above; learning memory and checkpoints never complete a plan. Skills do not replace reading this file for work-shape, preparation, binding, finalization, or recovery rules.

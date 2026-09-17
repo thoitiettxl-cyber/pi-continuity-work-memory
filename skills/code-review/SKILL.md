@@ -103,5 +103,6 @@ Order by severity, then present:
 
 If no finding survives verification, say so and list residual risks or checks
 not performed. A read-only review creates no lifecycle document and no safe
-checkpoint. If the user later requests fixes, classify and prepare that
-mutative work before editing.
+checkpoint. If the user later requests fixes, classify that mutative work with
+`continuity_workflow_status` / `continuity_prepare_work` per
+`workflow/WORKFLOW.md` before editing.

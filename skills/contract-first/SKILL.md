@@ -35,7 +35,8 @@ current owner and artifact before proposing another one. If a material product,
 compatibility, security, migration, or recovery decision is unresolved, ask for
 that decision rather than encoding a guess.
 
-Before the first authorized mutation, call `continuity_prepare_work` when managed
+When Continuity tools are available, prefer `continuity_workflow_status`
+before mutative work. Before the first authorized mutation, call `continuity_prepare_work` when managed
 workflow eligibility is active. Durable work uses one bound execution plan; do
 not create a parallel contract task log or elevate memory/checkpoints to product
 or completion authority.
@@ -126,7 +127,8 @@ Report:
 - end-to-end proof, skipped/deferred checks, and residual risk.
 
 Passing separate consumer and provider test suites is not integration proof
-unless both are checked against the same artifact. A safe checkpoint proves
-repository/operation safety only, never contract correctness or task completion.
-Do not commit, push, publish, deploy, install dependencies, or mutate external
-state unless the user explicitly requested that exact action and target.
+unless both are checked against the same artifact. A safe checkpoint proves repository/operation safety only, never contract
+correctness or task completion. When a bound plan's in-scope outcome is done
+with recorded Result and no remaining authorized delivery, set Status to Ready
+for completion and call `continuity_finalize_work` in the same run. Do not commit, push, publish, deploy, install dependencies, or mutate external state unless the
+user explicitly requested that exact action and target.

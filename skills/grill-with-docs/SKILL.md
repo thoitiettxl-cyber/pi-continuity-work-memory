@@ -137,13 +137,17 @@ After Shared Understanding is confirmed:
   return the confirmed summary and write nothing.
 - If unresolved material uncertainty still leaves authority blocked, report the
   smallest missing decision and write nothing.
-- Before any repository mutation, call `continuity_prepare_work` when the
-  managed workflow is available and eligible.
+- Prefer `continuity_workflow_status` when Continuity is available, then before
+  any repository mutation call `continuity_prepare_work` when the managed
+  workflow is available and eligible.
 - Bounded mutation creates no lifecycle execution plan. It may update an
   existing authoritative product document only when that documentation change
   was explicitly authorized.
-- Durable mutation creates or binds exactly one execution plan. That plan owns
-  task progress, task-local decisions, validation, and result.
+- Durable mutation creates or binds exactly one execution plan (rebind with
+  `continuity_bind_work_document` only after re-reading a verified existing
+  plan). That plan owns task progress, task-local decisions, validation, and
+  result. When it is ready with recorded Result and no remaining authorized
+  delivery, call `continuity_finalize_work` in the same run.
 - Update domain language only under the accepted repository convention. If
   active domain-modeling is needed, read the discovered `domain-modeling`
   skill and follow it.

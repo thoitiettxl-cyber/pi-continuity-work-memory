@@ -54,6 +54,29 @@ They must:
 - commit, push, publish, deploy, or mutate external state only when the user
   explicitly requests the exact action and target.
 
+## Continuity Tool Alignment
+
+Skills follow the package-owned [workflow/WORKFLOW.md](../workflow/WORKFLOW.md)
+contract. Before mutative work when Continuity is available:
+
+1. Prefer `continuity_workflow_status` (and `continuity_status` when resume or
+   evidence is unclear).
+2. Call `continuity_prepare_work` before the first repository mutation when
+   managed mode is eligible.
+3. Keep durable truth in exactly one bound execution plan; rebind with
+   `continuity_bind_work_document` only after re-reading a verified existing
+   plan.
+4. When a bound plan's in-scope outcome is done with recorded Result and no
+   remaining authorized delivery, set Status to Ready for completion and call
+   `continuity_finalize_work` in the same run.
+5. Use `continuity_validate` for allow-listed proof, `continuity_checkpoint`
+   only for repository/operation safety, and `continuity_recover` only for
+   store-only context — never as completion or mutation authority.
+
+Read-only skills (`code-review`) and explicit first-pass
+`onboard-repository` / `audit-onboarding-proposal` must not call
+`continuity_prepare_work` merely because they loaded.
+
 The skills contain no executable helper, runtime dependency, native binary,
 desktop-browser assumption, transcript protocol, or Repository Harness runtime
 integration. See [UPSTREAM.md](UPSTREAM.md) for both source lineages, license

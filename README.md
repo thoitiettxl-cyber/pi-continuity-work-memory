@@ -28,6 +28,15 @@ the npm `prepare` lifecycle generates the ignored `dist/` entrypoint from source
 without requiring development dependencies. Start a fresh Pi process after
 installation so the extension and all packaged skills are discovered together.
 
+After install, discoverability map:
+
+- Extension tools/commands: `/continuity`, `/memory`, and the Continuity tool
+  surface described under Managed repository workflow below.
+- Packaged skills: listed in [Bundled global engineering skills](#bundled-global-engineering-skills);
+  full authority contract in `skills/README.md`; provenance in `skills/UPSTREAM.md`.
+- Managed workflow defaults: checksum-verified `workflow/WORKFLOW.md` plus
+  templates under `workflow/templates/` (see Managed repository workflow).
+
 The unpinned command follows the repository's default branch. Use
 `pi update --extensions` to update it, or pin a reviewed tag/commit by appending
 `@<ref>` to the Git source. Remove it with:
@@ -101,7 +110,8 @@ For isolated tests, override them with `PI_CONTINUITY_HOME` and `PI_WORK_MEMORY_
 
 The managed package ships `skills/` as a Pi package resource. A global managed
 install makes these skills available in every repository without copying them
-into each workspace:
+into each workspace. See `skills/README.md` for the shared authority contract
+and Continuity tool alignment, and `workflow/WORKFLOW.md` for work-shape rules:
 
 - `/skill:grill-with-docs` — explicitly clarify uncertain intent and preserve
   confirmed shared understanding in the correct repository-owned document.
@@ -204,7 +214,7 @@ Structured tools:
 
 ## Managed repository workflow
 
-The release payload contains checksum-verified package assets under `workflow/`, including `WORKFLOW.md` plus execution-plan, proposed-decision, and application-runbook templates. These assets are process defaults and scaffolding; applicable repository `AGENTS.md` files, explicit user authority, repository documents, code, tests, runtime evidence, and Git history remain the system of record.
+The release payload contains checksum-verified package assets under `workflow/`, including `WORKFLOW.md` (agent onboarding, Continuity tool contract, work shapes, preparation, validation/completion, recovery) plus execution-plan, proposed-decision, and application-runbook templates. These assets are process defaults and scaffolding; applicable repository `AGENTS.md` files, explicit user authority, repository documents, code, tests, runtime evidence, and Git history remain the system of record. Packaged skills under `skills/` must follow the same Continuity tool contract.
 
 The workflow is lazy and observable:
 

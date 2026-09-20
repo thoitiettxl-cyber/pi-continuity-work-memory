@@ -82,4 +82,10 @@ test("WORKFLOW.md encodes onboarding and Continuity tool contracts", async () =>
 	assert.match(workflow, /docs\/audits\//);
 	assert.match(workflow, /must not become plan Result/);
 	assert.match(workflow, /Do not alias it to conversation/);
+	assert.match(workflow, /There is no separate read-only TypeSafe path/);
+	const loop = workflow.slice(workflow.indexOf("## Working Loop"), workflow.indexOf("## Select The Work Shape"));
+	assert.ok(
+		loop.indexOf("**Prepare when mutating**") < loop.indexOf("**Optional TypeSafe slot**"),
+		"TypeSafe slot must follow prepare in the working loop",
+	);
 });

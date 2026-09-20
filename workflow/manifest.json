@@ -4,7 +4,7 @@
   "assets": [
     {
       "path": "WORKFLOW.md",
-      "sha256": "580d3f8a01e0bc36379dcfaa17423b6c3f7323db9e837dad61ad528f82066987"
+      "sha256": "cdbda2be8aea98cc151e79d7af1362bd3324f91591dbc11b3ab4de8e70a20ab9"
     },
     {
       "path": "templates/application-runbook.md",

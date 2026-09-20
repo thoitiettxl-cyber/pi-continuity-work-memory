@@ -61,6 +61,12 @@ Different artifacts answer different questions:
 - Package-owned engineering skills are optional process guidance. They cannot
   grant mutation or external-action authority, create parallel durable task
   truth, or override repository instructions and evidence.
+- A task-session architecture spec, when one exists, frames that mission only.
+  It is not this file, not an execution plan, and not TypeSafe audit evidence.
+  Continuity does not bind it.
+- Files under `docs/audits/` are TypeSafe request/raw/summary dumps when
+  present. They are not plans, architecture, validation, or completion
+  evidence.
 
 A verified checkpoint means only that its repository fingerprint, executable
 receipt, operation ledger, and hash chain are safe. Task completion remains a
@@ -381,8 +387,9 @@ deferred, and skipped checks separately.
 | Document | Audience and ownership |
 |---|---|
 | `AGENTS.md` | Compact repository instructions and contributor entrypoint |
-| `docs/ARCHITECTURE.md` | Architecture, repository workflow, validation ladder, and documentation map |
+| `docs/ARCHITECTURE.md` | Package contributor architecture, repository workflow, validation ladder, and documentation map. Not a task-session architecture spec |
 | `docs/proposals/*.md` | Exploratory or accepted design history; implementation status does not make proposals active plans, runtime contracts, validation, or completion evidence |
+| `docs/audits/` | TypeSafe request/raw/summary dumps when present; not a plan, task architecture spec, validation, or completion evidence |
 | `README.md` | User-facing package behavior, installation, commands, security boundaries, and support contract |
 | `workflow/WORKFLOW.md` | Package-owned managed-workflow process defaults shipped to consumer repositories |
 | `workflow/templates/*.md` | Deterministic process scaffolding; templates do not establish product facts |
@@ -401,6 +408,11 @@ deferred, and skipped checks separately.
 | `package.json` | Package identity, support range, Pi entrypoint, Git-install lifecycle, payload inventory, and scripts |
 | `test/*.test.ts` | Executable behavioral and invariant documentation |
 | `scripts/` | Repository-owned validation, install, deployment, version, provider, platform, and release entrypoints |
+
+When a mission needs a stable frame (dual authority, comparison, or
+lock-understanding-before-code), that **task architecture spec** is a separate
+authorized file. It is not this document, not an execution plan, and not a
+TypeSafe audit. Continuity binds only execution plans.
 
 When documents disagree, inspect the artifact that owns the disputed claim and
 verify behavior against current code, tests, runtime evidence, and Git state.

@@ -57,8 +57,11 @@ test("WORKFLOW.md encodes onboarding and Continuity tool contracts", async () =>
 	for (const section of [
 		"## Agent Onboarding",
 		"## Continuity Tool Contract",
+		"## Working Loop",
 		"## Select The Work Shape",
 		"## Managed Preparation",
+		"## Repository Document Authority",
+		"### Document roles",
 		"## Validation And Completion",
 		"## Recovery",
 		"## Packaged Engineering Skills",
@@ -75,4 +78,8 @@ test("WORKFLOW.md encodes onboarding and Continuity tool contracts", async () =>
 	]) assert.ok(workflow.includes("`" + tool + "`"), `WORKFLOW must document ${tool}`);
 	assert.match(workflow, /skills\/README\.md/);
 	assert.match(workflow, /do not need `repository-harness` installed/);
+	assert.match(workflow, /Task architecture spec/);
+	assert.match(workflow, /docs\/audits\//);
+	assert.match(workflow, /must not become plan Result/);
+	assert.match(workflow, /Do not alias it to conversation/);
 });

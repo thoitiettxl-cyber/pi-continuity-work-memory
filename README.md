@@ -1,13 +1,13 @@
 # Pi Continuity + Work Memory
 
-One opt-in Pi package for versions `>=0.84.1 <0.86.0`, providing a Pi extension for branch-correct work continuity, a package-owned managed repository workflow, evidence-backed safe checkpoints, and scoped persistent learning memory, plus eleven global engineering skills adapted for the same authority and runtime contract.
+One opt-in Pi package for versions `>=0.86.0 <0.87.0`, providing a Pi extension for branch-correct work continuity, a package-owned managed repository workflow, evidence-backed safe checkpoints, and scoped persistent learning memory, plus eleven global engineering skills adapted for the same authority and runtime contract.
 
 The implementation combines clean architecture and transactional recovery, Pi compaction/session lifecycle handling, a package-owned workflow and template bundle, and a two-stage provider-backed memory pipeline. Consumer repositories do not need `repository-harness` installed, and the extension never invokes or installs it.
 
 ## Requirements
 
 - Node.js 22.19.0 or newer
-- Pi `>=0.84.1 <0.86.0`
+- Pi `>=0.86.0 <0.87.0`
 - Built-in `node:sqlite`; no native SQLite npm addon
 - Git for verified safe checkpoints
 - Network access to the reviewed Git source and npm registry/cache for Git installation
@@ -400,14 +400,16 @@ Only TUI mode calls status/notification APIs. RPC, JSON, and print modes do not 
 ## Validation
 
 ```sh
-npm ci
-npm run validate
+bun install
+bun run validate
 scripts/validate-premerge.sh
 git diff --check
 ```
 
-`npm run validate` includes `npm run validate:git-install`, which can also be
-run separately. This proof serves a clean temporary Git source
+`bun run validate` includes `validate:git-install`, which can also be
+run separately. For npm-only environments, `npm install` and `npm run …`
+still work; `bun.lock` is the reproducible CI lockfile (regenerate
+`package-lock.json` only when you need npm-compat offline installs). This proof serves a clean temporary Git source
 over loopback, runs Pi's real `install git:...` command with its default
 `npm install --omit=dev` lifecycle, verifies the managed checkout and commands,
 then advances the source and proves `pi update --extensions` cleans and rebuilds
@@ -420,7 +422,7 @@ Additional executable proofs:
 # Validate an explicit supported Pi binary and report its actual version
 PI_VALIDATION_PI=/absolute/path/to/pi node scripts/validate-install.mjs
 
-# Requires Alpine Linux 3.24 ARM64, Node >=22.19.0, and Pi >=0.84.1 <0.86.0
+# Requires Alpine Linux 3.24 ARM64, Node >=22.19.0, and Pi >=0.86.0 <0.87.0
 PI_VALIDATION_PI=/absolute/path/to/pi scripts/validate-alpine-arm64.sh
 
 # Requires a credential-configured Pi directory and the actual target model
@@ -429,7 +431,7 @@ PI_PROVIDER_PROOF_MODEL=provider/model \
 node scripts/validate-provider.mjs
 ```
 
-The lockfile pins Pi 0.84.1 as the lower-bound development dependency. Host
+The Bun lockfile pins Pi 0.86.0 as the development dependency (peer range `>=0.86.0 <0.87.0`). Host
 proofs use PATH `pi` unless `PI_VALIDATION_PI` (or `PI_PROVIDER_PROOF_PI` for
 provider proof) names another binary in the peer range. Nested
 `node_modules/.bin/pi` is not treated as the live system. Proofs that reach a Pi

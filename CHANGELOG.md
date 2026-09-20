@@ -18,6 +18,8 @@
 
 ### Changed
 
+- Raised supported Pi peer range to `>=0.86.0 <0.87.0` and pinned development `@earendil-works/pi-{ai,coding-agent,tui}` to `0.86.0`. Standardized on Bun `1.4.2` (`packageManager`, `bun.lock` as CI truth) while keeping `prepare` npm-compatible for Pi Git-install omit-dev.
+
 - Instructed agents to set a bound plan to `Ready for completion` and call `continuity_finalize_work` in the same run once in-scope work, proof, and Result are recorded, without waiting for a second user request. Remaining in-scope delivery still keeps the plan active; `agent_settled` still never auto-finalizes.
 
 - Changed learning-memory search to rank every visible published record instead of a 500-record recency window, and budgeted `before_agent_start` injection from the selected model `contextWindow` using a labeled `ceil(chars/4)` estimate. Default and mid windows half-split the first atom share so long matches cannot drop baselines.

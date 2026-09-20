@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [dev-next, main, harden/**]
+    branches: [dev-next, main, harden/**, compat/**]
   pull_request:
     branches: [dev-next, main]
 
@@ -12,12 +12,13 @@ concurrency:
 
 jobs:
   test:
-    name: Node ${{ matrix.node-version }} — typecheck + test
+    name: Bun ${{ matrix.bun-version }} / Node ${{ matrix.node-version }} — typecheck + test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         node-version: ["22.19.0"]
+        bun-version: ["1.4.2"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,15 +27,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ matrix.bun-version }}
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Typecheck
-        run: npm run typecheck
+        run: bun run typecheck
 
       - name: Test
-        run: npm test
+        run: bun run test
 
       # validate:release needs a local Pi binary; omit until a stable CI Pi install exists.

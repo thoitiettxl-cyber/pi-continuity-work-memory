@@ -22,7 +22,7 @@ architecture, workflow, validation ladder, and documentation map.
 
 ## Implementation
 
-- Use Node.js `>=22.19.0`; run `npm ci` for a reproducible install. The supported Pi range is `>=0.84.1 <0.86.0`. Proofs must check the live system `pi` (PATH or `PI_VALIDATION_PI`), not a nested `node_modules` pin.
+- Use Node.js `>=22.19.0` and Bun `1.4.2` (`packageManager`). Prefer `bun install` / `bun run …` for a reproducible install (`bun.lock` is CI truth). `npm install` remains supported for Pi Git-install omit-dev (`prepare`). The supported Pi range is `>=0.86.0 <0.87.0`. Proofs must check the live system `pi` (PATH or `PI_VALIDATION_PI`), not a nested `node_modules` pin.
 - Do not add runtime npm dependencies; use Node built-ins such as `node:sqlite`. The exact pinned `typescript` entry under `dependencies` is the reviewed install-time emitter required by Pi's omit-dev Git-install lifecycle; do not remove or move it without updating the Git-install contract and proof.
 - Preserve the responsibilities described in `docs/ARCHITECTURE.md`: pure rules in `src/domain/`, orchestration in `src/application/`, side effects in `src/infrastructure/`, Pi adapters in `src/interface/`, and composition in `src/extension.ts`.
 - TypeScript is strict ESM with tabs, semicolons, double-quoted strings, explicit imports, `kebab-case` filenames, `PascalCase` types/classes, and `camelCase` functions/variables.
@@ -36,12 +36,12 @@ Repository gates are mutating even when used only as proof: `clean` and `validat
 
 Choose proof proportional to the change, then run every repository gate required by its scope:
 
-- `npm run typecheck` — strict TypeScript check.
-- `npm run build` — compile the extension and declarations to `dist/`.
-- `npm test` — serial unit and integration baseline.
-- `npm run validate` — clean, typecheck, build, tests, install proof, and release validation.
+- `bun run typecheck` — strict TypeScript check.
+- `bun run build` — compile the extension and declarations to `dist/`.
+- `bun run test` — serial unit and integration baseline.
+- `bun run validate` — clean, typecheck, build, tests, install proof, and release validation.
 - `scripts/validate-premerge.sh` — required premerge gate, including Pi checks and `git diff --check`.
-- `npm run release` — required when validating a distributable payload.
+- `bun run release` — required when validating a distributable payload.
 
 Always review the final diff and report passed, failed, deferred, and skipped checks separately. A required skipped or failing check is not a pass.
 

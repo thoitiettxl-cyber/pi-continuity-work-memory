@@ -29,6 +29,10 @@ Use Continuity tools as operational controls, not as a second system of record:
 
 Packaged skills must follow this table. Read-only skills and first-pass onboarding/audit must not call `continuity_prepare_work` merely because they loaded.
 
+### Optional TypeSafe judgment
+
+When the TypeSafe extension and skill `typesafe-ai` are installed, `typesafe_evaluate` (noul / choice / score) may inform bounded decisions. TypeSafe is optional selective judgment only; it must not replace `continuity_validate`, checkpoint, or prepare / bind / finalize authority. Prefer `/skill:typesafe-ai` when that skill is available. The `typesafe-extension-completion` surface is out-of-band meta for custom-provider extensions, not part of this product workflow.
+
 ## Select The Work Shape
 
 ### Read-only

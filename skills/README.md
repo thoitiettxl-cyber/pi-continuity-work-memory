@@ -77,6 +77,10 @@ Read-only skills (`code-review`) and explicit first-pass
 `onboard-repository` / `audit-onboarding-proposal` must not call
 `continuity_prepare_work` merely because they loaded.
 
+## TypeSafe interop
+
+Continuity packaged skills remain prompt-only engineering skills. TypeSafe is a separate judgment layer (`typesafe_evaluate` / skill `typesafe-ai`) when the typesafe extension and that skill are installed; it does not replace Continuity validate, checkpoint, or prepare / bind / finalize authority.
+
 The skills contain no executable helper, runtime dependency, native binary,
 desktop-browser assumption, transcript protocol, or Repository Harness runtime
 integration. See [UPSTREAM.md](UPSTREAM.md) for both source lineages, license

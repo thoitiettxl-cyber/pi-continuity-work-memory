@@ -11,5 +11,5 @@ fi
 export PI_VALIDATION_PI
 pi_version=$("$PI_VALIDATION_PI" --version)
 node scripts/pi-version.mjs "$pi_version" >/dev/null
-npm run validate
+bun run validate
 git diff --check -- .

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "RC6SourceLocalHardenCiValidated",
-  "generatedAt": "2026-09-17T13:13:33+07:00",
+  "generatedAt": "2026-09-20T06:41:35Z",
   "packageVersion": "1.0.0-rc.6",
   "worktree": "source-local harden/tests-rc6 on 1.0.0-rc.6: prior harden retained; added GitHub Actions CI (Node 22.19.0 npm ci/typecheck/test); real-provider memory remains explicitly DEFERRED; TypeSafe follow-up audit recorded",
   "environment": {
@@ -9,9 +9,11 @@
     "npm": "10.9.3",
     "sqlite": "node:sqlite",
     "platform": "Debian GNU/Linux 13 (trixie) x86_64",
-    "piLowerBound": "0.84.1",
-    "piCurrent": "0.84.1",
-    "piRange": ">=0.84.1 <0.86.0"
+    "piLowerBound": "0.86.0",
+    "piCurrent": "0.86.0",
+    "piRange": ">=0.86.0 <0.87.0",
+    "bun": "1.4.2",
+    "packageManager": "bun@1.4.2"
   },
   "pass": [
     {
@@ -60,8 +62,8 @@
       "npm run validate:release"
     ],
     "observations": {
-      "tests": "279/279",
-      "typecheck": "PASS",
+      "tests": "bun run test on Node v22.19.0: 282/282 serial tests passed after Pi 0.86.0 + bun migration.",
+      "typecheck": "bun run typecheck PASS against @earendil-works/pi-* 0.86.0",
       "build": "PASS via build:test / prepare git-install",
       "nodeConstraint": "engines node >=22.19.0; proof run used Node v22.19.0 (host previously Node 20)",
       "hardenedAreas": "continuity uncertain checkpoint block; memory agent-tool global-user gate + empty content; memory-context-budget estimatedTokenCount/separator/UTF-16 edges; tool-classifier ignored tools, local write/edit, shell-wrapper fail-closed, validation allow-list, git read globals; git-install proof identity alignment",
@@ -69,7 +71,8 @@
       "releaseStaticValidation": "PASS (npm run validate:release on Pi 0.84.1)",
       "engineeringSkills": "contract tests still expect eleven skills",
       "ciWorkflow": "PRESENT .github/workflows/ci.yml (typecheck+test; no validate:release)",
-      "realProviderMemory": "DEFERRED \u2014 not attempted in this PR; documented only"
+      "realProviderMemory": "DEFERRED \u2014 not attempted in this PR; documented only",
+      "evidence": "bun run typecheck PASS; bun run test 282/282 PASS; PI_VALIDATION_PI=/workspace/bin/pi bun run validate:install PASS (pi 0.86.0); validate:git-install PASS; validate:release PASS. Real-provider memory remains DEFERRED."
     },
     "notRevalidated": [
       "real-provider memory execution",

@@ -151,7 +151,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | Session-objective prompt policy | `test/canonical.test.ts`, `test/continuity.test.ts`, `src/domain/canonical.ts`, `src/application/continuity-service.ts` | `escapeXmlText` encodes `&` then `<` then `>`; `contextSummary` escapes dynamic interpolations, wraps a non-empty-after-trim goal once, and emits exactly one prompt-only policy kind (`bound-active`, `bound-completed`, `bound-unaligned`, or `goal-only`) without Goal tools, auto-continuation, or completion authority. | PASS in current source-local tests; provider compliance remains DEFERRED |
 | UX/non-interactive | `test/extension-mode.test.ts`, `test/context-pressure-extension.test.ts`, `node scripts/validate-install.mjs` | Namespaces/tools registered; exact short Continuity and context-pressure TUI labels; RPC/JSON/print never touch TUI APIs or receive governor context transformation. | PASS |
 | Execution plan browser | `test/plan-browser-files.test.ts`, `test/plan-browser-command.test.ts`, `test/plan-browser-ui.test.ts`, `src/interface/plan-browser.ts`, `src/infrastructure/execution-plan-files.ts` | Trusted idle TUI `/continuity plans [query]` lists bounded active/completed Markdown without creating directories; rejects symlink/nonregular/oversized/invalid files; re-reads identity/digest before drafting; Work/Refine append editor text without submit/bind/status change; completed plans cannot Work; RPC/JSON/print, untrusted, busy, and session/tree replacement stay inert. Live overlay chrome is component-tested, not a live-terminal recording. | PASS in current source-local tests plus observed isolated Pi 0.84.1 install, omit-dev Git-install load, release packaging, and premerge (`git diff --check`). Live TUI overlay remains unrecorded. |
-| Pi support matrix | `test/pi-version.test.ts`, `scripts/pi-version.mjs`, `scripts/validate-premerge.sh`, `scripts/validate-release.mjs` | Runtime range is `>=0.84.1 <0.86.0`; lower bound 0.84.1 and live 0.85.x pass; 0.86.0 fails with actionable range diagnostic; install/premerge/provider proofs skip nested `node_modules/.bin/pi` and check the live host (PATH/`PI_VALIDATION_PI`); reports show the actual host version. | PASS on live Pi 0.85.1 |
+| Pi support matrix | `test/pi-version.test.ts`, `scripts/pi-version.mjs`, `scripts/validate-premerge.sh`, `scripts/validate-release.mjs` | Runtime range is `>=0.86.0 <0.87.0`; lower bound 0.86.0 and live 0.86.x pass; 0.85.x and 0.87.0 fail with actionable range diagnostic; install/premerge/provider proofs skip nested `node_modules/.bin/pi` and check the live host (PATH/`PI_VALIDATION_PI`); reports show the actual host version. | PASS on live Pi 0.86.0 |
 | Alpine ARM64 matrix | `scripts/validate-alpine-arm64.sh` | Alpine 3.24, ARM64, Node >=22.19.0, supported Pi binary, and exact global-install proof. Wrong environment reports `DEFERRED`. | PASS on Alpine 3.24.1 aarch64, Pi 0.84.3 |
 | Release artifact | `node scripts/package-release.mjs` | Payload comes from `package.json.files`; checksum-bound workflow assets are included; exact staged payload installs; sanitized independent ZIP has exact inventory, `unzip -t`, SHA-256, and no stores/credentials/settings/.git/node_modules/target/logs. | PASS for the definitive clean-commit RC6 archive: 138 files, exact staged install, `unzip -t` PASS, SHA-256 `8e85b9fce05be8dec0508630dc7ceac63d63f6ab6362f645e5b0b2c7ac3f399f`, GitHub prerelease publication, and checksum-pinned managed deployment |
 
@@ -183,7 +183,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 - Unit/integration/install/release gates: `PASS` only on zero exit status and
   asserted observations.
 - Version support: `PASS` only when the actual binary satisfies
-  `>=0.84.1 <0.86.0`; unsupported or malformed versions fail with the range.
+  `>=0.86.0 <0.87.0`; unsupported or malformed versions fail with the range.
 - Real provider: `PASS` only after an explicitly authorized configured provider
   publishes Stage 1 and Stage 2 with non-zero usage; otherwise `DEFERRED` or
   `FAIL`.
@@ -194,11 +194,11 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 
 ## Enforcement levels
 
-- Local validation entrypoints: `npm run validate` runs clean, typecheck,
+- Local validation entrypoints: `bun run validate` runs clean, typecheck,
   build, tests, install, Git-install, and release validation.
   `scripts/validate-premerge.sh` checks Node and Pi, runs that gate, and runs
   `git diff --check`. Recorded results above describe their reported runs;
   they do not establish a fresh PASS for the current worktree.
 - Optional hooks: none installed or required.
-- CI invocation: `.github/workflows/ci.yml` runs `npm ci`, `npm run typecheck`, and `npm test` on Node **22.19.0** for `pull_request`/`push` to `dev-next`/`main` and `push` to `harden/**`. `validate:release` stays local-only (requires a Pi binary).
+- CI invocation: `.github/workflows/ci.yml` runs `bun install --frozen-lockfile`, `bun run typecheck`, and `bun run test` with Bun **1.4.2** on Node **22.19.0** for `pull_request`/`push` to `dev-next`/`main` and `push` to `harden/**`/`compat/**`. `validate:release` stays local-only (requires a Pi binary).
 - Branch protection: unverified; no external repository policy was changed.

@@ -27,4 +27,4 @@ pi_version=$("$PI_VALIDATION_PI" --version)
 node "$project_root/scripts/pi-version.mjs" "$pi_version" >/dev/null
 
 node "$project_root/scripts/validate-install.mjs" --package "$project_root"
-printf '{"status":"PASS","platform":"Alpine Linux 3.24 ARM64","node":">=22.19.0","pi":"%s","piRange":">=0.84.1 <0.86.0"}\n' "$pi_version"
+printf '{"status":"PASS","platform":"Alpine Linux 3.24 ARM64","node":">=22.19.0","pi":"%s","piRange":">=0.86.0 <0.87.0"}\n' "$pi_version"

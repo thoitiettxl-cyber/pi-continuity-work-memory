@@ -31,7 +31,23 @@ Packaged skills must follow this table. Read-only skills and first-pass onboardi
 
 ### Optional TypeSafe judgment
 
-When the TypeSafe extension and skill `typesafe-ai` are installed, `typesafe_evaluate` (noul / choice / score) may inform bounded decisions. TypeSafe is optional selective judgment only; it must not replace `continuity_validate`, checkpoint, or prepare / bind / finalize authority. Prefer `/skill:typesafe-ai` when that skill is available. The `typesafe-extension-completion` surface is out-of-band meta for custom-provider extensions, not part of this product workflow.
+When the TypeSafe extension and skill `typesafe-ai` are installed, `typesafe_evaluate` (noul / choice / score) may inform bounded decisions **after evidence, after `continuity_prepare_work`, and before a branch choice**. If TypeSafe is absent, continue and record the assumption. TypeSafe is optional selective judgment only; it must not replace `continuity_validate`, checkpoint, or prepare / bind / finalize authority, and its scores must not become plan Result, Status, or checkpoint meaning.
+
+Calling `typesafe_evaluate` is an agent-issued mutation in managed mode: call `continuity_prepare_work` first. Do not call it during unprepared read-only work. There is no separate read-only TypeSafe path. Prefer `/skill:typesafe-ai` when that skill is available. The `typesafe-extension-completion` surface is out-of-band meta for custom-provider extensions, not part of this product workflow.
+
+## Working Loop
+
+Follow this sequence. Skills and TypeSafe do not replace it.
+
+1. **Orient** — Load applicable `AGENTS.md`, inspect the worktree, and read only the architecture and decision docs the request needs.
+2. **Evidence** — Establish facts from repository files, code, tests, runtime behavior, and Git. Learning memory, leftover plan Status, TypeSafe scores, and audit dumps are not task truth.
+3. **Prepare when mutating** — Call `continuity_prepare_work` before the first agent repository mutation, including before `typesafe_evaluate`. Read-only work that stays read-only skips this step and skips TypeSafe. Bounded work creates no lifecycle document. Durable work uses exactly one execution plan. Ambiguous or missing authority creates nothing and blocks mutation.
+4. **Optional TypeSafe slot** — After prepare, before a bounded branch (scope, routing, or scoring), `typesafe_evaluate` may inform the choice when TypeSafe is installed. If it is absent, continue and record the assumption. Skip this slot when staying read-only. The call never becomes Result, Status, finalize, or checkpoint authority.
+5. **Implement** — Change only the authorized target. Do not invent a second lifecycle document type.
+6. **Prove** — Use repository-appropriate executable or observable evidence. Plans, checklists, TypeSafe answers, audit dumps, memory, and checkpoints are not behavior proof.
+7. **Complete** — For bound durable work, when the in-scope outcome is done, proof is recorded, and Result is not pending, set Status to Ready for completion and call `continuity_finalize_work` in the same run. `continuity_checkpoint` records repository/operation safety only.
+
+A file under `docs/plans/active/` is current only while Continuity is bound to it or the user names that path.
 
 ## Select The Work Shape
 
@@ -69,6 +85,20 @@ The managed mutation gate applies to agent-issued repository tools. A direct use
 Once an execution plan is created or bound, the repository file owns durable task truth. Continuity stores only its work-item identity, path, template version, digest, phase, and operational resume hint. Do not copy the plan, durable decisions, validation claims, or completion status into Continuity or learning memory.
 
 When repository content changes, repository content wins. Re-read and explicitly rebind it. Recovery never restores an older template over the repository, recreates a missing file, or replays an uncertain write.
+
+### Document roles
+
+Do not conflate these artifacts when they exist:
+
+| Artifact | Role |
+| --- | --- |
+| Package architecture map (`docs/ARCHITECTURE.md` in this repository; the consumer's equivalent otherwise) | Contributor/package structure, workflow, and documentation map. **Not** a task-session architecture spec. |
+| Task architecture spec | Optional stable frame for **one mission** (dual-authority comparison, or lock-understanding-before-code). Not a managed-workflow lifecycle document; Continuity never binds it; do not merge it into the package architecture map. Create it only when the user authorizes that file and path. |
+| Execution plan (`docs/plans/active/`, then `docs/plans/completed/`) | Durable task truth while bound or explicitly named. Leftover Status is display data and does not authorize resume, finalize, or success claims. |
+| TypeSafe audit dump (`docs/audits/` when a repository keeps one) | Request/raw/summary evidence of a judgment. Not a plan, not architecture, not completion. |
+| Design proposal (`docs/proposals/`) | Design history. Implementation status does not make it a plan or runtime contract. |
+
+`continuity_checkpoint` is verified repository/operation safety. Do not alias it to conversation `checkpoint` / `rewind` tools from other packages.
 
 ## Validation And Completion
 

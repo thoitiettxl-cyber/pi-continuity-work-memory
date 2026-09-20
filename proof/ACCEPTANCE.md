@@ -5,6 +5,14 @@ complete only when every mandatory row has an observed `PASS`. Missing authority
 credentials, target hardware, or external proof remains `DEFERRED` rather than
 being inferred from source or prior artifacts.
 
+## Current RC7 Pi 0.86 host-behavior (PR #3)
+
+`PASS (source-local premerge)` — package identity is **1.0.0-rc.7**. Host contract is Pi **`>=0.86.0 <0.87.0`**. `before_agent_start` injects Continuity, managed workflow, and learning memory through `systemPromptOptions.sections` and must not return `{ systemPrompt }` or set `forceSystemPrompt`.
+
+Observed on Ubuntu **24.04.5 LTS** aarch64 with Node **v22.19.0**, Bun **1.4.2**, live Pi **0.86.0** (`PI_VALIDATION_PI=/root/.bun/bin/pi`): `bun run typecheck`; `bun run test` **283/283**; `validate:install` PASS (11 skills); `validate:git-install` PASS (omit-dev managed checkout + update rebuild); `validate:release` PASS; `git diff --check`; wrapped by `scripts/validate-premerge.sh`. Host `/usr/local/bin/node` is a Bun shim and was not used as the test runner.
+
+Do not treat historical RC6 Alpine Pi 0.84.3, historical RC6 GitHub prerelease, or real-provider memory as a current PASS. Alpine ARM64 remains **historical / not applicable** for RC7 (script kept; not run; not PASS). Real-provider memory remains **DEFERRED**. Details: `proof/RESULTS.json`.
+
 ## Current source-local harden (tests + proof refresh)
 
 `PASS (source-local harden/tests-rc6)` — on Node **v22.19.0**, branch `harden/tests-rc6`,
@@ -152,7 +160,7 @@ See `RESULTS.json` and `../RECONSTRUCTION_NOTES.md`.
 | UX/non-interactive | `test/extension-mode.test.ts`, `test/context-pressure-extension.test.ts`, `node scripts/validate-install.mjs` | Namespaces/tools registered; exact short Continuity and context-pressure TUI labels; RPC/JSON/print never touch TUI APIs or receive governor context transformation. | PASS |
 | Execution plan browser | `test/plan-browser-files.test.ts`, `test/plan-browser-command.test.ts`, `test/plan-browser-ui.test.ts`, `src/interface/plan-browser.ts`, `src/infrastructure/execution-plan-files.ts` | Trusted idle TUI `/continuity plans [query]` lists bounded active/completed Markdown without creating directories; rejects symlink/nonregular/oversized/invalid files; re-reads identity/digest before drafting; Work/Refine append editor text without submit/bind/status change; completed plans cannot Work; RPC/JSON/print, untrusted, busy, and session/tree replacement stay inert. Live overlay chrome is component-tested, not a live-terminal recording. | PASS in current source-local tests plus observed isolated Pi 0.84.1 install, omit-dev Git-install load, release packaging, and premerge (`git diff --check`). Live TUI overlay remains unrecorded. |
 | Pi support matrix | `test/pi-version.test.ts`, `scripts/pi-version.mjs`, `scripts/validate-premerge.sh`, `scripts/validate-release.mjs` | Runtime range is `>=0.86.0 <0.87.0`; lower bound 0.86.0 and live 0.86.x pass; 0.85.x and 0.87.0 fail with actionable range diagnostic; install/premerge/provider proofs skip nested `node_modules/.bin/pi` and check the live host (PATH/`PI_VALIDATION_PI`); reports show the actual host version. | PASS on live Pi 0.86.0 |
-| Alpine ARM64 matrix | `scripts/validate-alpine-arm64.sh` | Alpine 3.24, ARM64, Node >=22.19.0, supported Pi binary, and exact global-install proof. Wrong environment reports `DEFERRED`. | PASS on Alpine 3.24.1 aarch64, Pi 0.84.3 |
+| Alpine ARM64 matrix | `scripts/validate-alpine-arm64.sh` | Alpine 3.24, ARM64, Node >=22.19.0, supported Pi binary, and exact global-install proof. Wrong environment reports `DEFERRED`. | Historical RC5 PASS on Alpine 3.24.1 aarch64, Pi 0.84.3. **Not applicable for RC7** — script retained; not run; not a current PASS. |
 | Release artifact | `node scripts/package-release.mjs` | Payload comes from `package.json.files`; checksum-bound workflow assets are included; exact staged payload installs; sanitized independent ZIP has exact inventory, `unzip -t`, SHA-256, and no stores/credentials/settings/.git/node_modules/target/logs. | PASS for the definitive clean-commit RC6 archive: 138 files, exact staged install, `unzip -t` PASS, SHA-256 `8e85b9fce05be8dec0508630dc7ceac63d63f6ab6362f645e5b0b2c7ac3f399f`, GitHub prerelease publication, and checksum-pinned managed deployment |
 
 ## Authority and reliability invariants

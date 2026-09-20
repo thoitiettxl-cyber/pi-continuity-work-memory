@@ -272,11 +272,11 @@ for (const mode of ["tui", "rpc", "json", "print"] as const) {
 				type: "before_agent_start",
 				prompt: "needle",
 				systemPrompt: "base",
-				systemPromptOptions: { contextFiles: [] },
+				systemPromptOptions: { contextFiles: [] as Array<{ path: string; content?: string }>, sections: {} as Record<string, string> },
 			};
 			(runtime.ctx as { model: { contextWindow: number } }).model = { contextWindow: 16_384 };
-			const smallResult = await emit(runtime, "before_agent_start", event) as { systemPrompt?: string };
-			const small = memoryBlock(smallResult.systemPrompt ?? "");
+			assert.equal(await emit(runtime, "before_agent_start", event), undefined);
+			const small = memoryBlock(event.systemPromptOptions.sections["persistent-memory"] ?? "");
 			assert.ok(small.length > 0);
 			assert.ok(small.length <= 8_192);
 			assert.match(small, /useful-baseline-marker/);
@@ -285,13 +285,13 @@ for (const mode of ["tui", "rpc", "json", "print"] as const) {
 			assert.ok(small.startsWith("<persistent-memory authority=\"learning-only\">"));
 			assert.ok(small.endsWith("</persistent-memory>"));
 			(runtime.ctx as { model: { contextWindow: number } }).model = { contextWindow: 32_768 };
-			const midResult = await emit(runtime, "before_agent_start", event) as { systemPrompt?: string };
-			const mid = memoryBlock(midResult.systemPrompt ?? "");
+			assert.equal(await emit(runtime, "before_agent_start", event), undefined);
+			const mid = memoryBlock(event.systemPromptOptions.sections["persistent-memory"] ?? "");
 			assert.ok(mid.length <= 16_384);
 			assert.ok(mid.length > small.length);
 			(runtime.ctx as { model: { contextWindow: number } }).model = { contextWindow: 128_000 };
-			const largeResult = await emit(runtime, "before_agent_start", event) as { systemPrompt?: string };
-			const large = memoryBlock(largeResult.systemPrompt ?? "");
+			assert.equal(await emit(runtime, "before_agent_start", event), undefined);
+			const large = memoryBlock(event.systemPromptOptions.sections["persistent-memory"] ?? "");
 			assert.ok(large.length <= 64_000);
 			assert.ok(large.length > mid.length);
 			await emit(runtime, "session_shutdown", { type: "session_shutdown", reason: "quit" });

@@ -1,97 +1,74 @@
 {
   "schemaVersion": 1,
-  "status": "RC6SourceLocalHardenCiValidated",
-  "generatedAt": "2026-09-20T06:41:35Z",
-  "packageVersion": "1.0.0-rc.6",
-  "worktree": "source-local harden/tests-rc6 on 1.0.0-rc.6: prior harden retained; added GitHub Actions CI (Node 22.19.0 npm ci/typecheck/test); real-provider memory remains explicitly DEFERRED; TypeSafe follow-up audit recorded",
+  "status": "RC7Pi086HostBehaviorPremergeValidated",
+  "generatedAt": "2026-09-20T08:06:29.000Z",
+  "packageVersion": "1.0.0-rc.7",
+  "worktree": "compat/pi-0.86-bun host-behavior: before_agent_start injects via systemPromptOptions.sections; identity 1.0.0-rc.7; peer >=0.86.0 <0.87.0; Alpine historical/not applicable; real-provider DEFERRED",
   "environment": {
     "node": "v22.19.0",
-    "npm": "10.9.3",
     "sqlite": "node:sqlite",
-    "platform": "Debian GNU/Linux 13 (trixie) x86_64",
+    "platform": "Linux 6.12.23-android16-OP-WILD aarch64 (Ubuntu 24.04.5 LTS)",
     "piLowerBound": "0.86.0",
     "piCurrent": "0.86.0",
     "piRange": ">=0.86.0 <0.87.0",
     "bun": "1.4.2",
-    "packageManager": "bun@1.4.2"
+    "packageManager": "bun@1.4.2",
+    "piBinary": "/root/.bun/bin/pi"
   },
   "pass": [
-    {
-      "gate": "source-local npm test harden",
-      "evidence": "npm test on Node v22.19.0: 279/279 serial tests passed after CI contract test. npm run typecheck PASS. Prior validate:release PASS on Pi 0.84.1 remains historical for this refresh."
-    },
-    {
-      "gate": "github-actions CI workflow",
-      "evidence": ".github/workflows/ci.yml added: Node 22.19.0, npm ci, npm run typecheck, npm test on pull_request/push to dev-next|main and push to harden/**. validate:release omitted (Pi binary). Contract test asserts workflow shape."
-    },
-    {
-      "gate": "proof identity alignment",
-      "evidence": "proof/RESULTS.json packageVersion matches package.json 1.0.0-rc.6; install-contract test asserts engines >=22.19.0, peer Pi range, eleven skills, and release payload proof files."
-    },
-    {
-      "gate": "historical RC6 release and deployment",
-      "evidence": "Prior RC6 delivery remains documented in proof/ACCEPTANCE.md (commit 1140be1, ZIP SHA-256 8e85b9fce05be8dec0508630dc7ceac63d63f6ab6362f645e5b0b2c7ac3f399f, GitHub prerelease v1.0.0-rc.6). This RESULTS refresh does not re-claim Alpine, real-provider, or managed-deploy as freshly observed."
-    },
-    {
-      "gate": "historical RC5 candidate validation",
-      "evidence": "Immutable RC5 evidence remains historical (152/152 era RESULTS content superseded for packageVersion identity only)."
-    },
-    {
-      "gate": "historical RC2 modified-source real provider",
-      "evidence": "Historical RC2 evidence only; provider runtime unchanged; not rerun for this harden pass."
-    }
+    "bun run typecheck",
+    "bun run test (283/283, node:test via Node v22.19.0)",
+    "bun run validate:install (Pi 0.86.0, 11 skills, workflow assets verified)",
+    "bun run validate:git-install (omit-dev managed checkout, prepareBuild, isolated Pi load, git update rebuild)",
+    "bun run validate:release (static release validation on Node v22.19.0 / Pi 0.86.0)",
+    "git diff --check",
+    "scripts/validate-premerge.sh wrapping bun run validate"
   ],
   "deferred": [
-    "real-provider memory execution (historical RC2 only)",
-    "real-provider memory still DEFERRED this PR (scaffold only; no authorized live run)",
-    "Alpine Linux 3.24 ARM64 matrix revalidation on this host",
-    "isolated Pi Git-install / global-install proof on this worktree",
-    "fresh managed deployment / GitHub release republication"
+    "real-provider memory execution (scaffold/MemoryProviderDeferredError only; no authorized live run)",
+    "Alpine Linux 3.24 ARM64 matrix (historical RC5 on Pi 0.84.3 only; not a live RC7 gate; script retained)",
+    "GitHub prerelease republication and managed user deploy"
   ],
-  "pendingDelivery": [
-    "optional validate:install / validate:git-install on this worktree",
-    "optional validate:release in CI once a stable Pi binary install path exists"
-  ],
+  "pendingDelivery": [],
   "developmentValidation": {
-    "status": "PASS_SOURCE_LOCAL",
-    "generatedAt": "2026-09-17T13:13:33+07:00",
-    "scope": "harden/tests-rc6 source-local suite + CI workflow addition on 1.0.0-rc.6; TypeSafe follow-up after CI (overall ~1.99 RC solid; top risk memory_provider_deferred)",
+    "status": "PASS",
+    "generatedAt": "2026-09-20T08:06:29.000Z",
+    "scope": "PR #3 Pi 0.86 host-behavior on 1.0.0-rc.7 observed on this Ubuntu/Debian host",
     "commands": [
-      "npm test",
-      "npm run typecheck",
-      "npm run validate:release"
+      "bun run typecheck",
+      "bun run test",
+      "bun run validate:install",
+      "bun run validate:git-install",
+      "bun run validate:release",
+      "git diff --check"
     ],
     "observations": {
-      "tests": "bun run test on Node v22.19.0: 282/282 serial tests passed after Pi 0.86.0 + bun migration.",
-      "typecheck": "bun run typecheck PASS against @earendil-works/pi-* 0.86.0",
-      "build": "PASS via build:test / prepare git-install",
-      "nodeConstraint": "engines node >=22.19.0; proof run used Node v22.19.0 (host previously Node 20)",
-      "hardenedAreas": "continuity uncertain checkpoint block; memory agent-tool global-user gate + empty content; memory-context-budget estimatedTokenCount/separator/UTF-16 edges; tool-classifier ignored tools, local write/edit, shell-wrapper fail-closed, validation allow-list, git read globals; git-install proof identity alignment",
-      "piInstallProof": "NOT RERUN on this worktree",
-      "releaseStaticValidation": "PASS (npm run validate:release on Pi 0.84.1)",
-      "engineeringSkills": "contract tests still expect eleven skills",
-      "ciWorkflow": "PRESENT .github/workflows/ci.yml (typecheck+test; no validate:release)",
-      "realProviderMemory": "DEFERRED \u2014 not attempted in this PR; documented only",
-      "evidence": "bun run typecheck PASS; bun run test 282/282 PASS; PI_VALIDATION_PI=/workspace/bin/pi bun run validate:install PASS (pi 0.86.0); validate:git-install PASS; validate:release PASS. Real-provider memory remains DEFERRED."
+      "tests": "283/283 pass",
+      "typecheck": "PASS",
+      "piInstallProof": "PASS pi=0.86.0 skillsLoaded=11",
+      "gitInstallProof": "PASS gitSource managedCheckout defaultOmitDevInstall prepareBuild generatedEntrypoint isolatedPiLoad gitUpdateRebuild",
+      "releaseStaticValidation": "PASS node=v22.19.0 pi=0.86.0 workflowAssets=4 skills=11",
+      "realProviderMemory": "DEFERRED",
+      "alpineArm64": "historical / not applicable",
+      "evidence": "Observed scripts/validate-premerge.sh with PATH Node v22.19.0 and PI_VALIDATION_PI=/root/.bun/bin/pi. Host /usr/local/bin/node is a Bun shim (process.versions.node 26.3.0) and cannot run node --test; proof used official Node v22.19.0 linux-arm64."
     },
     "notRevalidated": [
       "real-provider memory execution",
       "Alpine ARM64",
-      "isolated global/Git install proofs",
-      "npm run release packaging",
-      "CI validate:release with Pi binary"
+      "GitHub release republication",
+      "managed user deploy"
     ],
-    "authority": "Applies to harden/tests-rc6 source-local tests plus addition of GitHub Actions CI and proof/audit doc updates for 1.0.0-rc.6. Does not claim fresh real-provider memory, Alpine, install, or release republication."
+    "authority": "Applies to the current uncommitted RC7 host-behavior worktree after local premerge. Does not authorize commit, push, merge, or publication."
   },
   "releaseIdentity": {
     "status": "selected",
-    "version": "1.0.0-rc.6",
-    "reason": "Package identity remains 1.0.0-rc.6; this commit hardens tests/proof freshness without advancing a new prerelease number."
+    "version": "1.0.0-rc.7",
+    "reason": "Peer drop plus before_agent_start section injection is breaking versus rc.6."
   },
   "previousRelease": {
-    "version": "1.0.0-rc.5",
-    "artifactSha256": "83d17834af73149e426e168709731321736d7e64b72dcd1ad4e40cde43fb8b4e",
-    "evidence": "Historical RC5 RESULTS identity retained for lineage; superseded packageVersion is 1.0.0-rc.6."
+    "version": "1.0.0-rc.6",
+    "artifactSha256": "8e85b9fce05be8dec0508630dc7ceac63d63f6ab6362f645e5b0b2c7ac3f399f",
+    "evidence": "Historical RC6 identity retained for lineage; current packageVersion is 1.0.0-rc.7."
   },
-  "policy": "Record observed source-local harden + CI workflow presence. Do not promote deferred provider/Alpine/install/release gates. Keep safety classifiers unchanged."
+  "policy": "Record only observed gates. Do not promote deferred provider/Alpine/publish/deploy."
 }

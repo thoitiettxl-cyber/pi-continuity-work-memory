@@ -33,7 +33,7 @@ test("package declares the clean Git-install build and validation contract", () 
 	assert.match(readme, /pi install git:github\.com\/thoitiettxl-cyber\/pi-continuity-work-memory/);
 });
 
-test("package engines, peer range, and proof identity stay aligned for RC6 install validation", () => {
+test("package engines, peer range, and proof identity stay aligned for RC7 install validation", () => {
 	const manifest = readJson("package.json") as {
 		version?: string;
 		engines?: { node?: string };
@@ -48,7 +48,7 @@ test("package engines, peer range, and proof identity stay aligned for RC6 insta
 	};
 	const acceptance = readFileSync(resolve(root, "proof/ACCEPTANCE.md"), "utf8");
 
-	assert.equal(manifest.version, "1.0.0-rc.6");
+	assert.equal(manifest.version, "1.0.0-rc.7");
 	assert.equal(manifest.engines?.node, ">=22.19.0");
 	assert.equal((manifest as { packageManager?: string }).packageManager, "bun@1.4.2");
 	assert.equal(manifest.peerDependencies?.["@earendil-works/pi-coding-agent"], ">=0.86.0 <0.87.0");
@@ -65,9 +65,8 @@ test("package engines, peer range, and proof identity stay aligned for RC6 insta
 		assert.ok(manifest.files?.includes(required), `missing release payload entry ${required}`);
 	}
 	assert.equal(results.packageVersion, manifest.version, "RESULTS.json packageVersion must match package.json");
-	assert.match(results.status ?? "", /RC6/);
-	assert.match(acceptance, /1\.0\.0-rc\.6/);
-	assert.match(acceptance, /harden\/tests-rc6|source-local harden/i);
+	assert.match(results.status ?? "", /RC7/);
+	assert.match(acceptance, /1\.0\.0-rc\.7/);
 });
 
 test("GitHub Actions CI runs bun typecheck and test on Node 22.19 PRs", () => {

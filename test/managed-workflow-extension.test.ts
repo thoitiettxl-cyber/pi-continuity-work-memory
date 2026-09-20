@@ -115,6 +115,52 @@ const durableParams = {
 	},
 };
 
+interface PromptOptionsLike {
+	contextFiles?: Array<{ path: string; content?: string }>;
+	sections?: Record<string, string>;
+	forceSystemPrompt?: string;
+}
+
+function injectedSections(event: { systemPromptOptions?: PromptOptionsLike }): Record<string, string> {
+	return event.systemPromptOptions?.sections ?? {};
+}
+
+test("before_agent_start injects Continuity through systemPromptOptions.sections and does not return systemPrompt", async () => {
+	const root = temporaryDirectory("managed-extension-sections");
+	await writeFile(join(root, "AGENTS.md"), "# Repository instructions\n", "utf8");
+	const oldContinuity = process.env.PI_CONTINUITY_HOME;
+	const oldMemory = process.env.PI_WORK_MEMORY_HOME;
+	process.env.PI_CONTINUITY_HOME = join(root, ".proof-continuity");
+	process.env.PI_WORK_MEMORY_HOME = join(root, ".proof-memory");
+	try {
+		const proof = runtime(root);
+		extension(proof.api);
+		await emit(proof, "session_start", { type: "session_start", reason: "startup" });
+		const event = {
+			type: "before_agent_start",
+			prompt: "Implement durable work",
+			systemPrompt: "base-prompt-must-remain-unreturned",
+			systemPromptOptions: {
+				contextFiles: [{ path: join(root, "AGENTS.md"), content: "# Repository instructions" }],
+			} as PromptOptionsLike,
+		};
+		const before = await emit(proof, "before_agent_start", event);
+		assert.equal(before[0], undefined);
+		assert.equal(event.systemPromptOptions.forceSystemPrompt, undefined);
+		assert.equal(event.systemPrompt, "base-prompt-must-remain-unreturned");
+		const sections = injectedSections(event);
+		assert.match(sections["continuity-work-state"] ?? "", /<continuity-work-state authority="external-extension-only">/);
+		assert.match(sections["managed-repository-workflow"] ?? "", /<managed-repository-workflow/);
+		assert.match(sections["managed-repository-workflow"] ?? "", /continuity_prepare_work/);
+		await emit(proof, "session_shutdown", { type: "session_shutdown", reason: "quit" });
+	} finally {
+		if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;
+		else process.env.PI_CONTINUITY_HOME = oldContinuity;
+		if (oldMemory === undefined) delete process.env.PI_WORK_MEMORY_HOME;
+		else process.env.PI_WORK_MEMORY_HOME = oldMemory;
+	}
+});
+
 test("trusted runtime loads package workflow, blocks unprepared mutation, and materializes one durable plan through public Pi APIs", async () => {
 	const root = temporaryDirectory("managed-extension-runtime");
 	await writeFile(join(root, "AGENTS.md"), "# Repository instructions\n", "utf8");
@@ -135,14 +181,16 @@ test("trusted runtime loads package workflow, blocks unprepared mutation, and ma
 		assert.equal(staleEligibility?.block, true);
 		assert.match(staleEligibility?.reason ?? "", /eligibility was not established/);
 
-		const before = await emit(proof, "before_agent_start", {
+		const startEvent = {
 			type: "before_agent_start",
 			prompt: "Implement durable work",
 			systemPrompt: "base",
-			systemPromptOptions: { contextFiles: [{ path: join(root, "AGENTS.md"), content: "# Repository instructions" }] },
-		});
-		assert.match(before[0]?.systemPrompt ?? "", /managed-repository-workflow/);
-		assert.match(before[0]?.systemPrompt ?? "", /continuity_prepare_work/);
+			systemPromptOptions: { contextFiles: [{ path: join(root, "AGENTS.md"), content: "# Repository instructions" }] } as PromptOptionsLike,
+		};
+		const before = await emit(proof, "before_agent_start", startEvent);
+		assert.equal(before[0], undefined);
+		assert.match(injectedSections(startEvent)["managed-repository-workflow"] ?? "", /managed-repository-workflow/);
+		assert.match(injectedSections(startEvent)["managed-repository-workflow"] ?? "", /continuity_prepare_work/);
 
 		const blocked = (await emit(proof, "tool_call", {
 			type: "tool_call",
@@ -358,14 +406,16 @@ test("before_agent_start conditions memory recall on the current event prompt", 
 		seed.close();
 		extension(proof.api);
 		await emit(proof, "session_start", { type: "session_start", reason: "startup" });
-		const before = await emit(proof, "before_agent_start", {
+		const recallEvent = {
 			type: "before_agent_start",
 			prompt: "find the needle",
 			systemPrompt: "base",
-			systemPromptOptions: { contextFiles: [{ path: join(root, "AGENTS.md"), content: "# Repository instructions" }] },
-		});
-		assert.match(before[0]?.systemPrompt ?? "", /needle query-conditioned repository atom/);
-		assert.doesNotMatch(before[0]?.systemPrompt ?? "", /unrelated formatting repository atom/);
+			systemPromptOptions: { contextFiles: [{ path: join(root, "AGENTS.md"), content: "# Repository instructions" }] } as PromptOptionsLike,
+		};
+		const before = await emit(proof, "before_agent_start", recallEvent);
+		assert.equal(before[0], undefined);
+		assert.match(injectedSections(recallEvent)["persistent-memory"] ?? "", /needle query-conditioned repository atom/);
+		assert.doesNotMatch(injectedSections(recallEvent)["persistent-memory"] ?? "", /unrelated formatting repository atom/);
 		await emit(proof, "session_shutdown", { type: "session_shutdown", reason: "quit" });
 	} finally {
 		if (oldContinuity === undefined) delete process.env.PI_CONTINUITY_HOME;

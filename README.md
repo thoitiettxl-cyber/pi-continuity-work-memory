@@ -56,7 +56,7 @@ the stable package path under Pi's agent directory:
 
 ```sh
 node scripts/manage-user-install.mjs deploy \
-  --archive release/pi-continuity-work-memory-1.0.0-rc.6.zip
+  --archive release/pi-continuity-work-memory-1.0.0-rc.7.zip
 ```
 
 Use this command only with a trusted release: verification executes the

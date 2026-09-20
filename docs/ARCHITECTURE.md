@@ -138,9 +138,12 @@ stay at the boundaries.
 
 ### Continuity Prompt Injection
 
-1. `before_agent_start` appends `ContinuityService.contextSummary()` to
-   `systemPrompt`. That string is the only injection caller for work-state
-   fields.
+1. `before_agent_start` writes Continuity, managed-workflow, and learning-memory
+   blocks into `event.systemPromptOptions.sections` under
+   `continuity-work-state`, `managed-repository-workflow`, and
+   `persistent-memory`. It does not return `systemPrompt` or set
+   `forceSystemPrompt`. `ContinuityService.contextSummary()` remains the only
+   injection caller for work-state fields.
 2. Dynamic interpolations are untrusted escaped text-node data. A goal that is
    non-empty after trim is wrapped once as `untrusted-objective`. Empty-after-trim
    goal stays `Goal: (unset)`.

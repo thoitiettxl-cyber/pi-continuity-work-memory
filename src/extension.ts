@@ -650,7 +650,15 @@ export default function extension(pi: ExtensionAPI): void {
 			)
 			: "";
 		const memoryPrompt = memory.contextPrompt(event.prompt, ctx.model?.contextWindow);
-		return { systemPrompt: `${event.systemPrompt}\n\n${continuity.contextSummary()}${workflowPrompt ? `\n\n${workflowPrompt}` : ""}${memoryPrompt ? `\n\n${memoryPrompt}` : ""}` };
+		const options = event.systemPromptOptions;
+		const sections = options.sections ?? (options.sections = {});
+		const summary = continuity.contextSummary();
+		if (summary) sections["continuity-work-state"] = summary;
+		else delete sections["continuity-work-state"];
+		if (workflowPrompt) sections["managed-repository-workflow"] = workflowPrompt;
+		else delete sections["managed-repository-workflow"];
+		if (memoryPrompt) sections["persistent-memory"] = memoryPrompt;
+		else delete sections["persistent-memory"];
 	});
 
 	pi.on("message_end", async (event, ctx) => {

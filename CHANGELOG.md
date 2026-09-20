@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Breaking
+
+- Dropped Pi `0.84.x` and `0.85.x`. The supported host range is `>=0.86.0 <0.87.0`.
+- `before_agent_start` injects Continuity, managed workflow, and learning memory through `systemPromptOptions.sections` and no longer returns `{ systemPrompt }` or sets `forceSystemPrompt`.
+
 ### Added
 
 - Added `/continuity plans [query]`, a trusted TUI-only browser for existing execution plans that fuzzy-searches active/completed Markdown, shows read-only detail, and appends Work/Refine editor drafts without submitting, binding, or changing plan status.
@@ -18,6 +23,7 @@
 
 ### Changed
 
+- Advanced the package prerelease identity to `1.0.0-rc.7` for Pi 0.86 host-behavior (section injection plus dropped 0.84/0.85 peers), preserving historical RC6 archive identity.
 - Raised supported Pi peer range to `>=0.86.0 <0.87.0` and pinned development `@earendil-works/pi-{ai,coding-agent,tui}` to `0.86.0`. Standardized on Bun `1.4.2` (`packageManager`, `bun.lock` as CI truth) while keeping `prepare` npm-compatible for Pi Git-install omit-dev.
 
 - Instructed agents to set a bound plan to `Ready for completion` and call `continuity_finalize_work` in the same run once in-scope work, proof, and Result are recorded, without waiting for a second user request. Remaining in-scope delivery still keeps the plan active; `agent_settled` still never auto-finalizes.

@@ -18,13 +18,13 @@ case "$(uname -m)" in
   *) echo '{"status":"DEFERRED","reason":"architecture is not ARM64"}'; exit 2 ;;
 esac
 
-node -e 'const [major,minor]=process.versions.node.split(".").map(Number); if (major<22 || (major===22 && minor<19)) process.exit(1)'
+bun -e 'const version = process.versions.bun || ""; const [major, minor, patch] = version.split(".").map(Number); if (major !== 1 || minor < 4 || (minor === 4 && patch < 2)) process.exit(1)'
 if [ -z "${PI_VALIDATION_PI:-}" ]; then
-  PI_VALIDATION_PI=$(node "$project_root/scripts/pi-version.mjs" --resolve)
+  PI_VALIDATION_PI=$(bun "$project_root/scripts/pi-version.mjs" --resolve)
 fi
 export PI_VALIDATION_PI
 pi_version=$("$PI_VALIDATION_PI" --version)
-node "$project_root/scripts/pi-version.mjs" "$pi_version" >/dev/null
+bun "$project_root/scripts/pi-version.mjs" "$pi_version" >/dev/null
 
-node "$project_root/scripts/validate-install.mjs" --package "$project_root"
-printf '{"status":"PASS","platform":"Alpine Linux 3.24 ARM64","node":">=22.19.0","pi":"%s","piRange":">=0.86.0 <0.87.0"}\n' "$pi_version"
+bun "$project_root/scripts/validate-install.mjs" --package "$project_root"
+printf '{"status":"PASS","platform":"Alpine Linux 3.24 ARM64","bun":">=1.4.2","pi":"%s","piRange":">=0.87.0 <0.88.0"}\n' "$pi_version"

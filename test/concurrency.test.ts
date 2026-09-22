@@ -29,10 +29,10 @@ store.close();
 	});
 }
 
-test("two Node/Pi processes sharing one store lose no records and surface no SQLITE_BUSY", async () => {
+test("two Bun processes sharing one store lose no records and surface no SQLITE_BUSY", async () => {
 	const root = temporaryDirectory("concurrency");
 	const database = join(root, "memory.sqlite");
-	const moduleUrl = pathToFileURL(resolve(".test-build/src/infrastructure/memory-store.js")).href;
+	const moduleUrl = pathToFileURL(resolve("src/infrastructure/memory-store.ts")).href;
 	await Promise.all([
 		runWriter(moduleUrl, database, "process-a", 150),
 		runWriter(moduleUrl, database, "process-b", 150),

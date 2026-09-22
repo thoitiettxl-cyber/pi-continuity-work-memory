@@ -4,6 +4,10 @@
 
 ### Breaking
 
+- Dropped Pi `0.86.x`. The supported host range is `>=0.87.0 <0.88.0`.
+- Provider-bound memory source follows Pi 0.87 canonical session context. `context_edit` omissions are not sent, replacements replace content, and `SessionManager.buildSessionProjection()` is used when the host provides it.
+- Deferred and pending memory-provider stops no longer become successful extracts.
+- Development, tests, and repository scripts run through Bun 1.4.2. The `node` binary is no longer required. Portable `node:` built-ins remain because Pi loads the extension, and `prepare` stays on npm for Pi Git-install.
 - Dropped Pi `0.84.x` and `0.85.x`. The supported host range is `>=0.86.0 <0.87.0`.
 - `before_agent_start` injects Continuity, managed workflow, and learning memory through `systemPromptOptions.sections` and no longer returns `{ systemPrompt }` or sets `forceSystemPrompt`.
 
@@ -24,6 +28,7 @@
 ### Changed
 
 - Documented the managed working loop in `workflow/WORKFLOW.md`: evidence, prepare-by-shape, optional TypeSafe slot after prepare, and four document roles so task architecture specs, TypeSafe audits, and execution plans are not conflated with `docs/ARCHITECTURE.md`.
+- Advanced the package prerelease identity to `1.0.0-rc.8` and pinned development Pi packages to `0.87.0` for the `>=0.87.0 <0.88.0` host window.
 - Advanced the package prerelease identity to `1.0.0-rc.7` for Pi 0.86 host-behavior (section injection plus dropped 0.84/0.85 peers), preserving historical RC6 archive identity.
 - Raised supported Pi peer range to `>=0.86.0 <0.87.0` and pinned development `@earendil-works/pi-{ai,coding-agent,tui}` to `0.86.0`. Standardized on Bun `1.4.2` (`packageManager`, `bun.lock` as CI truth) while keeping `prepare` npm-compatible for Pi Git-install omit-dev.
 

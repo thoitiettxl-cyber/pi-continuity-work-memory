@@ -118,6 +118,115 @@ function serializeEntry(entry: SessionEntry): unknown {
 	return { id: entry.id, parentId: entry.parentId, type: entry.type };
 }
 
+interface ProjectedContribution {
+	sourceEntry: SessionEntry;
+	messages: Array<{ role?: string; content?: unknown }>;
+}
+
+type ContextReplacement = { content: unknown } | null;
+
+function projectionById(ctx: ExtensionContext): Map<string, ProjectedContribution> | undefined {
+	const build = (ctx.sessionManager as { buildSessionProjection?: () => { entries?: ProjectedContribution[] } }).buildSessionProjection;
+	if (typeof build !== "function") return undefined;
+	const projection = build.call(ctx.sessionManager);
+	const byId = new Map<string, ProjectedContribution>();
+	for (const item of projection.entries ?? []) {
+		if (item?.sourceEntry?.id) byId.set(item.sourceEntry.id, item);
+	}
+	return byId;
+}
+
+function latestContextEdits(branch: readonly SessionEntry[]): Map<string, ContextReplacement> {
+	const edits = new Map<string, ContextReplacement>();
+	for (const entry of branch) {
+		if (entry.type !== "context_edit") continue;
+		edits.set(entry.targetId, entry.replacement);
+	}
+	return edits;
+}
+
+function editRequiresResync(branch: readonly SessionEntry[], start: number): boolean {
+	if (start <= 1) return false;
+	for (let index = start; index < branch.length; index += 1) {
+		const entry = branch[index];
+		if (!entry || entry.type !== "context_edit") continue;
+		const targetIndex = branch.findIndex((candidate) => candidate.id === entry.targetId);
+		if (targetIndex >= 0 && targetIndex < start - 1) return true;
+	}
+	return false;
+}
+
+function omissionRecord(entry: SessionEntry): unknown {
+	return {
+		id: entry.id,
+		parentId: entry.parentId,
+		type: "context_omission",
+		targetId: entry.id,
+		omitted: true,
+	};
+}
+
+function replacedMessage(entry: Extract<SessionEntry, { type: "message" }>, content: unknown): SessionEntry {
+	const role = (entry.message as { role?: unknown }).role;
+	const normalized = (role === "assistant" || role === "toolResult") && typeof content === "string"
+		? [{ type: "text", text: content }]
+		: content;
+	return { ...entry, message: { ...entry.message, content: normalized } } as SessionEntry;
+}
+
+function serializeProjected(entry: SessionEntry, messages: Array<{ role?: string; content?: unknown }>): unknown {
+	const first = messages[0];
+	if (messages.length === 1 && entry.type === "message" && first) {
+		return serializeEntry({ ...entry, message: first } as SessionEntry);
+	}
+	if (messages.length === 1 && entry.type === "custom_message") {
+		return {
+			id: entry.id,
+			parentId: entry.parentId,
+			type: "custom_message",
+			customType: entry.customType,
+			display: entry.display,
+			content: sanitizeValue(first?.content),
+		};
+	}
+	return {
+		id: entry.id,
+		parentId: entry.parentId,
+		type: entry.type,
+		messages: sanitizeValue(messages),
+	};
+}
+
+function serializeProviderEntry(
+	entry: SessionEntry,
+	projection: Map<string, ProjectedContribution> | undefined,
+	edits: Map<string, ContextReplacement>,
+): unknown {
+	if (projection) {
+		const projected = projection.get(entry.id);
+		if (!projected) return undefined;
+		if (projected.messages.length > 0) return serializeProjected(entry, projected.messages);
+		if (entry.type === "message" || entry.type === "custom_message") return omissionRecord(entry);
+		return serializeEntry(entry);
+	}
+	if (entry.type === "context_edit") return undefined;
+	if (!edits.has(entry.id)) return serializeEntry(entry);
+	const replacement = edits.get(entry.id) ?? null;
+	if (replacement === null) return omissionRecord(entry);
+	if (entry.type === "message") return serializeEntry(replacedMessage(entry, replacement.content));
+	if (entry.type === "custom_message") {
+		return {
+			id: entry.id,
+			parentId: entry.parentId,
+			type: "custom_message",
+			customType: entry.customType,
+			display: entry.display,
+			content: sanitizeValue(replacement.content),
+		};
+	}
+	return serializeEntry(entry);
+}
+
 function boundedEntry(value: unknown): { value: unknown; json: string } {
 	const json = JSON.stringify(value);
 	if (json.length <= PROVIDER_ENTRY_MAX_CHARS) return { value, json };
@@ -177,8 +286,14 @@ export function memorySource(ctx: ExtensionContext, afterEntryId?: string | null
 		if (index >= 0) start = index + 1;
 		else resync = true;
 	}
+	// Pi 0.87 model context is the session projection, not the raw branch.
+	const projection = projectionById(ctx);
+	const edits = projection ? new Map<string, ContextReplacement>() : latestContextEdits(branch);
+	if (!resync && editRequiresResync(branch, start)) resync = true;
 	const selected = resync || start === 0 ? branch : branch.slice(Math.max(0, start - 1));
-	const serialized = selected.map(serializeEntry).filter((value) => value !== undefined);
+	const serialized = selected
+		.map((entry) => serializeProviderEntry(entry, projection, edits))
+		.filter((value) => value !== undefined);
 	const text = sanitizeProviderBoundText(boundedSource(serialized), PROVIDER_SOURCE_MAX_CHARS, privatePaths);
 	const newEntries = resync ? branch : branch.slice(start);
 	return {

@@ -43,7 +43,8 @@ function walk(path) {
 	});
 }
 
-if (manifest.engines?.node !== ">=22.19.0") failures.push("Node engine must be >=22.19.0");
+if (manifest.engines?.bun !== ">=1.4.2") failures.push("Bun engine must be >=1.4.2");
+if (manifest.packageManager !== "bun@1.4.2") failures.push("packageManager must be bun@1.4.2");
 if (manifest.peerDependencies?.["@earendil-works/pi-coding-agent"] !== SUPPORTED_PI_RANGE) failures.push(`Pi coding-agent peer range must be ${SUPPORTED_PI_RANGE}`);
 if (manifest.peerDependencies?.["@earendil-works/pi-ai"] !== SUPPORTED_PI_RANGE) failures.push(`Pi AI peer range must be ${SUPPORTED_PI_RANGE}`);
 const expectedBuildDependencies = { typescript: "5.9.3" };

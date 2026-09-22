@@ -42,8 +42,8 @@ function fail(message) {
 
 function usage() {
 	return `Usage:
-  node scripts/manage-user-install.mjs deploy (--archive <zip> | --package <directory>) [options]
-  node scripts/manage-user-install.mjs remove [options]
+  bun scripts/manage-user-install.mjs deploy (--archive <zip> | --package <directory>) [options]
+  bun scripts/manage-user-install.mjs remove [options]
 
 Options:
   --agent-dir <path>           Pi user agent directory (default: PI_CODING_AGENT_DIR or ~/.pi/agent)

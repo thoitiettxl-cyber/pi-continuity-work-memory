@@ -18,7 +18,7 @@ import { pathToFileURL } from "node:url";
 
 import { temporaryDirectory } from "./helpers.js";
 
-const projectRoot = resolve(import.meta.dirname, "..", "..");
+const projectRoot = resolve(import.meta.dirname, "..");
 const managerScript = resolve(projectRoot, "scripts", "manage-user-install.mjs");
 const pi = resolve(projectRoot, "node_modules", ".bin", process.platform === "win32" ? "pi.cmd" : "pi");
 const expectedSkills = ["audit-onboarding-proposal", "code-review", "codebase-design", "contract-first", "diagnosing-bugs", "domain-modeling", "encode-invariant", "grill-with-docs", "improve-harness", "onboard-repository", "tdd"];

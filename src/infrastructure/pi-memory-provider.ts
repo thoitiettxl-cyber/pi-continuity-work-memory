@@ -56,6 +56,13 @@ const REASONING_EFFORT_APIS = new Set([
 	"openai-responses",
 ]);
 
+function providerStopError(stage: string, response: { stopReason: string; errorMessage?: string | null }): Error {
+	if (response.stopReason === "deferred" || response.stopReason === "pending") {
+		return new MemoryProviderDeferredError(`Stage ${stage} provider stop is ${response.stopReason}`);
+	}
+	return new Error(response.errorMessage || `Stage ${stage} stopped: ${response.stopReason}`);
+}
+
 function completionOptions(ctx: ExtensionContext, model: NonNullable<ExtensionContext["model"]>, signal: AbortSignal) {
 	const clampedThinkingLevel = model.reasoning && REASONING_EFFORT_APIS.has(model.api)
 		? clampThinkingLevel(model, ctx.thinkingLevel ?? "off")
@@ -106,8 +113,8 @@ ${input.sourceText}
 			const response = await ctx.modelRegistry.complete(model, {
 				messages: [{ role: "user", content: [{ type: "text", text: prompt }], timestamp: Date.now() }],
 			}, completionOptions(ctx, model, signal));
-			if (response.stopReason === "error" || response.stopReason === "aborted") {
-				throw new Error(response.errorMessage || `Stage 1 stopped: ${response.stopReason}`);
+			if (response.stopReason === "error" || response.stopReason === "aborted" || response.stopReason === "deferred" || response.stopReason === "pending") {
+				throw providerStopError("1", response);
 			}
 			const root = parseJsonObject(textContent(response.content));
 			const candidates = Array.isArray(root.memories) ? root.memories : [];
@@ -151,8 +158,8 @@ ${JSON.stringify(input.records)}`;
 			const response = await ctx.modelRegistry.complete(model, {
 				messages: [{ role: "user", content: [{ type: "text", text: prompt }], timestamp: Date.now() }],
 			}, completionOptions(ctx, model, signal));
-			if (response.stopReason === "error" || response.stopReason === "aborted") {
-				throw new Error(response.errorMessage || `Stage 2 stopped: ${response.stopReason}`);
+			if (response.stopReason === "error" || response.stopReason === "aborted" || response.stopReason === "deferred" || response.stopReason === "pending") {
+				throw providerStopError("2", response);
 			}
 			const root = parseJsonObject(textContent(response.content));
 			const candidates = Array.isArray(root.baselines) ? root.baselines : [];

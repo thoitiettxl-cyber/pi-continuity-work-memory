@@ -1,13 +1,13 @@
 # Pi Continuity + Work Memory
 
-One opt-in Pi package for versions `>=0.86.0 <0.87.0`, providing a Pi extension for branch-correct work continuity, a package-owned managed repository workflow, evidence-backed safe checkpoints, and scoped persistent learning memory, plus eleven global engineering skills adapted for the same authority and runtime contract.
+One opt-in Pi package for versions `>=0.87.0 <0.88.0`, providing a Pi extension for branch-correct work continuity, a package-owned managed repository workflow, evidence-backed safe checkpoints, and scoped persistent learning memory, plus eleven global engineering skills adapted for the same authority and runtime contract.
 
 The implementation combines clean architecture and transactional recovery, Pi compaction/session lifecycle handling, a package-owned workflow and template bundle, and a two-stage provider-backed memory pipeline. Consumer repositories do not need `repository-harness` installed, and the extension never invokes or installs it.
 
 ## Requirements
 
-- Node.js 22.19.0 or newer
-- Pi `>=0.86.0 <0.87.0`
+- Bun 1.4.2 or newer
+- Pi `>=0.87.0 <0.88.0`
 - Built-in `node:sqlite`; no native SQLite npm addon
 - Git for verified safe checkpoints
 - Network access to the reviewed Git source and npm registry/cache for Git installation
@@ -55,8 +55,8 @@ keep the development checkout separate and deploy a verified release payload to
 the stable package path under Pi's agent directory:
 
 ```sh
-node scripts/manage-user-install.mjs deploy \
-  --archive release/pi-continuity-work-memory-1.0.0-rc.7.zip
+bun scripts/manage-user-install.mjs deploy \
+  --archive release/pi-continuity-work-memory-1.0.0-rc.8.zip
 ```
 
 Use this command only with a trusted release: verification executes the
@@ -84,7 +84,7 @@ To unregister the package while retaining both the managed runtime and the
 persistent stores:
 
 ```sh
-node scripts/manage-user-install.mjs remove
+bun scripts/manage-user-install.mjs remove
 ```
 
 Pass `--remove-runtime` only when the runtime directory should also be moved
@@ -420,18 +420,18 @@ Additional executable proofs:
 
 ```sh
 # Validate an explicit supported Pi binary and report its actual version
-PI_VALIDATION_PI=/absolute/path/to/pi node scripts/validate-install.mjs
+PI_VALIDATION_PI=/absolute/path/to/pi bun scripts/validate-install.mjs
 
-# Requires Alpine Linux 3.24 ARM64, Node >=22.19.0, and Pi >=0.86.0 <0.87.0
+# Requires Alpine Linux 3.24 ARM64, Bun >=1.4.2, and Pi >=0.87.0 <0.88.0
 PI_VALIDATION_PI=/absolute/path/to/pi scripts/validate-alpine-arm64.sh
 
 # Requires a credential-configured Pi directory and the actual target model
 PI_PROVIDER_PROOF_AGENT_DIR=/path/to/pi-agent \
 PI_PROVIDER_PROOF_MODEL=provider/model \
-node scripts/validate-provider.mjs
+bun scripts/validate-provider.mjs
 ```
 
-The Bun lockfile pins Pi 0.86.0 as the development dependency (peer range `>=0.86.0 <0.87.0`). Host
+The Bun lockfile pins Pi 0.87.0 as the development dependency (peer range `>=0.87.0 <0.88.0`). Host
 proofs use PATH `pi` unless `PI_VALIDATION_PI` (or `PI_PROVIDER_PROOF_PI` for
 provider proof) names another binary in the peer range. Nested
 `node_modules/.bin/pi` is not treated as the live system. Proofs that reach a Pi

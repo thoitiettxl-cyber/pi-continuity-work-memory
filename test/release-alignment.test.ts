@@ -117,6 +117,41 @@ test("memory-only xAI Responses calls clamp an unsupported session off level and
 	assert.equal(requestOptions?.reasoningEffort, "low");
 });
 
+test("deferred and pending provider stops do not become successful memory extracts", async () => {
+	for (const stopReason of ["deferred", "pending"] as const) {
+		const ctx = {
+			model: {
+				id: "proof",
+				api: "openai-responses",
+				provider: "openai",
+				reasoning: false,
+				maxTokens: 8_192,
+				compat: {},
+			},
+			modelRegistry: {
+				hasConfiguredAuth: () => true,
+				async complete() {
+					return {
+						role: "assistant",
+						content: [{ type: "text", text: "{\"memories\":[{\"scope\":\"session\",\"kind\":\"fact\",\"content\":\"must-not-publish\"}]}" }],
+						usage,
+						stopReason,
+						timestamp: Date.now(),
+					};
+				},
+			},
+		} as unknown as ExtensionContext;
+		const provider = new PiMemoryProvider(() => ctx);
+		await assert.rejects(() => provider.extract({
+			sourceText: "durable source",
+			allowedScopes: ["session"],
+			workItemId: "work",
+			repositoryId: "repo",
+			sessionKey: "session",
+		}, new AbortController().signal), (error: unknown) => error instanceof MemoryProviderDeferredError && error.message.includes(stopReason));
+	}
+});
+
 test("memory-only OpenAI Responses calls suppress explicit prompt-cache mode without mutating the selected model", async () => {
 	const selectedModel = {
 		id: "gpt-proof",

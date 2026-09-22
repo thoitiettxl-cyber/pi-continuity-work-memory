@@ -5,14 +5,14 @@ import { resolve } from "node:path";
 import test from "node:test";
 
 const script = resolve("scripts/pi-version.mjs");
-const range = ">=0.86.0 <0.87.0";
+const range = ">=0.87.0 <0.88.0";
 
 function check(version: string) {
 	return spawnSync(process.execPath, [script, version], { encoding: "utf8" });
 }
 
-test("Pi version validation accepts the lower bound and current 0.86.x releases while reporting the actual version", () => {
-	for (const [input, expected] of [["0.86.0", "0.86.0"], ["0.86.1", "0.86.1"], ["v0.86.99", "0.86.99"]] as const) {
+test("Pi version validation accepts the lower bound and current 0.87.x releases while reporting the actual version", () => {
+	for (const [input, expected] of [["0.87.0", "0.87.0"], ["0.87.1", "0.87.1"], ["v0.87.99", "0.87.99"]] as const) {
 		const result = check(input);
 		assert.equal(result.status, 0, result.stderr);
 		const report = JSON.parse(result.stdout) as Record<string, unknown>;
@@ -23,7 +23,7 @@ test("Pi version validation accepts the lower bound and current 0.86.x releases 
 });
 
 test("Pi version validation rejects versions outside the package peer range with an actionable diagnostic", () => {
-	for (const version of ["0.85.1", "0.84.1", "0.87.0", "1.0.0", "0.86.0-beta.1", "not-a-version"]) {
+	for (const version of ["0.86.1", "0.85.1", "0.88.0", "1.0.0", "0.87.0-beta.1", "not-a-version"]) {
 		const result = check(version);
 		assert.notEqual(result.status, 0);
 		assert.match(result.stderr, /Unsupported Pi version/);

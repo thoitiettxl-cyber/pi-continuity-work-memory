@@ -72,7 +72,7 @@ let proofExitCode = 0;
 try {
 	mkdirSync(workspace, { recursive: true });
 	mkdirSync(sessionDir, { recursive: true });
-	writeFileSync(join(workspace, "package.json"), '{"scripts":{"test":"node --test"}}\n', "utf8");
+	writeFileSync(join(workspace, "package.json"), '{"scripts":{"test":"bun test"}}\n', "utf8");
 	mkdirSync(join(workspace, "test"), { recursive: true });
 	writeFileSync(join(workspace, "test", "proof.test.mjs"), 'import test from "node:test";\nimport assert from "node:assert/strict";\ntest("provider proof", () => assert.equal(2 + 2, 4));\n', "utf8");
 	for (const args of [["init", "-q"], ["config", "user.email", "proof@example.invalid"], ["config", "user.name", "Proof"], ["add", "package.json", "test/proof.test.mjs"], ["commit", "-qm", "initial"]]) {

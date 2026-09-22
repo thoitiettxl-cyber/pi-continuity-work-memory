@@ -5,7 +5,7 @@ import test from "node:test";
 
 import { loadSkillsFromDir } from "@earendil-works/pi-coding-agent";
 
-const root = resolve(import.meta.dirname, "..", "..");
+const root = resolve(import.meta.dirname, "..");
 const skillsRoot = join(root, "skills");
 const expectedSkills = [
 	"audit-onboarding-proposal",
@@ -118,7 +118,7 @@ test("skill inventory and frontmatter are Pi-compatible", () => {
 		assert.equal(metadata.name, name);
 		assert.equal(typeof metadata.description, "string");
 		assert.ok(String(metadata.description).length > 20 && String(metadata.description).length <= 1_024);
-		assert.match(String(metadata.compatibility), /Pi >=0\.86\.0 <0\.87\.0/);
+		assert.match(String(metadata.compatibility), /Pi >=0\.87\.0 <0\.88\.0/);
 		const sourceCommits = sourceCommitsFor(name);
 		assert.ok(sourceCommits.length > 0, `${name} has no reviewed source commit`);
 		for (const sourceCommit of sourceCommits) {

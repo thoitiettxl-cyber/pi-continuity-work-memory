@@ -2,9 +2,9 @@ import { existsSync } from "node:fs";
 import { delimiter, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const SUPPORTED_PI_RANGE = ">=0.86.0 <0.87.0";
-const MIN_SUPPORTED = { major: 0, minor: 86, patch: 0 };
-const MAX_EXCLUSIVE = { major: 0, minor: 87, patch: 0 };
+export const SUPPORTED_PI_RANGE = ">=0.87.0 <0.88.0";
+const MIN_SUPPORTED = { major: 0, minor: 87, patch: 0 };
+const MAX_EXCLUSIVE = { major: 0, minor: 88, patch: 0 };
 
 export function parsePiVersion(value) {
 	const text = String(value ?? "").trim();

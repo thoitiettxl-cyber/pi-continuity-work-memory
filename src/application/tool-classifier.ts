@@ -43,6 +43,8 @@ const VALIDATION_COMMANDS = [
 	/^pnpm\s+(?:test|run\s+(?:test|validate|check|lint|typecheck|build))(?:\s+.*)?$/,
 	/^yarn\s+(?:test|run\s+(?:test|validate|check|lint|typecheck|build))(?:\s+.*)?$/,
 	/^node\s+--test(?:\s+.*)?$/,
+	/^bun\s+test(?:\s+.*)?$/,
+	/^bun\s+run\s+(?:test|typecheck|build|validate)(?:\s+.*)?$/,
 	/^pytest(?:\s+.*)?$/,
 	/^python(?:3)?\s+-m\s+pytest(?:\s+.*)?$/,
 	/^cargo\s+(?:test|check|clippy)(?:\s+.*)?$/,

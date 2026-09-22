@@ -175,7 +175,7 @@ test("two processes opening one RC2 store converge on one valid v2 schema", asyn
 	const path = join(root, "state.sqlite");
 	createV1(path, CONTINUITY_V1).close();
 	chmodSync(path, 0o600);
-	const moduleUrl = pathToFileURL(resolve(".test-build/src/infrastructure/continuity-store.js")).href;
+	const moduleUrl = pathToFileURL(resolve("src/infrastructure/continuity-store.ts")).href;
 	await Promise.all([runMigrationChild(moduleUrl, path), runMigrationChild(moduleUrl, path)]);
 	const store = new ContinuityStore(path);
 	assert.equal(String((store.db.prepare("SELECT value FROM continuity_meta WHERE key = 'schema_version'").get() as Record<string, unknown>).value), "2");

@@ -186,6 +186,105 @@ test("memorySource after a cursor counts only new turns and keeps a small backgr
 	assert.equal(missing.newTurnCount, 3);
 });
 
+test("memorySource applies the latest context_edit and does not send omitted or stale replacement content", () => {
+	const now = new Date().toISOString();
+	const entries = [
+		{
+			type: "message",
+			id: "secret-user",
+			parentId: null,
+			timestamp: now,
+			message: { role: "user", content: [{ type: "text", text: "omitted-secret-canary" }], timestamp: 1 },
+		},
+		{
+			type: "message",
+			id: "assistant",
+			parentId: "secret-user",
+			timestamp: now,
+			message: { role: "assistant", content: [{ type: "text", text: "original-assistant-canary" }], timestamp: 2 },
+		},
+		{
+			type: "context_edit",
+			id: "edit-1",
+			parentId: "assistant",
+			timestamp: now,
+			targetId: "secret-user",
+			replacement: { content: [{ type: "text", text: "stale-replacement-canary" }] },
+		},
+		{
+			type: "context_edit",
+			id: "edit-2",
+			parentId: "edit-1",
+			timestamp: now,
+			targetId: "secret-user",
+			replacement: null,
+		},
+		{
+			type: "context_edit",
+			id: "edit-3",
+			parentId: "edit-2",
+			timestamp: now,
+			targetId: "assistant",
+			replacement: { content: "normalized-assistant-replacement" },
+		},
+	] as SessionEntry[];
+	const source = memorySource(contextFor(entries));
+	assert.equal(source.text.includes("omitted-secret-canary"), false);
+	assert.equal(source.text.includes("stale-replacement-canary"), false);
+	assert.equal(source.text.includes("original-assistant-canary"), false);
+	assert.match(source.text, /context_omission/);
+	assert.match(source.text, /normalized-assistant-replacement/);
+});
+
+test("a later context_edit targeting an earlier entry resynchronizes provider source without omitted content", () => {
+	const now = new Date().toISOString();
+	const entries = [
+		{ type: "message", id: "u1", parentId: null, timestamp: now, message: { role: "user", content: [{ type: "text", text: "early-secret-canary" }], timestamp: 1 } },
+		{ type: "message", id: "a1", parentId: "u1", timestamp: now, message: { role: "assistant", content: [{ type: "text", text: "ack" }], timestamp: 2 } },
+		{ type: "message", id: "u2", parentId: "a1", timestamp: now, message: { role: "user", content: [{ type: "text", text: "later-visible" }], timestamp: 3 } },
+		{ type: "context_edit", id: "edit", parentId: "u2", timestamp: now, targetId: "u1", replacement: null },
+	] as SessionEntry[];
+	const source = memorySource(contextFor(entries), "a1");
+	assert.equal(source.resync, true);
+	assert.equal(source.newTurnCount, 3);
+	assert.equal(source.text.includes("early-secret-canary"), false);
+	assert.match(source.text, /later-visible/);
+	assert.match(source.text, /context_omission/);
+});
+
+test("memorySource prefers canonical session projection over raw branch content and keeps the leaf cursor", () => {
+	const now = new Date().toISOString();
+	const oldMessage = { role: "user", content: [{ type: "text", text: "compacted-secret-canary" }], timestamp: 1 };
+	const visibleMessage = { role: "user", content: [{ type: "text", text: "projected-visible-marker" }], timestamp: 2 };
+	const entries = [
+		{ type: "message", id: "old", parentId: null, timestamp: now, message: oldMessage },
+		{ type: "message", id: "visible", parentId: "old", timestamp: now, message: visibleMessage },
+		{ type: "custom", id: "leaf", parentId: "visible", timestamp: now, customType: "cursor", data: {} },
+	] as SessionEntry[];
+	const ctx = {
+		sessionManager: {
+			getBranch: () => entries,
+			getSessionId: () => "projection-session",
+			getSessionFile: () => undefined,
+			getLeafId: () => "leaf",
+			buildSessionProjection: () => ({
+				entries: [
+					{ sourceEntry: entries[1], messages: [visibleMessage] },
+					{ sourceEntry: entries[2], messages: [] },
+				],
+			}),
+		},
+	} as unknown as ExtensionContext;
+	const source = memorySource(ctx);
+	assert.equal(source.lastEntryId, "leaf");
+	assert.equal(source.resync, false);
+	assert.equal(source.text.includes("compacted-secret-canary"), false);
+	assert.match(source.text, /projected-visible-marker/);
+	const incremental = memorySource(ctx, "leaf");
+	assert.equal(incremental.resync, false);
+	assert.equal(incremental.newTurnCount, 0);
+});
+
 test("MemoryService sanitizes Stage 1 metadata and every Stage 2 field even when callers or legacy rows bypass session serialization", async () => {
 	const root = temporaryDirectory("provider-boundary");
 	const store = new MemoryStore(join(root, "memory.sqlite"));

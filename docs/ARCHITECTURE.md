@@ -99,7 +99,7 @@ stay at the boundaries.
 | Area | Responsibility | Key files |
 |---|---|---|
 | Composition root | Registers Pi events, tools, commands, trust behavior, and wires services/stores | `src/extension.ts` |
-| Pi/session adapter | Builds branch context, embeds/restores Continuity state, and serializes bounded provider input | `src/interface/session-adapter.ts` |
+| Pi/session adapter | Builds branch context, embeds/restores Continuity state, and serializes bounded provider input from the canonical session projection when the host provides it | `src/interface/session-adapter.ts` |
 | Plan browser display | Read-only catalog/detail projections and Work/Refine editor-draft text | `src/domain/plan-browser.ts` |
 | Plan browser TUI | Trusted idle search/filter, Markdown detail, and reviewable editor drafts | `src/interface/plan-browser.ts` |
 | Core state | WorkState, evidence, operation, checkpoint, memory, and schema types | `src/domain/types.ts` |
@@ -332,7 +332,7 @@ opening the repository or starting/ending an agent run creates no document.
 - Keep pure integrity/state rules in `src/domain/` and side effects at the
   infrastructure/runtime boundaries.
 - Preserve strict ESM TypeScript style and the existing support contract:
-  Node.js `>=22.19.0`, Pi `>=0.86.0 <0.87.0`, no production runtime
+  Bun `1.4.2`, Pi `>=0.87.0 <0.88.0`, no production runtime
   dependencies, and only the pinned TypeScript install-time emitter required to
   generate ignored `dist/` output in Pi's default omit-dev Git clone.
 - Add focused tests whenever behavior, authority, recovery, migration,

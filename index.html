@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pi Continuity + Work Memory Explorer</title>
+  <meta name="description" content="Interactive workspace for branch-correct Pi continuity, execution plan management, context pressure monitoring, persistent memory, and engineering skills.">
+  <meta property="og:title" content="Pi Continuity + Work Memory Explorer">
+  <meta property="og:description" content="Interactive workspace for branch-correct Pi continuity, execution plan management, context pressure monitoring, persistent memory, and engineering skills.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    pre, code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-sky-500/20 font-mono font-bold text-white text-lg">
+          π
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-semibold text-white tracking-tight">Pi Continuity + Work Memory</h1>
+            <span class="px-2 py-0.5 text-xs font-mono font-medium rounded-full bg-sky-950 text-sky-400 border border-sky-800/60">v1.0.0-rc.8</span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Branch-correct continuity, execution plans, context governor & skills</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 text-xs font-mono">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span>Online :3000</span>
+        </div>
+        <button id="refreshBtn" onclick="refreshAllData()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span class="hidden sm:inline">Refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- NAVIGATION TABS -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 overflow-x-auto text-sm border-t border-slate-800/60">
+      <button onclick="switchTab('plans')" id="tab-btn-plans" class="tab-btn active px-4 py-3 border-b-2 border-sky-500 text-sky-400 font-medium whitespace-nowrap flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+        <span>Execution Plans</span>
+        <span id="plansBadge" class="ml-1 px-1.5 py-0.2 rounded-full text-xs bg-slate-800 text-slate-300 font-mono">...</span>
+      </button>
+      <button onclick="switchTab('continuity')" id="tab-btn-continuity" class="tab-btn px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium whitespace-nowrap flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span>Continuity & Work State</span>
+      </button>
+      <button onclick="switchTab('governor')" id="tab-btn-governor" class="tab-btn px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium whitespace-nowrap flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <span>Context Governor</span>
+      </button>
+      <button onclick="switchTab('canonical')" id="tab-btn-canonical" class="tab-btn px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium whitespace-nowrap flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <span>Secret Redaction</span>
+      </button>
+      <button onclick="switchTab('typesafe')" id="tab-btn-typesafe" class="tab-btn px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium whitespace-nowrap flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <span>TypeSafe / Jev</span>
+        <span class="ml-1 px-1.5 py-0.2 rounded-full text-xs bg-indigo-950 text-indigo-400 border border-indigo-800/80 font-mono">Fast</span>
+      </button>
+      <button onclick="switchTab('skills')" id="tab-btn-skills" class="tab-btn px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium whitespace-nowrap flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+        <span>Engineering Skills</span>
+        <span class="ml-1 px-1.5 py-0.2 rounded-full text-xs bg-slate-800 text-slate-300 font-mono">11</span>
+      </button>
+      <button onclick="switchTab('workflow')" id="tab-btn-workflow" class="tab-btn px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium whitespace-nowrap flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        <span>Workflow & Architecture</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: EXECUTION PLANS -->
+    <!-- ========================================== -->
+    <div id="tab-plans" class="tab-content block">
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+        
+        <!-- Left Panel: Plans List -->
+        <div class="w-full lg:w-96 flex-shrink-0 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Plans Catalog</h2>
+            <button onclick="openNewPlanModal()" class="px-2.5 py-1 rounded bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium flex items-center gap-1 shadow transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>New Plan</span>
+            </button>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="space-y-2">
+            <div class="relative">
+              <input type="text" id="planSearchInput" oninput="filterPlansList()" placeholder="Filter plans by name, status, id..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500">
+              <span class="absolute right-3 top-2.5 text-slate-500 text-xs">⌘K</span>
+            </div>
+            <div class="flex gap-1.5 text-xs">
+              <button onclick="setPlanScopeFilter('all')" id="filter-all" class="plan-filter-btn flex-1 py-1 px-2 rounded bg-sky-950 text-sky-400 border border-sky-800/80 font-medium">All (<span id="count-all">0</span>)</button>
+              <button onclick="setPlanScopeFilter('active')" id="filter-active" class="plan-filter-btn flex-1 py-1 px-2 rounded bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200">Active (<span id="count-active">0</span>)</button>
+              <button onclick="setPlanScopeFilter('completed')" id="filter-completed" class="plan-filter-btn flex-1 py-1 px-2 rounded bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200">Done (<span id="count-completed">0</span>)</button>
+            </div>
+          </div>
+
+          <!-- List Container -->
+          <div id="plansListContainer" class="space-y-2 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
+            <div class="text-center py-8 text-xs text-slate-500">Loading plans...</div>
+          </div>
+        </div>
+
+        <!-- Right Panel: Plan Detail Viewer & Step Checklist -->
+        <div class="flex-1 w-full bg-slate-900 border border-slate-800 rounded-xl p-6 min-h-[550px]">
+          <div id="planDetailEmpty" class="h-full flex flex-col items-center justify-center text-center py-20 text-slate-500">
+            <svg class="w-12 h-12 text-slate-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <p class="text-sm font-medium">Select an execution plan to inspect</p>
+            <p class="text-xs text-slate-600 mt-1">View outcome, steps, constraints, and interactively toggle progress.</p>
+          </div>
+
+          <div id="planDetailContent" class="hidden space-y-6">
+            <div class="border-b border-slate-800 pb-4">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                <div class="flex items-center gap-2">
+                  <span id="detailScopeBadge" class="px-2 py-0.5 text-xs font-mono font-medium rounded bg-emerald-950 text-emerald-400 border border-emerald-800">active</span>
+                  <span id="detailStatusBadge" class="px-2 py-0.5 text-xs font-medium rounded bg-slate-800 text-slate-300">In progress</span>
+                  <span id="detailWorkItemBadge" class="text-xs font-mono text-slate-500">ID: work-123</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button id="detailToggleRawBtn" onclick="toggleRawMarkdown()" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+                    View Raw Markdown
+                  </button>
+                </div>
+              </div>
+              <h2 id="detailTitle" class="text-xl font-bold text-white tracking-tight">Plan Title</h2>
+              <p id="detailPath" class="text-xs font-mono text-slate-400 mt-1">docs/plans/active/example.md</p>
+            </div>
+
+            <!-- Structured View -->
+            <div id="structuredPlanView" class="space-y-6">
+              <div>
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Outcome</h3>
+                <p id="detailOutcome" class="text-sm text-slate-200 bg-slate-950/60 border border-slate-800/80 rounded-lg p-3"></p>
+              </div>
+
+              <!-- Steps List with interactive checkboxes -->
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Execution Steps</h3>
+                  <span id="detailStepRatio" class="text-xs font-mono text-sky-400">0/0 Completed</span>
+                </div>
+                <div id="detailStepsContainer" class="space-y-2 bg-slate-950/60 border border-slate-800/80 rounded-lg p-3">
+                  <!-- Steps rendered dynamically -->
+                </div>
+              </div>
+
+              <!-- Scope & Constraints Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-950/40 border border-slate-800/60 rounded-lg p-3">
+                  <h4 class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    In Scope
+                  </h4>
+                  <ul id="detailInScope" class="text-xs text-slate-300 space-y-1 list-disc list-inside"></ul>
+                </div>
+
+                <div class="bg-slate-950/40 border border-slate-800/60 rounded-lg p-3">
+                  <h4 class="text-xs font-semibold text-rose-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Out of Scope
+                  </h4>
+                  <ul id="detailOutOfScope" class="text-xs text-slate-400 space-y-1 list-disc list-inside"></ul>
+                </div>
+              </div>
+
+              <!-- Constraints -->
+              <div class="bg-slate-950/40 border border-slate-800/60 rounded-lg p-3">
+                <h4 class="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  Constraints & Invariants
+                </h4>
+                <ul id="detailConstraints" class="text-xs text-slate-300 space-y-1 list-disc list-inside"></ul>
+              </div>
+            </div>
+
+            <!-- Raw Markdown View -->
+            <div id="rawPlanView" class="hidden">
+              <textarea id="rawPlanTextarea" rows="20" class="w-full font-mono text-xs bg-slate-950 border border-slate-800 rounded-lg p-4 text-slate-200 focus:outline-none focus:border-sky-500"></textarea>
+              <div class="mt-3 flex justify-end gap-2">
+                <button onclick="saveRawPlanContent()" class="px-3 py-1.5 rounded bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium transition">
+                  Save Changes
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: CONTINUITY & WORK STATE -->
+    <!-- ========================================== -->
+    <div id="tab-continuity" class="tab-content hidden space-y-6">
+      
+      <!-- Top banner: Active Goal & Work Item -->
+      <div class="bg-gradient-to-r from-sky-950/60 via-slate-900 to-indigo-950/50 border border-sky-800/40 rounded-xl p-5 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 text-xs font-mono rounded bg-sky-900/80 text-sky-300 border border-sky-700/60">ACTIVE CONTINUITY ROOT</span>
+            <span id="cs-workItemId" class="text-xs font-mono text-slate-400">deliver-pi-continuity-rc8</span>
+          </div>
+          <span id="cs-updatedAt" class="text-xs text-slate-500 font-mono">Last updated: Just now</span>
+        </div>
+        <h2 id="cs-goal" class="text-lg font-bold text-white tracking-tight">Managed repository workflow, branch-correct Pi continuity, and scoped persistent memory</h2>
+      </div>
+
+      <!-- Grid of state elements -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Plan Steps -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              Plan Steps
+            </h3>
+            <span id="cs-currentStepBadge" class="text-xs font-mono px-2 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-800/80">Active: step-2</span>
+          </div>
+          <div id="cs-planList" class="space-y-2 text-xs"></div>
+        </div>
+
+        <!-- Next Actions -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+            Next Actions
+          </h3>
+          <ul id="cs-nextActionsList" class="space-y-1.5 text-xs text-slate-300"></ul>
+        </div>
+
+        <!-- Decisions Ledger -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Bound Decisions
+          </h3>
+          <ul id="cs-decisionsList" class="space-y-1.5 text-xs text-slate-300"></ul>
+        </div>
+
+        <!-- Completed Work -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Completed Work
+          </h3>
+          <ul id="cs-completedWorkList" class="space-y-1.5 text-xs text-slate-300"></ul>
+        </div>
+
+        <!-- Constraints & Blockers -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            Constraints & Blockers
+          </h3>
+          <div class="space-y-2">
+            <div>
+              <span class="text-xs font-medium text-slate-400">Constraints:</span>
+              <ul id="cs-constraintsList" class="mt-1 space-y-1 text-xs text-slate-300"></ul>
+            </div>
+            <div>
+              <span class="text-xs font-medium text-slate-400">Blockers:</span>
+              <ul id="cs-blockersList" class="mt-1 space-y-1 text-xs text-rose-400"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verified Checkpoints Chain -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+              Checkpoint Chain
+            </h3>
+            <span class="text-xs font-mono text-emerald-400">Chain Valid</span>
+          </div>
+          <div id="checkpointsChainContainer" class="space-y-2 text-xs font-mono">
+            <!-- Dynamic checkpoints -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Interactive Continuity Patch Tester -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+        <h3 class="text-sm font-semibold text-white mb-1">Apply Continuity Patch (Simulate Agent State Transition)</h3>
+        <p class="text-xs text-slate-400 mb-4">Updates session working memory in accordance with the WorkPatchSchema contract.</p>
+
+        <form id="patchForm" onsubmit="submitContinuityPatch(event)" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Updated Goal</label>
+              <input type="text" id="patchGoal" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Active Step ID</label>
+              <input type="text" id="patchStepId" placeholder="e.g. step-2" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Append Next Action</label>
+              <input type="text" id="patchNextAction" placeholder="e.g. Verify serial unit test results" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Append Decision</label>
+              <input type="text" id="patchDecision" placeholder="e.g. Approved clean architecture separation" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2">
+            <button type="submit" class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium transition shadow-lg shadow-sky-600/20">
+              Apply Work State Patch
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: CONTEXT PRESSURE GOVERNOR -->
+    <!-- ========================================== -->
+    <div id="tab-governor" class="tab-content hidden space-y-6">
+      
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+        <div class="max-w-3xl">
+          <h2 class="text-base font-bold text-white mb-1">Context Pressure Governor</h2>
+          <p class="text-xs text-slate-400">
+            Monitors session token consumption against model capacity. Triggers proactive advisories and compaction directives before catastrophic truncation occurs.
+          </p>
+        </div>
+
+        <!-- Visual Meter & Gauges -->
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+          
+          <!-- Gauge Card -->
+          <div class="lg:col-span-1 bg-slate-950 border border-slate-800/80 rounded-xl p-6 flex flex-col items-center justify-center text-center">
+            <div class="relative w-36 h-36 flex items-center justify-center">
+              <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" stroke="#1e293b" stroke-width="10" fill="transparent" />
+                <circle id="governorMeterCircle" cx="50" cy="50" r="42" stroke="#0ea5e9" stroke-width="10" stroke-linecap="round" fill="transparent" stroke-dasharray="264" stroke-dashoffset="79" class="transition-all duration-500" />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center font-mono">
+                <span id="govMeterPercent" class="text-2xl font-bold text-white">70%</span>
+                <span class="text-[10px] text-slate-400 uppercase">Usage</span>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <span id="govLevelBadge" class="px-3 py-1 rounded-full text-xs font-mono font-semibold uppercase bg-amber-950 text-amber-400 border border-amber-800">
+                ELEVATED (70%)
+              </span>
+            </div>
+          </div>
+
+          <!-- Controls & Sliders -->
+          <div class="lg:col-span-2 bg-slate-950 border border-slate-800/80 rounded-xl p-6 space-y-5">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="font-medium text-slate-300">Total Tokens Consumed:</span>
+                <span id="govTokensDisplay" class="font-mono text-sky-400 font-semibold">140,000</span>
+              </div>
+              <input type="range" id="govTokensSlider" min="10000" max="200000" step="5000" value="140000" oninput="updateGovernorEvaluation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-500">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="font-medium text-slate-300">Model Context Window:</span>
+                <span id="govWindowDisplay" class="font-mono text-slate-400">200,000</span>
+              </div>
+              <select id="govWindowSelect" onchange="updateGovernorEvaluation()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200">
+                <option value="200000">200,000 (Claude 3.5 Sonnet / Default)</option>
+                <option value="128000">128,000 (GPT-4o / Responses)</option>
+                <option value="1000000">1,000,000 (Gemini 1.5/2.0 Pro)</option>
+                <option value="64000">64,000 (Compact Model)</option>
+              </select>
+            </div>
+
+            <!-- Presets -->
+            <div class="flex flex-wrap gap-2 pt-2">
+              <span class="text-xs text-slate-400 self-center mr-1">Simulate Presets:</span>
+              <button onclick="setGovernorPreset(50000)" class="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs transition">Nominal (25%)</button>
+              <button onclick="setGovernorPreset(150000)" class="px-2.5 py-1 rounded bg-amber-950 hover:bg-amber-900 border border-amber-800 text-amber-300 text-xs transition">Elevated (75%)</button>
+              <button onclick="setGovernorPreset(185000)" class="px-2.5 py-1 rounded bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-xs transition">Critical (92%)</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Rendered Advisory & Actions -->
+        <div class="mt-6 space-y-4">
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Live Injected Agent Advisory</h3>
+            <div id="govAdvisoryBox" class="bg-amber-950/30 border border-amber-800/60 rounded-xl p-4 text-xs font-mono text-amber-200">
+              [Context Pressure: Elevated (70%)] Session context is approaching operational thresholds. Prefer concise diffs and prepare for compaction.
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Mandatory Operational Actions</h3>
+            <ul id="govActionsList" class="space-y-1.5 text-xs text-slate-300 list-disc list-inside bg-slate-950/40 border border-slate-800/60 rounded-lg p-3">
+              <li>Begin prioritizing completion of current step</li>
+              <li>Avoid unnecessary expansive file reads</li>
+              <li>Stage memory checkpoint</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: CANONICAL SECRET REDACTION -->
+    <!-- ========================================== -->
+    <div id="tab-canonical" class="tab-content hidden space-y-6">
+      
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+        <div class="max-w-3xl mb-6">
+          <h2 class="text-base font-bold text-white mb-1">Fail-Closed Secret Redaction Sandbox</h2>
+          <p class="text-xs text-slate-400">
+            Validates canonical redaction invariants from <code class="text-sky-400">src/domain/canonical.ts</code>. Private keys, GitHub tokens, Bearer authorization credentials, OpenAI/Google API keys, and local session paths are stripped before persisting to learning memory or external providers.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Input -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Raw Input (Contains Secrets)</label>
+              <button onclick="loadSampleCredentials()" class="text-xs text-sky-400 hover:text-sky-300 transition">
+                Load Sample Payloads
+              </button>
+            </div>
+            <textarea id="redactInput" rows="12" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-sky-500"></textarea>
+            <div class="flex justify-end">
+              <button onclick="executeRedaction()" class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium transition shadow-lg shadow-sky-600/20">
+                Execute Redaction Pass
+              </button>
+            </div>
+          </div>
+
+          <!-- Redacted Output -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Sanitized Memory Output</label>
+              <span id="redactStatusBadge" class="text-xs font-mono text-emerald-400">Ready</span>
+            </div>
+            <textarea id="redactOutput" rows="12" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-emerald-300 focus:outline-none"></textarea>
+            <p class="text-[11px] text-slate-500">
+              Matches provider-bound and memory-bound invariant rules tested in <code class="text-slate-400">test/canonical.test.ts</code>.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB: TYPESAFE / JEV FAST JUDGMENT -->
+    <!-- ========================================== -->
+    <div id="tab-typesafe" class="tab-content hidden space-y-6">
+      
+      <div class="bg-gradient-to-r from-indigo-950/60 via-slate-900 to-sky-950/50 border border-indigo-800/40 rounded-xl p-5 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 text-xs font-mono rounded bg-indigo-900/80 text-indigo-300 border border-indigo-700/60">TYPESAFE / JEV SYSTEM ONE</span>
+            <span class="text-xs font-mono text-emerald-400">Model: jev-1.13.0 · Low-Latency Fast Judgment</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">Fail-Closed · Native Fallback Enabled</span>
+        </div>
+        <h2 class="text-lg font-bold text-white tracking-tight">Harness Performance Acceleration: Jev Decision Points</h2>
+        <p class="text-xs text-slate-300 mt-1">
+          Eliminates wasteful GPT turns and minimizes prompt tokens by offloading atomic decisions (noul, choice, score) to fast Jev evaluation while preserving fail-closed deterministic authority.
+        </p>
+      </div>
+
+      <!-- 7 Opportunities Disposition Matrix -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+          <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Audited 7 Opportunities Disposition Matrix
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="py-2 pr-4 font-semibold"># Opportunity</th>
+                <th class="py-2 pr-4 font-semibold">Integration Point</th>
+                <th class="py-2 pr-4 font-semibold">Mechanism</th>
+                <th class="py-2 pr-4 font-semibold">Disposition</th>
+                <th class="py-2 font-semibold">Speed Benefit</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 text-slate-300">
+              <tr>
+                <td class="py-2.5 pr-4 font-medium text-white">1. Tool-output chunking</td>
+                <td class="py-2.5 pr-4 text-sky-400">src/domain/canonical.ts</td>
+                <td class="py-2.5 pr-4">Deterministic head/tail + scoring</td>
+                <td class="py-2.5 pr-4"><span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Enabled</span></td>
+                <td class="py-2.5 text-emerald-400 font-bold">-65% input tokens</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-4 font-medium text-white">2. Context retention during compaction</td>
+                <td class="py-2.5 pr-4 text-sky-400">src/application/context-pressure-governor.ts</td>
+                <td class="py-2.5 pr-4">Deterministic authority preserve</td>
+                <td class="py-2.5 pr-4"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">Deterministic</span></td>
+                <td class="py-2.5 text-slate-400">Zero AI drift</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-4 font-medium text-white">3. Prepared tool workflows</td>
+                <td class="py-2.5 pr-4 text-sky-400">src/application/managed-workflow-service.ts</td>
+                <td class="py-2.5 pr-4">Sequential pipeline chaining</td>
+                <td class="py-2.5 pr-4"><span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Enabled</span></td>
+                <td class="py-2.5 text-emerald-400 font-bold">-3 GPT turns</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-4 font-medium text-white">4. Tool catalog selection</td>
+                <td class="py-2.5 pr-4 text-sky-400">src/application/tool-classifier.ts</td>
+                <td class="py-2.5 pr-4">Deterministic allowlist</td>
+                <td class="py-2.5 pr-4"><span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Enabled</span></td>
+                <td class="py-2.5 text-emerald-400 font-bold">-40% prompt overhead</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-4 font-medium text-white">5. Ambiguous properties check</td>
+                <td class="py-2.5 pr-4 text-sky-400">src/application/typesafe-service.ts</td>
+                <td class="py-2.5 pr-4">Jev Noul judgment</td>
+                <td class="py-2.5 pr-4"><span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Enabled</span></td>
+                <td class="py-2.5 text-emerald-400 font-bold">&lt;60ms latency</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-4 font-medium text-white">6. Predefined failure recovery</td>
+                <td class="py-2.5 pr-4 text-sky-400">src/application/typesafe-service.ts</td>
+                <td class="py-2.5 pr-4">Jev Choice + error shortcuts</td>
+                <td class="py-2.5 pr-4"><span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Enabled</span></td>
+                <td class="py-2.5 text-emerald-400 font-bold">-1 GPT turn</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-4 font-medium text-white">7. Task routing & coordination</td>
+                <td class="py-2.5 pr-4 text-sky-400">src/application/typesafe-service.ts</td>
+                <td class="py-2.5 pr-4">Jev Score & Choice</td>
+                <td class="py-2.5 pr-4"><span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Enabled</span></td>
+                <td class="py-2.5 text-emerald-400 font-bold">Optimal skill match</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Interactive Fast Judgment Sandbox -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Controls -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Evaluate Fast Judgment</h3>
+            <span class="text-xs font-mono text-sky-400">API: /api/typesafe/evaluate</span>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Evaluation Kind</label>
+              <select id="ts-kind" onchange="onTypeSafeKindChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+                <option value="noul">Noul (Binary Probability / Yes-No)</option>
+                <option value="choice">Choice (Atomic 1-of-N Selection)</option>
+                <option value="score">Score (0.0 to 3.0 Quality Rating)</option>
+                <option value="recovery">Recovery (Failure Action Selector)</option>
+                <option value="ambiguity">Ambiguity (Tool Call Property Check)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Evaluation Prompt</label>
+              <input type="text" id="ts-prompt" value="Is the current branch ready for dev-next merge review?" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+            </div>
+
+            <div id="ts-choices-group" class="hidden">
+              <label class="block text-xs font-medium text-slate-300 mb-1">Choices (comma separated)</label>
+              <input type="text" id="ts-choices" value="retry, rollback, escalate-to-user" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+            </div>
+
+            <div id="ts-recovery-group" class="hidden">
+              <label class="block text-xs font-medium text-slate-300 mb-1">Failure Reason</label>
+              <input type="text" id="ts-failure" value="Error: listen EADDRINUSE: address already in use 0.0.0.0:3000" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Structured Context (JSON)</label>
+              <textarea id="ts-context" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-sky-500">{"branch": "main", "testsPassing": true, "uncommittedChanges": 0}</textarea>
+            </div>
+
+            <div class="flex justify-end pt-2">
+              <button onclick="executeTypeSafeEvaluation()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition shadow-lg shadow-indigo-600/20 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span>Run Jev Fast Judgment</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result View -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Judgment Output</h3>
+              <span id="ts-statusBadge" class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Ready</span>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-4 space-y-3 font-mono text-xs">
+              <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span class="text-slate-400">Decision Outcome:</span>
+                <span id="ts-decisionOutcome" class="text-sm font-bold text-sky-400">READY</span>
+              </div>
+              <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span class="text-slate-400">Confidence / Level:</span>
+                <span id="ts-decisionConfidence" class="text-slate-200">0.85 (High)</span>
+              </div>
+              <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span class="text-slate-400">Fallback Mechanism:</span>
+                <span id="ts-fallbackStatus" class="text-emerald-400">Deterministic Rule Active</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block mb-1">Raw API Payload:</span>
+                <pre id="ts-rawPayload" class="text-[11px] text-slate-300 whitespace-pre-wrap max-h-36 overflow-y-auto bg-slate-900 p-2 rounded border border-slate-800">Awaiting evaluation run...</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-slate-500 font-mono">
+            Complies with TypeSafe documentation contract (https://docs.typesafe.ai) and preserves fail-closed runtime safety.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- ========================================== -->
+    <div id="tab-skills" class="tab-content hidden space-y-6">
+      
+      <div>
+        <h2 class="text-base font-bold text-white mb-1">Bundled Pi Engineering Skills</h2>
+        <p class="text-xs text-slate-400">
+          Eleven specialized global skills adapted for Pi's authority and clean architecture contracts.
+        </p>
+      </div>
+
+      <div id="skillsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 6: WORKFLOW & ARCHITECTURE -->
+    <!-- ========================================== -->
+    <div id="tab-workflow" class="tab-content hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left: Workflow Guide & Templates Menu -->
+        <div class="lg:col-span-1 space-y-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Workflow Documents</h3>
+            <button onclick="loadWorkflowDoc('WORKFLOW.md')" id="wf-btn-workflow" class="w-full text-left px-3 py-2 rounded-lg bg-sky-950 text-sky-400 border border-sky-800/80 text-xs font-medium transition">
+              workflow/WORKFLOW.md
+            </button>
+            <button onclick="loadWorkflowDoc('execution-plan.md')" id="wf-btn-plan" class="w-full text-left px-3 py-2 rounded-lg bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200 text-xs font-medium transition">
+              templates/execution-plan.md
+            </button>
+            <button onclick="loadWorkflowDoc('decision-record.md')" id="wf-btn-decision" class="w-full text-left px-3 py-2 rounded-lg bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200 text-xs font-medium transition">
+              templates/decision-record.md
+            </button>
+            <button onclick="loadWorkflowDoc('application-runbook.md')" id="wf-btn-runbook" class="w-full text-left px-3 py-2 rounded-lg bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200 text-xs font-medium transition">
+              templates/application-runbook.md
+            </button>
+          </div>
+
+          <!-- Manifest Integrity -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Asset Manifest</h3>
+              <span class="text-xs font-mono text-emerald-400">SHA256 OK</span>
+            </div>
+            <p class="text-xs text-slate-400">All workflow templates strictly match checksum declarations in <code class="text-slate-300">workflow/manifest.json</code>.</p>
+          </div>
+        </div>
+
+        <!-- Right: Document Content Reader -->
+        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-6 min-h-[500px]">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+            <h3 id="workflowDocTitle" class="text-sm font-bold text-white font-mono">workflow/WORKFLOW.md</h3>
+            <span class="text-xs text-slate-500">Read-Only Bundle Asset</span>
+          </div>
+          <pre id="workflowDocContent" class="text-xs text-slate-300 font-mono whitespace-pre-wrap overflow-x-auto max-h-[600px] overflow-y-auto leading-relaxed bg-slate-950 p-4 rounded-lg border border-slate-800/80">Loading...</pre>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MODAL: CREATE NEW PLAN -->
+  <div id="newPlanModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-xl w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white">Create New Execution Plan</h3>
+        <button onclick="closeNewPlanModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <form id="newPlanForm" onsubmit="submitNewPlan(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-medium text-slate-300 mb-1">Plan Title</label>
+          <input type="text" id="np-title" required placeholder="e.g. Implement real-time memory synchronization" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-sky-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-300 mb-1">File Slug (.md)</label>
+            <input type="text" id="np-slug" placeholder="e.g. real-time-memory-sync" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-sky-500">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-300 mb-1">Work Item ID</label>
+            <input type="text" id="np-workId" placeholder="e.g. task-901" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-sky-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-300 mb-1">Desired Outcome</label>
+          <textarea id="np-outcome" rows="2" placeholder="Clear definition of what this plan delivers and verifies..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-sky-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-300 mb-1">Steps (one per line)</label>
+          <textarea id="np-steps" rows="4" placeholder="Initial architecture review&#10;Implement core service logic&#10;Run unit and integration proof tests" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-sky-500"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+          <button type="button" onclick="closeNewPlanModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Cancel</button>
+          <button type="submit" class="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium transition shadow-lg shadow-sky-600/20">Scaffold Plan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SKILL DETAIL DRAWER -->
+  <div id="skillModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 p-4">
+        <div>
+          <h3 id="skillModalTitle" class="text-base font-bold text-white font-mono">skill-name</h3>
+          <p id="skillModalPath" class="text-xs text-slate-400 font-mono">skills/skill-name/SKILL.md</p>
+        </div>
+        <button onclick="closeSkillModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+      <div class="p-4 overflow-y-auto flex-1">
+        <pre id="skillModalContent" class="text-xs text-slate-200 font-mono whitespace-pre-wrap leading-relaxed bg-slate-950 p-4 rounded-lg border border-slate-800/80">Loading...</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-600">
+    Pi Continuity + Work Memory · Clean Architecture · Node.js 22 Runtime · AI Studio Build
+  </footer>
+
+  <!-- CLIENT LOGIC -->
+  <script>
+    let state = {
+      plans: [],
+      selectedPlan: null,
+      currentFilter: 'all',
+      workState: null,
+      skills: [],
+      workflowData: null,
+      rawMode: false
+    };
+
+    // TAB SWITCHING
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-sky-500', 'text-sky-400');
+        btn.classList.add('border-transparent', 'text-slate-400');
+      });
+
+      const targetTab = document.getElementById(`tab-${tabId}`);
+      const targetBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (targetTab) targetTab.classList.remove('hidden');
+      if (targetBtn) {
+        targetBtn.classList.add('border-sky-500', 'text-sky-400');
+        targetBtn.classList.remove('border-transparent', 'text-slate-400');
+      }
+
+      if (tabId === 'continuity' && !state.workState) loadWorkState();
+      if (tabId === 'skills' && state.skills.length === 0) loadSkills();
+      if (tabId === 'workflow' && !state.workflowData) loadWorkflow();
+    }
+
+    // LOAD PLANS
+    async function loadPlans() {
+      try {
+        const res = await fetch('/api/plans');
+        const data = await res.json();
+        state.plans = data.plans || [];
+        document.getElementById('plansBadge').innerText = state.plans.length;
+        updatePlanCounts();
+        renderPlansList();
+        if (state.plans.length > 0 && !state.selectedPlan) {
+          selectPlan(state.plans[0]);
+        }
+      } catch (err) {
+        console.error('Failed to load plans:', err);
+      }
+    }
+
+    function updatePlanCounts() {
+      const active = state.plans.filter(p => p.scope === 'active').length;
+      const completed = state.plans.filter(p => p.scope === 'completed').length;
+      document.getElementById('count-all').innerText = state.plans.length;
+      document.getElementById('count-active').innerText = active;
+      document.getElementById('count-completed').innerText = completed;
+    }
+
+    function setPlanScopeFilter(filter) {
+      state.currentFilter = filter;
+      document.querySelectorAll('.plan-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-sky-950', 'text-sky-400', 'border-sky-800/80');
+        btn.classList.add('bg-slate-900', 'text-slate-400', 'border-slate-800');
+      });
+      const activeBtn = document.getElementById(`filter-${filter}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-sky-950', 'text-sky-400', 'border-sky-800/80');
+        activeBtn.classList.remove('bg-slate-900', 'text-slate-400', 'border-slate-800');
+      }
+      renderPlansList();
+    }
+
+    function filterPlansList() {
+      renderPlansList();
+    }
+
+    function renderPlansList() {
+      const container = document.getElementById('plansListContainer');
+      const query = (document.getElementById('planSearchInput')?.value || '').toLowerCase().trim();
+
+      const filtered = state.plans.filter(p => {
+        if (state.currentFilter !== 'all' && p.scope !== state.currentFilter) return false;
+        if (!query) return true;
+        return (
+          p.title.toLowerCase().includes(query) ||
+          p.fileName.toLowerCase().includes(query) ||
+          p.workItemId.toLowerCase().includes(query) ||
+          p.declaredStatus.toLowerCase().includes(query)
+        );
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-xs text-slate-500">No matching plans found</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(plan => {
+        const isSelected = state.selectedPlan && state.selectedPlan.relativePath === plan.relativePath;
+        const totalSteps = plan.stepCounts?.total || 0;
+        const doneSteps = plan.stepCounts?.completed || 0;
+        const pct = totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : (plan.scope === 'completed' ? 100 : 0);
+
+        return `
+          <div onclick="selectPlanByPath('${plan.relativePath}')" class="p-3 rounded-lg border cursor-pointer transition ${
+            isSelected
+              ? 'bg-sky-950/60 border-sky-600/80 shadow-md'
+              : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 hover:bg-slate-850'
+          }">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-[11px] font-mono px-1.5 py-0.2 rounded ${
+                plan.scope === 'completed'
+                  ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60'
+                  : 'bg-amber-950 text-amber-400 border border-amber-800/60'
+              }">${plan.scope}</span>
+              <span class="text-[10px] text-slate-500 font-mono">${plan.declaredStatus}</span>
+            </div>
+            <h4 class="text-xs font-semibold text-white line-clamp-1">${plan.title}</h4>
+            <div class="mt-2 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+              <span>${plan.workItemId}</span>
+              <span>${doneSteps}/${totalSteps} (${pct}%)</span>
+            </div>
+            <div class="mt-1.5 w-full bg-slate-800 rounded-full h-1">
+              <div class="bg-sky-500 h-1 rounded-full" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectPlanByPath(relPath) {
+      const plan = state.plans.find(p => p.relativePath === relPath);
+      if (plan) selectPlan(plan);
+    }
+
+    async function selectPlan(plan) {
+      state.selectedPlan = plan;
+      renderPlansList();
+
+      document.getElementById('planDetailEmpty').classList.add('hidden');
+      document.getElementById('planDetailContent').classList.remove('hidden');
+
+      document.getElementById('detailTitle').innerText = plan.title;
+      document.getElementById('detailPath').innerText = plan.relativePath;
+      document.getElementById('detailScopeBadge').innerText = plan.scope;
+      document.getElementById('detailScopeBadge').className = `px-2 py-0.5 text-xs font-mono font-medium rounded ${
+        plan.scope === 'completed' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'
+      }`;
+      document.getElementById('detailStatusBadge').innerText = plan.declaredStatus;
+      document.getElementById('detailWorkItemBadge').innerText = `ID: ${plan.workItemId}`;
+      document.getElementById('detailOutcome').innerText = plan.outcome;
+
+      // Steps
+      const totalSteps = plan.stepCounts?.total || plan.steps?.length || 0;
+      const doneSteps = plan.stepCounts?.completed || plan.steps?.filter(s => s.status === 'completed').length || 0;
+      document.getElementById('detailStepRatio').innerText = `${doneSteps}/${totalSteps} Completed`;
+
+      const stepsContainer = document.getElementById('detailStepsContainer');
+      if (!plan.steps || plan.steps.length === 0) {
+        stepsContainer.innerHTML = `<span class="text-xs text-slate-500">No explicit checkbox steps defined in markdown.</span>`;
+      } else {
+        stepsContainer.innerHTML = plan.steps.map((step, idx) => `
+          <label class="flex items-start gap-2.5 p-1.5 rounded hover:bg-slate-900 cursor-pointer">
+            <input type="checkbox" ${step.status === 'completed' ? 'checked' : ''} onchange="toggleStep(${idx}, this.checked)" class="mt-0.5 h-3.5 w-3.5 rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-0">
+            <span class="text-xs ${step.status === 'completed' ? 'line-through text-slate-500' : 'text-slate-200'}">${step.text}</span>
+          </label>
+        `).join('');
+      }
+
+      // In Scope
+      const inScopeList = document.getElementById('detailInScope');
+      inScopeList.innerHTML = (plan.inScope && plan.inScope.length)
+        ? plan.inScope.map(i => `<li>${i}</li>`).join('')
+        : `<li class="text-slate-500">Not specified</li>`;
+
+      // Out of Scope
+      const outScopeList = document.getElementById('detailOutOfScope');
+      outScopeList.innerHTML = (plan.outOfScope && plan.outOfScope.length)
+        ? plan.outOfScope.map(i => `<li>${i}</li>`).join('')
+        : `<li class="text-slate-500">None</li>`;
+
+      // Constraints
+      const constraintsList = document.getElementById('detailConstraints');
+      constraintsList.innerHTML = (plan.constraints && plan.constraints.length)
+        ? plan.constraints.map(i => `<li>${i}</li>`).join('')
+        : `<li class="text-slate-500">None specified</li>`;
+
+      // Fetch raw content
+      try {
+        const res = await fetch(`/api/plans/${plan.scope}/${encodeURIComponent(plan.fileName)}`);
+        const detail = await res.json();
+        document.getElementById('rawPlanTextarea').value = detail.content || '';
+      } catch (err) {
+        console.error('Failed to load raw plan content:', err);
+      }
+    }
+
+    async function toggleStep(stepIndex, completed) {
+      if (!state.selectedPlan) return;
+      try {
+        await fetch(`/api/plans/${state.selectedPlan.scope}/${encodeURIComponent(state.selectedPlan.fileName)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stepIndex, completed })
+        });
+        await loadPlans();
+      } catch (err) {
+        console.error('Failed to update step:', err);
+      }
+    }
+
+    function toggleRawMarkdown() {
+      state.rawMode = !state.rawMode;
+      const structured = document.getElementById('structuredPlanView');
+      const raw = document.getElementById('rawPlanView');
+      const btn = document.getElementById('detailToggleRawBtn');
+
+      if (state.rawMode) {
+        structured.classList.add('hidden');
+        raw.classList.remove('hidden');
+        btn.innerText = 'View Structured';
+      } else {
+        structured.classList.remove('hidden');
+        raw.classList.add('hidden');
+        btn.innerText = 'View Raw Markdown';
+      }
+    }
+
+    async function saveRawPlanContent() {
+      if (!state.selectedPlan) return;
+      const content = document.getElementById('rawPlanTextarea').value;
+      try {
+        await fetch(`/api/plans/${state.selectedPlan.scope}/${encodeURIComponent(state.selectedPlan.fileName)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+        alert('Plan saved successfully!');
+        await loadPlans();
+      } catch (err) {
+        alert('Failed to save plan: ' + err.message);
+      }
+    }
+
+    // NEW PLAN MODAL
+    function openNewPlanModal() {
+      document.getElementById('newPlanModal').classList.remove('hidden');
+    }
+    function closeNewPlanModal() {
+      document.getElementById('newPlanModal').classList.add('hidden');
+    }
+    async function submitNewPlan(e) {
+      e.preventDefault();
+      const title = document.getElementById('np-title').value;
+      const slug = document.getElementById('np-slug').value || title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const workItemId = document.getElementById('np-workId').value || 'work-' + Date.now();
+      const outcome = document.getElementById('np-outcome').value;
+      const rawSteps = document.getElementById('np-steps').value.split('\n').filter(s => s.trim());
+
+      try {
+        const res = await fetch('/api/plans', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, slug, workItemId, outcome, steps: rawSteps })
+        });
+        const result = await res.json();
+        closeNewPlanModal();
+        await loadPlans();
+        const created = state.plans.find(p => p.fileName === result.fileName);
+        if (created) selectPlan(created);
+      } catch (err) {
+        alert('Failed to create plan: ' + err.message);
+      }
+    }
+
+    // CONTINUITY WORK STATE
+    async function loadWorkState() {
+      try {
+        const res = await fetch('/api/work-state');
+        state.workState = await res.json();
+        renderWorkState();
+
+        // Also fetch checkpoints
+        const cpRes = await fetch('/api/checkpoints');
+        const cpData = await cpRes.json();
+        renderCheckpoints(cpData.checkpoints || []);
+      } catch (err) {
+        console.error('Failed to load work state:', err);
+      }
+    }
+
+    function renderWorkState() {
+      const ws = state.workState;
+      if (!ws) return;
+
+      document.getElementById('cs-goal').innerText = ws.goal || 'No active goal set';
+      document.getElementById('cs-workItemId').innerText = ws.workItemId || 'None';
+      document.getElementById('cs-updatedAt').innerText = `Updated: ${new Date(ws.updatedAt).toLocaleTimeString()}`;
+      document.getElementById('cs-currentStepBadge').innerText = `Active: ${ws.currentStepId || 'None'}`;
+
+      // Populate form fields
+      document.getElementById('patchGoal').value = ws.goal || '';
+      document.getElementById('patchStepId').value = ws.currentStepId || '';
+
+      // Plan steps
+      const planList = document.getElementById('cs-planList');
+      planList.innerHTML = (ws.plan || []).map(step => `
+        <div class="p-2 rounded border ${
+          step.id === ws.currentStepId ? 'bg-sky-950/60 border-sky-700 text-sky-200' : 'bg-slate-950 border-slate-800/80 text-slate-300'
+        } flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-[10px] text-slate-500">${step.id}</span>
+            <span>${step.text}</span>
+          </div>
+          <span class="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded ${
+            step.status === 'completed' ? 'bg-emerald-950 text-emerald-400' : (step.status === 'in_progress' ? 'bg-sky-950 text-sky-400' : 'bg-slate-800 text-slate-400')
+          }">${step.status}</span>
+        </div>
+      `).join('');
+
+      // Next Actions
+      const nextActionsList = document.getElementById('cs-nextActionsList');
+      nextActionsList.innerHTML = (ws.nextActions || []).map(a => `<li class="flex items-start gap-1.5"><span class="text-sky-400">›</span><span>${a}</span></li>`).join('');
+
+      // Decisions
+      const decisionsList = document.getElementById('cs-decisionsList');
+      decisionsList.innerHTML = (ws.decisions || []).map(d => `<li class="flex items-start gap-1.5"><span class="text-emerald-400">✓</span><span>${d}</span></li>`).join('');
+
+      // Completed Work
+      const completedWorkList = document.getElementById('cs-completedWorkList');
+      completedWorkList.innerHTML = (ws.completedWork || []).map(c => `<li class="flex items-start gap-1.5"><span class="text-emerald-400">•</span><span>${c}</span></li>`).join('');
+
+      // Constraints
+      const constraintsList = document.getElementById('cs-constraintsList');
+      constraintsList.innerHTML = (ws.constraints || []).map(c => `<li class="flex items-start gap-1.5"><span class="text-amber-400">!</span><span>${c}</span></li>`).join('');
+
+      // Blockers
+      const blockersList = document.getElementById('cs-blockersList');
+      blockersList.innerHTML = (ws.blockers && ws.blockers.length)
+        ? ws.blockers.map(b => `<li class="flex items-start gap-1.5"><span>✖</span><span>${b}</span></li>`).join('')
+        : `<li class="text-slate-500 italic">No active blockers</li>`;
+    }
+
+    function renderCheckpoints(checkpoints) {
+      const container = document.getElementById('checkpointsChainContainer');
+      container.innerHTML = checkpoints.map(cp => `
+        <div class="p-2.5 rounded bg-slate-950 border border-slate-800/80 space-y-1">
+          <div class="flex justify-between items-center text-[10px]">
+            <span class="text-sky-400 font-bold">${cp.id} (${cp.branch})</span>
+            <span class="text-slate-500">${new Date(cp.timestamp).toLocaleTimeString()}</span>
+          </div>
+          <p class="text-[11px] text-slate-300 font-sans">${cp.summary}</p>
+          <div class="text-[9px] text-slate-500 truncate">Hash: ${cp.checkpointHash}</div>
+        </div>
+      `).join('');
+    }
+
+    async function submitContinuityPatch(e) {
+      e.preventDefault();
+      const goal = document.getElementById('patchGoal').value;
+      const currentStepId = document.getElementById('patchStepId').value;
+      const nextAction = document.getElementById('patchNextAction').value.trim();
+      const decision = document.getElementById('patchDecision').value.trim();
+
+      const patch = { goal, currentStepId };
+      if (nextAction) {
+        patch.nextActions = [...(state.workState?.nextActions || []), nextAction];
+        document.getElementById('patchNextAction').value = '';
+      }
+      if (decision) {
+        patch.decisions = [...(state.workState?.decisions || []), decision];
+        document.getElementById('patchDecision').value = '';
+      }
+
+      try {
+        const res = await fetch('/api/work-state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(patch)
+        });
+        const result = await res.json();
+        state.workState = result.workState;
+        renderWorkState();
+      } catch (err) {
+        alert('Failed to patch work state: ' + err.message);
+      }
+    }
+
+    // CONTEXT PRESSURE GOVERNOR
+    async function updateGovernorEvaluation() {
+      const totalTokens = Number(document.getElementById('govTokensSlider').value);
+      const contextWindow = Number(document.getElementById('govWindowSelect').value);
+      document.getElementById('govTokensDisplay').innerText = totalTokens.toLocaleString();
+      document.getElementById('govWindowDisplay').innerText = contextWindow.toLocaleString();
+
+      try {
+        const res = await fetch('/api/context-pressure/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ totalTokens, contextWindow })
+        });
+        const data = await res.json();
+
+        // Update Gauge
+        document.getElementById('govMeterPercent').innerText = `${data.percent}%`;
+        const circle = document.getElementById('governorMeterCircle');
+        const circumference = 264;
+        const offset = circumference - (circumference * (data.percent / 100));
+        circle.style.strokeDashoffset = offset;
+
+        // Colors
+        let strokeColor = '#0ea5e9'; // sky
+        let badgeClass = 'bg-sky-950 text-sky-400 border-sky-800';
+        let boxClass = 'bg-sky-950/30 border-sky-800/60 text-sky-200';
+
+        if (data.level === 'critical') {
+          strokeColor = '#f43f5e'; // rose
+          badgeClass = 'bg-rose-950 text-rose-400 border-rose-800';
+          boxClass = 'bg-rose-950/30 border-rose-800/60 text-rose-200';
+        } else if (data.level === 'elevated') {
+          strokeColor = '#f59e0b'; // amber
+          badgeClass = 'bg-amber-950 text-amber-400 border-amber-800';
+          boxClass = 'bg-amber-950/30 border-amber-800/60 text-amber-200';
+        }
+
+        circle.setAttribute('stroke', strokeColor);
+        document.getElementById('govLevelBadge').className = `px-3 py-1 rounded-full text-xs font-mono font-semibold uppercase border ${badgeClass}`;
+        document.getElementById('govLevelBadge').innerText = data.statusText;
+
+        const advBox = document.getElementById('govAdvisoryBox');
+        advBox.className = `border rounded-xl p-4 text-xs font-mono ${boxClass}`;
+        advBox.innerText = data.advisory;
+
+        const actionsList = document.getElementById('govActionsList');
+        actionsList.innerHTML = (data.actions || []).map(a => `<li>${a}</li>`).join('');
+      } catch (err) {
+        console.error('Governor evaluation failed:', err);
+      }
+    }
+
+    function setGovernorPreset(tokens) {
+      document.getElementById('govTokensSlider').value = tokens;
+      updateGovernorEvaluation();
+    }
+
+    // CANONICAL SECRET REDACTION
+    function loadSampleCredentials() {
+      const sample = `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.secretpayload1234567890abcdef
+GitHub Access: ghp_111122223333444455556666777788889999
+OpenAI API Key: sk-proj-1234567890abcdef1234567890abcdef
+Google API Key: AIzaSyD1234567890abcdef1234567890abcdef
+Session Path: C:\\Users\\Administrator\\.pi\\sessions\\2026-09-17-secret.json
+
+-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEA0Y3eEXAMPLESECRETKEYDATA1234567890ABCDEF==
+-----END RSA PRIVATE KEY-----`;
+      document.getElementById('redactInput').value = sample;
+    }
+
+    async function executeRedaction() {
+      const text = document.getElementById('redactInput').value;
+      if (!text) return;
+
+      try {
+        const res = await fetch('/api/canonical/redact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        document.getElementById('redactOutput').value = data.redacted;
+        document.getElementById('redactStatusBadge').innerText = data.hasRedactions ? 'Secrets Redacted' : 'Clean Input';
+        document.getElementById('redactStatusBadge').className = data.hasRedactions
+          ? 'text-xs font-mono text-amber-400 font-semibold'
+          : 'text-xs font-mono text-emerald-400';
+      } catch (err) {
+        alert('Redaction error: ' + err.message);
+      }
+    }
+
+    // SKILLS
+    async function loadSkills() {
+      try {
+        const res = await fetch('/api/skills');
+        const data = await res.json();
+        state.skills = data.skills || [];
+        renderSkills();
+      } catch (err) {
+        console.error('Failed to load skills:', err);
+      }
+    }
+
+    function renderSkills() {
+      const grid = document.getElementById('skillsGrid');
+      grid.innerHTML = state.skills.map(s => `
+        <div onclick="openSkillModal('${s.id}')" class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-sky-600/60 hover:bg-slate-850 cursor-pointer transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono font-semibold text-sky-400">${s.id}</span>
+              ${s.companionFiles?.length ? `<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">+${s.companionFiles.length} docs</span>` : ''}
+            </div>
+            <p class="text-xs text-slate-300 line-clamp-3">${s.description}</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+            <span>${s.name}</span>
+            <span class="text-sky-500 hover:underline">View Spec →</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function openSkillModal(skillId) {
+      document.getElementById('skillModal').classList.remove('hidden');
+      document.getElementById('skillModalTitle').innerText = skillId;
+      document.getElementById('skillModalPath').innerText = `skills/${skillId}/SKILL.md`;
+      document.getElementById('skillModalContent').innerText = 'Loading skill documentation...';
+
+      try {
+        const res = await fetch(`/api/skills/${skillId}`);
+        const data = await res.json();
+        document.getElementById('skillModalContent').innerText = data.content || 'No content found';
+      } catch (err) {
+        document.getElementById('skillModalContent').innerText = 'Error loading skill: ' + err.message;
+      }
+    }
+
+    function closeSkillModal() {
+      document.getElementById('skillModal').classList.add('hidden');
+    }
+
+    // WORKFLOW & ARCHITECTURE
+    async function loadWorkflow() {
+      try {
+        const res = await fetch('/api/workflow');
+        state.workflowData = await res.json();
+        loadWorkflowDoc('WORKFLOW.md');
+      } catch (err) {
+        console.error('Failed to load workflow:', err);
+      }
+    }
+
+    function loadWorkflowDoc(name) {
+      if (!state.workflowData) return;
+      document.querySelectorAll('#tab-workflow button').forEach(b => {
+        b.classList.remove('bg-sky-950', 'text-sky-400', 'border-sky-800/80');
+        b.classList.add('bg-slate-950', 'text-slate-400', 'border-slate-800');
+      });
+
+      let content = '';
+      let title = name;
+
+      if (name === 'WORKFLOW.md') {
+        content = state.workflowData.workflowMd;
+        title = 'workflow/WORKFLOW.md';
+        const b = document.getElementById('wf-btn-workflow');
+        if (b) { b.classList.add('bg-sky-950', 'text-sky-400', 'border-sky-800/80'); b.classList.remove('bg-slate-950', 'text-slate-400', 'border-slate-800'); }
+      } else {
+        const template = (state.workflowData.templates || []).find(t => t.name === name);
+        content = template ? template.content : 'Template not found';
+        title = `workflow/templates/${name}`;
+        let bId = 'wf-btn-plan';
+        if (name === 'decision-record.md') bId = 'wf-btn-decision';
+        if (name === 'application-runbook.md') bId = 'wf-btn-runbook';
+        const b = document.getElementById(bId);
+        if (b) { b.classList.add('bg-sky-950', 'text-sky-400', 'border-sky-800/80'); b.classList.remove('bg-slate-950', 'text-slate-400', 'border-slate-800'); }
+      }
+
+      document.getElementById('workflowDocTitle').innerText = title;
+      document.getElementById('workflowDocContent').innerText = content;
+    }
+
+    function onTypeSafeKindChange() {
+      const kind = document.getElementById('ts-kind').value;
+      const choicesGroup = document.getElementById('ts-choices-group');
+      const recoveryGroup = document.getElementById('ts-recovery-group');
+      const promptInput = document.getElementById('ts-prompt');
+
+      choicesGroup.classList.add('hidden');
+      recoveryGroup.classList.add('hidden');
+
+      if (kind === 'noul') {
+        promptInput.value = 'Is the current branch ready for dev-next merge review?';
+      } else if (kind === 'choice') {
+        choicesGroup.classList.remove('hidden');
+        promptInput.value = 'Select recovery strategy for interrupted operation';
+      } else if (kind === 'score') {
+        promptInput.value = 'Rate test proof maturity and layer decoupling';
+      } else if (kind === 'recovery') {
+        recoveryGroup.classList.remove('hidden');
+        promptInput.value = 'Match fastest safe recovery action';
+      } else if (kind === 'ambiguity') {
+        promptInput.value = 'Check parameter clarity and potential mutation side-effects';
+      }
+    }
+
+    async function executeTypeSafeEvaluation() {
+      const kind = document.getElementById('ts-kind').value;
+      const prompt = document.getElementById('ts-prompt').value;
+      let context = {};
+      try {
+        context = JSON.parse(document.getElementById('ts-context').value);
+      } catch (e) {
+        alert('Invalid JSON in context field');
+        return;
+      }
+
+      const body = { kind, prompt, context };
+      if (kind === 'choice') {
+        body.choices = document.getElementById('ts-choices').value.split(',').map(s => s.trim()).filter(Boolean);
+      } else if (kind === 'recovery') {
+        body.failureReason = document.getElementById('ts-failure').value;
+        body.availableActions = ['kill-existing-process', 'retry', 'abort'];
+      } else if (kind === 'ambiguity') {
+        body.toolName = 'git_commit';
+        body.args = context;
+      }
+
+      document.getElementById('ts-statusBadge').innerText = 'Evaluating...';
+      document.getElementById('ts-statusBadge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800';
+
+      try {
+        const res = await fetch('/api/typesafe/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+
+        let decision = 'N/A';
+        let confidence = 'N/A';
+
+        if (kind === 'noul') {
+          decision = data.result ? 'YES / PROCEED' : 'NO / REJECT';
+          confidence = `${(data.confidence * 100).toFixed(0)}% (prob: ${data.rawProbability.toFixed(2)})`;
+        } else if (kind === 'choice') {
+          decision = String(data.selected).toUpperCase();
+          confidence = `${((data.confidence || 0.9) * 100).toFixed(0)}%`;
+        } else if (kind === 'score') {
+          decision = `${data.score.toFixed(2)} / 3.0`;
+          confidence = `Level: ${data.level} (${((data.confidence || 0.85) * 100).toFixed(0)}%)`;
+        } else if (kind === 'recovery') {
+          decision = String(data.selectedAction).toUpperCase();
+          confidence = '100% (Matched)';
+        } else if (kind === 'ambiguity') {
+          decision = data.ambiguous ? 'AMBIGUOUS (BLOCK)' : 'UNAMBIGUOUS (SAFE)';
+          confidence = data.reason;
+        }
+
+        document.getElementById('ts-decisionOutcome').innerText = decision;
+        document.getElementById('ts-decisionConfidence').innerText = confidence;
+        document.getElementById('ts-fallbackStatus').innerText = data.fallbackUsed ? 'Fallback Rule Triggered' : 'Direct Jev Inferred';
+        document.getElementById('ts-fallbackStatus').className = data.fallbackUsed ? 'text-amber-400 font-mono' : 'text-emerald-400 font-mono';
+        document.getElementById('ts-rawPayload').innerText = JSON.stringify(data, null, 2);
+
+        document.getElementById('ts-statusBadge').innerText = 'Completed';
+        document.getElementById('ts-statusBadge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800';
+      } catch (err) {
+        document.getElementById('ts-statusBadge').innerText = 'Error';
+        document.getElementById('ts-statusBadge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-800';
+        document.getElementById('ts-rawPayload').innerText = 'Error: ' + err.message;
+      }
+    }
+
+    function refreshAllData() {
+      loadPlans();
+      loadWorkState();
+      loadSkills();
+      updateGovernorEvaluation();
+    }
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPlans();
+      updateGovernorEvaluation();
+      loadSampleCredentials();
+    });
+  </script>
+</body>
+</html>

@@ -61,15 +61,22 @@ export class TypeSafeService {
 			const sanitizedPrompt = redactSecrets(prompt);
 			const sanitizedContext = JSON.parse(redactSecrets(JSON.stringify(context)));
 			const payload = {
-				kind: "noul",
-				model: "jev-1.13.0",
-				prompt: sanitizedPrompt,
-				context: sanitizedContext,
+				model: "jev-latest",
+				state: Object.keys(sanitizedContext).length > 0 ? sanitizedContext : sanitizedPrompt,
+				questions: {
+					noul_eval: {
+						type: "noul",
+						instructions: sanitizedPrompt,
+					},
+				},
 			};
 
-			const response = await this.postRequest("/evaluate/noul", payload, timeoutMs);
-			if (typeof response?.probability === "number") {
-				const prob = Math.min(1.0, Math.max(0.0, response.probability));
+			const response = await this.postRequest("/systemone", payload, timeoutMs);
+			const answer = (response?.answers as Record<string, any>)?.noul_eval;
+			const noulVal = typeof answer?.noul === "number" ? answer.noul : (response?.probability as number);
+
+			if (typeof noulVal === "number") {
+				const prob = Math.min(1.0, Math.max(0.0, noulVal));
 				return {
 					result: prob >= 0.5,
 					confidence: Math.abs(prob - 0.5) * 2,
@@ -102,19 +109,32 @@ export class TypeSafeService {
 		try {
 			const sanitizedPrompt = redactSecrets(prompt);
 			const sanitizedContext = JSON.parse(redactSecrets(JSON.stringify(context)));
+			const criteriaMap: Record<string, string> = {};
+			for (const choice of choices) {
+				criteriaMap[choice] = choice;
+			}
+
 			const payload = {
-				kind: "choice",
-				model: "jev-1.13.0",
-				prompt: sanitizedPrompt,
-				choices,
-				context: sanitizedContext,
+				model: "jev-latest",
+				state: Object.keys(sanitizedContext).length > 0 ? sanitizedContext : sanitizedPrompt,
+				questions: {
+					choice_eval: {
+						type: "choice",
+						instructions: sanitizedPrompt,
+						criteria: criteriaMap,
+					},
+				},
 			};
 
-			const response = await this.postRequest("/evaluate/choice", payload, timeoutMs);
-			if (typeof response?.selected === "string" && choices.includes(response.selected as T)) {
+			const response = await this.postRequest("/systemone", payload, timeoutMs);
+			const answer = (response?.answers as Record<string, any>)?.choice_eval;
+			const selectedOption = answer?.choice ?? response?.selected;
+			const confidence = typeof answer?.confidence === "number" ? answer.confidence : (typeof response?.confidence === "number" ? response.confidence : 0.9);
+
+			if (typeof selectedOption === "string" && choices.includes(selectedOption as T)) {
 				return {
-					selected: response.selected as T,
-					confidence: typeof response.confidence === "number" ? response.confidence : 0.9,
+					selected: selectedOption as T,
+					confidence,
 					fallbackUsed: false,
 				};
 			}
@@ -139,18 +159,27 @@ export class TypeSafeService {
 			const sanitizedPrompt = redactSecrets(prompt);
 			const sanitizedContext = JSON.parse(redactSecrets(JSON.stringify(context)));
 			const payload = {
-				kind: "score",
-				model: "jev-1.13.0",
-				prompt: sanitizedPrompt,
-				context: sanitizedContext,
+				model: "jev-latest",
+				state: Object.keys(sanitizedContext).length > 0 ? sanitizedContext : sanitizedPrompt,
+				questions: {
+					score_eval: {
+						type: "score",
+						instructions: sanitizedPrompt,
+						criteria: ["unacceptable", "marginal-needs-review", "acceptable-solid", "high-quality"],
+					},
+				},
 			};
 
-			const response = await this.postRequest("/evaluate/score", payload, timeoutMs);
-			if (typeof response?.score === "number") {
-				const score = Math.max(0, Math.min(3.0, response.score));
+			const response = await this.postRequest("/systemone", payload, timeoutMs);
+			const answer = (response?.answers as Record<string, any>)?.score_eval;
+			const scoreVal = typeof answer?.score === "number" ? answer.score : (response?.score as number);
+			const confidence = typeof answer?.confidence === "number" ? answer.confidence : (typeof response?.confidence === "number" ? response.confidence : 0.85);
+
+			if (typeof scoreVal === "number") {
+				const score = Math.max(0, Math.min(3.0, scoreVal));
 				return {
 					score,
-					confidence: typeof response.confidence === "number" ? response.confidence : 0.85,
+					confidence,
 					level: this.scoreToLevel(score),
 					fallbackUsed: false,
 				};

@@ -1,0 +1,8 @@
+{
+  "name": "Pi Continuity + Work Memory Explorer",
+  "description": "Interactive workspace for branch-correct Pi continuity, execution plan management, context pressure monitoring, persistent memory, and engineering skills.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
